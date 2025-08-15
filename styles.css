@@ -210,98 +210,6 @@ body {
     transition: var(--transition);
 }
 
-/* Glowing Section Separator */
-.section {
-    position: relative;
-    overflow: hidden;
-}
-
-.section::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        var(--erin),
-        var(--aqua),
-        var(--fuchsia),
-        var(--yellow),
-        transparent
-    );
-    background-size: 400% 400%;
-    animation: gradientFlow 8s ease infinite;
-    opacity: 0.3;
-    filter: blur(1px);
-}
-
-.section::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        var(--erin-light),
-        var(--aqua-light),
-        var(--fuchsia-light),
-        var(--yellow-light),
-        transparent
-    );
-    background-size: 400% 400%;
-    animation: gradientFlow 12s ease infinite reverse;
-    opacity: 0.15;
-    filter: blur(3px);
-}
-
-@keyframes gradientFlow {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
-/* Enhanced effect on hover */
-.section:hover::after {
-    opacity: 0.5;
-    height: 2px;
-    filter: blur(0.5px);
-}
-
-.section:hover::before {
-    opacity: 0.25;
-    filter: blur(5px);
-}
-
-/* For sections with dark backgrounds */
-.section-dark {
-    background: var(--bg-secondary);
-}
-
-.section-dark::after,
-.section-dark::before {
-    opacity: 0.5;
-}
-
-.section-dark:hover::after {
-    opacity: 0.7;
-}
-
-.section-dark:hover::before {
-    opacity: 0.4;
-}
-
 /* Header */
 .header {
     position: fixed;
@@ -312,7 +220,6 @@ body {
     padding: 25px 0;
     backdrop-filter: var(--blur);
     background: rgba(10, 10, 11, 0.8);
-    border-bottom: 1px solid rgba(97, 244, 87, 0.1);
     transition: var(--transition);
 }
 
@@ -2184,14 +2091,17 @@ body.tour-active .logo-desktop {
     
     /* Dot hover/active states */
     .tour-dot:hover {
-        background-color: rgba(255, 255, 255, 0.5);
+        background-color: rgba(97, 244, 87, 0.3);
         transform: scale(1.15);
     }
     
     .tour-dot.active {
-        background-color: var(--highlight); /* Using your highlight color */
+        background: linear-gradient(135deg, 
+            rgba(97, 244, 87, 0.8), 
+            rgba(8, 254, 255, 0.6)
+        );
         transform: scale(1.3);
-        box-shadow: 0 0 0 2px rgba(255, 221, 0, 0.3); /* Glow effect */
+        box-shadow: 0 0 0 2px rgba(97, 244, 87, 0.2); /* Subtle glow effect */
         border-color: transparent;
     }
     
@@ -2205,7 +2115,7 @@ body.tour-active .logo-desktop {
         bottom: -3px;
         border-radius: 50%;
         background: transparent;
-        border: 1px solid var(--highlight);
+        border: 1px solid rgba(97, 244, 87, 0.4);
         animation: dotPulse 2s infinite;
         opacity: 0;
     }
@@ -2226,7 +2136,7 @@ body.tour-active .logo-desktop {
     
     /* Focus state for accessibility */
     .tour-dot:focus-visible {
-        outline: 2px solid var(--highlight);
+        outline: 2px solid rgba(97, 244, 87, 0.6);
         outline-offset: 2px;
     }
     
@@ -2246,9 +2156,9 @@ body.tour-active .logo-desktop {
 
 /* ===== Tour Section ===== */
 .tour-section {
-    background: var(--dark);
-    border-top: 3px solid var(--primary);
-    color: var(--light);
+    background: var(--bg-primary);
+    border-top: 3px solid rgba(97, 244, 87, 0.4);
+    color: var(--text-primary);
     padding: 3rem 1.5rem;
     margin: 0 auto;
     position: relative;
@@ -2258,7 +2168,7 @@ body.tour-active .logo-desktop {
     text-align: center;
     margin-bottom: 3rem;
     font-size: 2.5rem;
-    color: var(--light);
+    color: var(--text-primary);
     font-weight: 700;
     letter-spacing: 0.5px;
 }
@@ -2324,8 +2234,13 @@ body.tour-active .logo-desktop {
 .tour-date {
     display: flex;
     flex-direction: column;
-    background: rgba(133, 133, 133, 0.151);
-    border-radius: 14px; /* Applies to all corners */
+    background: linear-gradient(145deg,
+        rgba(133, 133, 133, 0.151) 0%,
+        rgba(97, 244, 87, 0.02) 25%,
+        rgba(8, 254, 255, 0.02) 75%,
+        rgba(133, 133, 133, 0.151) 100%
+    );
+    border-radius: 15px; /* Applies to all corners */
     overflow: hidden; /* Ensures child elements respect the border radius */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
@@ -2354,66 +2269,142 @@ body.tour-active .logo-desktop {
     }
 }
 
-/* Highlight styles */
+/* HIGHLIGHTED CARD - MAXIMUM CONTRAST */
 .tour-date.highlight {
-    border-left: 5px solid var(--highlight); /* Keep this dynamic */
+    /* THICK neon border with animation */
+    border-radius: 16px;
+    
+    /* MUCH brighter background with stronger gradients */
     background: linear-gradient(90deg, 
-        rgba(210, 180, 140, 0.15) 0%, /* Warm tan (linen) */
-        rgba(250, 240, 230, 0.05) 100% /* Soft ivory */
+        rgba(97, 244, 87, 0.25) 0%,
+        rgba(8, 254, 255, 0.15) 50%,
+        rgba(254, 255, 5, 0.12) 100%
     );
+    
+    /* MASSIVE shadow and glow effects */
     box-shadow: 
-        0 6px 16px rgba(210, 180, 140, 0.25), /* Outer glow */
-        inset 0 0 12px rgba(255, 245, 235, 0.4); /* Inner glow */
+        0 12px 32px rgba(0, 0, 0, 0.4),
+        0 0 50px rgba(97, 244, 87, 0.6),
+        0 0 100px rgba(97, 244, 87, 0.3),
+        inset 0 0 30px rgba(97, 244, 87, 0.2),
+        inset 0 2px 5px rgba(255, 255, 255, 0.3);
+    
+    /* Scale up the card slightly */
+    transform: scale(1.02);
     position: relative;
-    z-index: 1;
+    z-index: 10;
+    
+    /* Pulsing animation */
+    animation: highlightPulse 3s ease-in-out infinite;
 }
 
-.tour-date.highlight::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(255, 245, 235, 0.7), 
-        transparent
-    );
+/* Pulsing glow animation */
+@keyframes highlightPulse {
+    0%, 100% {
+        box-shadow: 
+            0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 50px rgba(97, 244, 87, 0.6),
+            0 0 100px rgba(97, 244, 87, 0.3),
+            inset 0 0 30px rgba(97, 244, 87, 0.2),
+            inset 0 2px 5px rgba(255, 255, 255, 0.3);
+    }
+    50% {
+        box-shadow: 
+            0 15px 40px rgba(0, 0, 0, 0.5),
+            0 0 70px rgba(97, 244, 87, 0.8),
+            0 0 140px rgba(97, 244, 87, 0.4),
+            inset 0 0 40px rgba(97, 244, 87, 0.3),
+            inset 0 2px 5px rgba(255, 255, 255, 0.4);
+    }
 }
 
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* SUPER BRIGHT "NEXT SHOW" BUTTON */
 .tour-date.highlight::after {
     content: 'NEXT SHOW';
     position: absolute;
-    top: 1.75rem;
-    right: 1.75rem;
+    top: 1.5rem;
+    right: 1.5rem;
+    
+    /* MAXIMUM brightness gradient */
     background: linear-gradient(
         135deg,
-        rgba(175, 135, 95, 0.98),    /* Deep toffee (darker base) */
-        rgba(220, 190, 160, 0.98),    /* Warm sand (mid-tone) */
-        rgba(240, 225, 210, 0.98)     /* Light cream (highlight) */
+        rgba(97, 244, 87, 1.0) 0%,
+        rgba(8, 254, 255, 1.0) 50%,
+        rgba(254, 255, 5, 1.0) 100%
     );
-    color: #1a120b;                   /* Near-black for max contrast */
-    padding: 0.4rem 1.3rem;
-    border-radius: 6px;
-    font-size: 0.82rem;
+    
+    color: #000;
+    padding: 0.6rem 1.6rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 1.3px;
-    z-index: 2;
-    /* Multi-layer shadows for depth */
+    letter-spacing: 1.5px;
+    z-index: 12;
+    
+    /* MASSIVE button shadows and effects */
     box-shadow: 
-        0 2px 0 rgba(120, 80, 50, 0.3),              /* Hard bottom shadow */
-        0 4px 8px rgba(0, 0, 0, 0.25),               /* Ambient shadow */
-        inset 0 1px 3px rgba(255, 255, 255, 0.6),    /* Top inner glow */
-        inset 0 -1px 2px rgba(100, 70, 40, 0.2);     /* Bottom inner shadow */
-    border: 1px solid rgba(150, 110, 70, 0.7);       /* Darker border */
+        0 4px 0 rgba(0, 0, 0, 0.4),
+        0 8px 20px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(97, 244, 87, 0.7),
+        0 0 60px rgba(97, 244, 87, 0.4),
+        inset 0 2px 5px rgba(255, 255, 255, 0.6),
+        inset 0 -2px 3px rgba(0, 0, 0, 0.2);
+    
+    border: 2px solid rgba(97, 244, 87, 0.8);
+    
     text-shadow: 
-        0 1px 1px rgba(255, 255, 255, 0.3),         /* Text highlight */
-        0 -1px 1px rgba(0, 0, 0, 0.1);               /* Text depth */
+        0 1px 2px rgba(255, 255, 255, 0.5),
+        0 -1px 1px rgba(0, 0, 0, 0.3);
+    
     transition: 
         transform 0.2s ease,
         box-shadow 0.2s ease;
+    
+    /* Button pulsing */
+    animation: buttonPulse 2s ease-in-out infinite;
+}
+
+@keyframes buttonPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 
+            0 4px 0 rgba(0, 0, 0, 0.4),
+            0 8px 20px rgba(0, 0, 0, 0.3),
+            0 0 30px rgba(97, 244, 87, 0.7),
+            0 0 60px rgba(97, 244, 87, 0.4),
+            inset 0 2px 5px rgba(255, 255, 255, 0.6),
+            inset 0 -2px 3px rgba(0, 0, 0, 0.2);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 
+            0 6px 0 rgba(0, 0, 0, 0.4),
+            0 12px 25px rgba(0, 0, 0, 0.4),
+            0 0 40px rgba(97, 244, 87, 0.9),
+            0 0 80px rgba(97, 244, 87, 0.6),
+            inset 0 2px 5px rgba(255, 255, 255, 0.7),
+            inset 0 -2px 3px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Hover effects for the highlighted card */
+.tour-date.highlight:hover {
+    transform: scale(1.04);
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.6),
+        0 0 80px rgba(97, 244, 87, 0.8),
+        0 0 160px rgba(97, 244, 87, 0.5),
+        inset 0 0 40px rgba(97, 244, 87, 0.3);
+}
+
+.tour-date.highlight:hover::after {
+    transform: scale(1.1);
 }
 
 /* ===== ENHANCED CURRENTLY PLAYING CARD ===== */
@@ -2422,13 +2413,15 @@ body.tour-active .logo-desktop {
     background: 
         linear-gradient(145deg, 
             rgba(20, 20, 20, 0.98) 0%,
-            rgba(35, 35, 35, 0.98) 50%,
+            rgba(35, 35, 35, 0.98) 30%,
+            rgba(253, 2, 253, 0.03) 50%,
+            rgba(254, 255, 5, 0.02) 70%,
             rgba(25, 25, 25, 0.98) 100%
         ),
         radial-gradient(
             circle at 35% 45%,
-            rgba(195, 169, 111, 0.25) 0%,
-            rgba(195, 169, 111, 0.1) 40%,
+            rgba(253, 2, 253, 0.12) 0%,
+            rgba(8, 254, 255, 0.08) 40%,
             transparent 70%
         );
     
@@ -2436,13 +2429,13 @@ body.tour-active .logo-desktop {
     box-shadow: 
         0 10px 35px rgba(0, 0, 0, 0.6),
         0 5px 15px rgba(0, 0, 0, 0.4),
-        0 0 50px rgba(195, 169, 111, 0.3),
-        0 0 100px rgba(195, 169, 111, 0.15),
+        0 0 30px rgba(253, 2, 253, 0.15),
+        0 0 60px rgba(8, 254, 255, 0.08),
         inset 0 1px 3px rgba(255, 255, 255, 0.08),
         inset 0 -2px 4px rgba(0, 0, 0, 0.3);
     
     /* Enhanced border with glow */
-    border: 1px solid rgba(195, 169, 111, 0.4);
+    border: 1px solid rgba(253, 2, 253, 0.3);
     position: relative;
     z-index: 10;
     
@@ -2466,8 +2459,8 @@ body.tour-active .logo-desktop {
         box-shadow: 
             0 10px 35px rgba(0, 0, 0, 0.6),
             0 5px 15px rgba(0, 0, 0, 0.4),
-            0 0 50px rgba(195, 169, 111, 0.3),
-            0 0 100px rgba(195, 169, 111, 0.15),
+            0 0 30px rgba(253, 2, 253, 0.15),
+            0 0 60px rgba(8, 254, 255, 0.08),
             inset 0 1px 3px rgba(255, 255, 255, 0.08),
             inset 0 -2px 4px rgba(0, 0, 0, 0.3);
     }
@@ -2476,8 +2469,8 @@ body.tour-active .logo-desktop {
         box-shadow: 
             0 15px 50px rgba(0, 0, 0, 0.7),
             0 8px 25px rgba(0, 0, 0, 0.5),
-            0 0 70px rgba(195, 169, 111, 0.45),
-            0 0 140px rgba(195, 169, 111, 0.25),
+            0 0 40px rgba(253, 2, 253, 0.25),
+            0 0 80px rgba(8, 254, 255, 0.15),
             inset 0 2px 5px rgba(255, 255, 255, 0.12),
             inset 0 -3px 6px rgba(0, 0, 0, 0.4);
     }
@@ -2495,31 +2488,32 @@ body.tour-active .logo-desktop {
     /* Modern glass morphism background */
     background: 
         linear-gradient(135deg, 
-            rgba(255, 50, 50, 0.95) 0%,
-            rgba(220, 20, 60, 0.98) 50%,
-            rgba(180, 20, 50, 1) 100%
+            rgba(253, 2, 253, 0.8) 0%,
+            rgba(254, 255, 5, 0.7) 30%,
+            rgba(97, 244, 87, 0.6) 60%,
+            rgba(8, 254, 255, 0.8) 100%
         );
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     
-    /* White text with subtle shadow */
-    color: rgba(255, 255, 255, 0.98);
+    /* Text styling */
+    color: rgba(3, 2, 5, 0.95);
     font-size: 0.9rem;
     font-weight: 550;
     text-transform: uppercase;
     letter-spacing: 3.5px;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     
     /* Rounded modern style */
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     z-index: 9999; /* Increased to ensure it shows above other elements */
     
-    /* Subtle shadow with red glow */
+    /* Subtle shadow with multi-color glow */
     box-shadow: 
         0 4px 15px rgba(0, 0, 0, 0.4),
-        0 2px 8px rgba(220, 20, 60, 0.5),
-        0 0 25px rgba(255, 50, 50, 0.4),
+        0 0 20px rgba(253, 2, 253, 0.2),
+        0 0 30px rgba(8, 254, 255, 0.1),
         inset 0 1px 2px rgba(255, 255, 255, 0.3),
         inset 0 -1px 3px rgba(0, 0, 0, 0.2);
     
@@ -2551,8 +2545,8 @@ body.tour-active .logo-desktop {
         transform: translateZ(0) scale(1);
         box-shadow: 
             0 4px 15px rgba(0, 0, 0, 0.4),
-            0 2px 8px rgba(220, 20, 60, 0.5),
-            0 0 25px rgba(255, 50, 50, 0.4),
+            0 0 20px rgba(253, 2, 253, 0.2),
+            0 0 30px rgba(8, 254, 255, 0.1),
             inset 0 1px 2px rgba(255, 255, 255, 0.3),
             inset 0 -1px 3px rgba(0, 0, 0, 0.2);
     }
@@ -2561,9 +2555,9 @@ body.tour-active .logo-desktop {
         transform: translateZ(0) scale(1.03);
         box-shadow: 
             0 6px 20px rgba(0, 0, 0, 0.5),
-            0 3px 12px rgba(220, 20, 60, 0.7),
-            0 0 35px rgba(255, 50, 50, 0.6),
-            0 0 60px rgba(255, 50, 50, 0.3),
+            0 0 25px rgba(253, 2, 253, 0.3),
+            0 0 40px rgba(8, 254, 255, 0.2),
+            0 0 50px rgba(97, 244, 87, 0.1),
             inset 0 2px 4px rgba(255, 255, 255, 0.4),
             inset 0 -2px 5px rgba(0, 0, 0, 0.3);
     }
@@ -2585,8 +2579,8 @@ body.tour-active .logo-desktop {
     background: 
         radial-gradient(
             circle at 70% 30%,
-            rgba(255, 255, 255, 0.06) 0%,
-            rgba(255, 255, 255, 0.03) 30%,
+            rgba(255, 255, 255, 0.04) 0%,
+            rgba(97, 244, 87, 0.02) 30%,
             transparent 60%
         );
     animation: subtle-glow-pulse 8s ease-in-out infinite alternate;
@@ -2605,8 +2599,8 @@ body.tour-active .logo-desktop {
     background: 
         radial-gradient(
             circle at 25% 70%,
-            rgba(195, 169, 111, 0.08) 0%,
-            rgba(195, 169, 111, 0.04) 40%,
+            rgba(253, 2, 253, 0.05) 0%,
+            rgba(8, 254, 255, 0.03) 40%,
             transparent 70%
         );
     animation: ambient-breathe 12s ease-in-out infinite alternate-reverse;
@@ -2640,20 +2634,21 @@ body.tour-active .logo-desktop {
 /* ===== ENHANCED DATE COMPONENT FOR LIVE CARD ===== */
 .tour-date.currently-playing .date {
     background: linear-gradient(135deg,
-        #f8e5a0 0%,
-        #f5d47f 25%,
-        #e0c060 50%,
-        #d4b15f 75%,
-        #c3a96f 100%
+        rgba(254, 255, 5, 0.9) 0%,
+        rgba(97, 244, 87, 0.8) 25%,
+        rgba(8, 254, 255, 0.7) 50%,
+        rgba(253, 2, 253, 0.6) 75%,
+        rgba(254, 255, 5, 0.8) 100%
     );
     
     /* Enhanced 3D metallic effect */
     box-shadow: 
         0 3px 12px rgba(0, 0, 0, 0.4),
-        inset 0 2px 6px rgba(255, 255, 255, 0.8),
-        inset 0 -2px 6px rgba(100, 80, 40, 0.5),
-        inset 2px 0 4px rgba(255, 255, 255, 0.4),
-        inset -2px 0 4px rgba(100, 80, 40, 0.3);
+        0 0 15px rgba(97, 244, 87, 0.2),
+        inset 0 2px 6px rgba(255, 255, 255, 0.6),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.2),
+        inset 2px 0 4px rgba(255, 255, 255, 0.3),
+        inset -2px 0 4px rgba(0, 0, 0, 0.2);
     
     /* Prevent transform inheritance issues */
     transform: translateZ(0);
@@ -2693,12 +2688,13 @@ body.tour-active .logo-desktop {
     box-shadow: 
         0 20px 60px rgba(0, 0, 0, 0.8),
         0 10px 30px rgba(0, 0, 0, 0.6),
-        0 0 80px rgba(195, 169, 111, 0.6),
-        0 0 160px rgba(195, 169, 111, 0.35),
+        0 0 50px rgba(253, 2, 253, 0.3),
+        0 0 80px rgba(8, 254, 255, 0.2),
+        0 0 100px rgba(97, 244, 87, 0.1),
         inset 0 3px 8px rgba(255, 255, 255, 0.15),
         inset 0 -4px 10px rgba(0, 0, 0, 0.5);
     
-    border-color: rgba(195, 169, 111, 0.6);
+    border-color: rgba(253, 2, 253, 0.4);
 }
 
 .tour-date.currently-playing:hover .info::before {
@@ -2717,7 +2713,7 @@ body.tour-active .logo-desktop {
         top: 1.5rem;
         right: 1.5rem;
         padding: 10px 12px;
-        font-size: 800px;
+        font-size: 0.8rem;
         letter-spacing: 1px;
     }
     
@@ -2762,19 +2758,21 @@ body.tour-active .logo-desktop {
 .tour-date.highlight:hover::after {
     transform: translateY(1px);       /* Sink slightly */
     box-shadow: 
-        0 1px 0 rgba(120, 80, 50, 0.3),
-        0 2px 4px rgba(0, 0, 0, 0.25),
+        0 1px 0 rgba(0, 0, 0, 0.2),
+        0 2px 4px rgba(0, 0, 0, 0.15),
+        0 0 10px rgba(97, 244, 87, 0.15),
         inset 0 1px 4px rgba(0, 0, 0, 0.1),
-        inset 0 -1px 2px rgba(255, 255, 255, 0.4);
+        inset 0 -1px 2px rgba(255, 255, 255, 0.3);
 }
 
 /* Tablet highlight adjustments */
 @media (max-width: 768px) {
     .tour-date.highlight {
-        border-left: 4px solid var(--highlight);
+        border-left: 4px solid rgba(97, 244, 87, 0.5);
         box-shadow: 
-            0 4px 12px rgba(210, 180, 140, 0.2),
-            inset 0 0 8px rgba(255, 245, 235, 0.3);
+            0 4px 12px rgba(0, 0, 0, 0.2),
+            0 0 15px rgba(97, 244, 87, 0.1),
+            inset 0 0 8px rgba(97, 244, 87, 0.08);
     }
     
     .tour-date.highlight::after {
@@ -2789,10 +2787,11 @@ body.tour-active .logo-desktop {
 /* Mobile highlight adjustments */
 @media (max-width: 480px) {
     .tour-date.highlight {
-        border-left: 3px solid var(--highlight);
+        border-left: 3px solid rgba(97, 244, 87, 0.4);
         box-shadow: 
-            0 3px 8px rgba(210, 180, 140, 0.15),
-            inset 0 0 6px rgba(255, 245, 235, 0.2);
+            0 3px 8px rgba(0, 0, 0, 0.15),
+            0 0 10px rgba(97, 244, 87, 0.08),
+            inset 0 0 6px rgba(97, 244, 87, 0.06);
     }
     
     .tour-date.highlight::after {
@@ -2807,12 +2806,18 @@ body.tour-active .logo-desktop {
 /* Hover effects */
 .tour-date:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(210, 180, 140, 0.3);
+    box-shadow: 
+        0 8px 20px rgba(0, 0, 0, 0.2),
+        0 0 25px rgba(8, 254, 255, 0.15),
+        0 0 40px rgba(97, 244, 87, 0.08);
+        border-color: #FEFF05;
+        border-width: 3.5px;
+        border-radius: 16px;
 }
 
 @media (max-width: 768px) {
     .tour-date {
-        -webkit-tap-highlight-color: rgba(210, 180, 140, 0.15);
+        -webkit-tap-highlight-color: rgba(8, 254, 255, 0.1);
     }
     
     .tour-date:hover {
@@ -2826,8 +2831,12 @@ body.tour-active .logo-desktop {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: var(--primary);
-    color: var(--dark);
+    background: linear-gradient(135deg,
+        rgba(97, 244, 87, 0.8) 0%,
+        rgba(8, 254, 255, 0.6) 50%,
+        rgba(254, 255, 5, 0.4) 100%
+    );
+    color: var(--black);
     padding: 1rem;
     text-align: center;
     transition: all 0.3s ease;
@@ -2838,18 +2847,29 @@ body.tour-active .logo-desktop {
 
 /* Container glow (subtle but visible) */
 .tour-date:hover .date {
-    box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.4);
+    background: linear-gradient(135deg,
+        rgba(254, 255, 5, 0.9) 0%,
+        rgba(253, 2, 253, 0.7) 50%,
+        rgba(8, 254, 255, 0.8) 100%
+    );
+    box-shadow: 
+        0 0 20px rgba(97, 244, 87, 0.2),
+        0 0 30px rgba(8, 254, 255, 0.15);
 }
 
 /* Date text glow (strong but not extreme) */
 .tour-date:hover .month {
     color: #ffffff;
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+    text-shadow: 
+        0 0 8px rgba(255, 255, 255, 0.7),
+        0 0 15px rgba(97, 244, 87, 0.3);
 }
 
 .tour-date:hover .day {
     color: #ffffff;
-    text-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
+    text-shadow: 
+        0 0 12px rgba(255, 255, 255, 0.9),
+        0 0 20px rgba(8, 254, 255, 0.3);
 }
 
 /* Optional: Add a soft inner glow to container */
@@ -2867,7 +2887,7 @@ body.tour-active .logo-desktop {
 }
 
 .tour-date:hover .date::after {
-    box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.3);
+    box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.2);
 }
 
 /* Original time element styles */
@@ -2904,7 +2924,12 @@ body.tour-active .logo-desktop {
         transform: translateX(-50%);
         width: 40px;
         height: 4px;
-        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(97, 244, 87, 0.6), 
+            rgba(8, 254, 255, 0.4),
+            transparent
+        );
         border-radius: 2px;
         opacity: 0.4;
         animation: scrollHint 3s ease-in-out infinite;
@@ -2917,7 +2942,8 @@ body.tour-active .logo-desktop {
         }
         50% { 
             opacity: 0.7; 
-            transform: translateX(-50%) scaleX(1.3); 
+            transform: translateX(-50%) scaleX(1.3);
+            box-shadow: 0 0 8px rgba(97, 244, 87, 0.3);
         }
     }
     
