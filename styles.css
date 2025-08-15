@@ -924,12 +924,12 @@ body.tour-active .logo-desktop {
 
 /* Sections */
 .section {
-    padding: 120px 0;
+    padding: 100px 0;
     position: relative;
 }
 
 .section-header {
-    margin-bottom: 80px;
+    margin-bottom: 40px;
     text-align: center;
     position: relative;
 }
@@ -950,7 +950,7 @@ body.tour-active .logo-desktop {
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: 3px;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
     position: relative;
 }
 
@@ -959,6 +959,7 @@ body.tour-active .logo-desktop {
     height: 2px;
     background: linear-gradient(90deg, var(--erin), var(--aqua));
     margin: 0 auto;
+    margin-bottom: 10px;
 }
 
 .about-section {
@@ -2159,14 +2160,13 @@ body.tour-active .logo-desktop {
     background: var(--bg-primary);
     border-top: 3px solid rgba(97, 244, 87, 0.4);
     color: var(--text-primary);
-    padding: 3rem 1.5rem;
+    padding: 100px;
     margin: 0 auto;
     position: relative;
 }
 
 .section-title {
     text-align: center;
-    margin-bottom: 3rem;
     font-size: 2.5rem;
     color: var(--text-primary);
     font-weight: 700;
@@ -3060,38 +3060,30 @@ animation: subtleGlow 8s ease-in-out infinite alternate;
         0 0 8px rgba(255, 255, 255, 0.164);
 }
 
-/* Base venue-promo styles */
+/* Subheader venue-promo - ultra subtle */
 .venue-promo {
     font-size: 0.75rem;
-    background: linear-gradient(
-    135deg,
-    rgba(245, 225, 195, 0.7) 0%,      /* Creamy beige */
-    rgba(230, 200, 170, 0.6) 25%,     /* Soft caramel */
-    rgba(220, 190, 160, 0.5) 50%,     /* Warm latte */
-    rgba(230, 200, 170, 0.6) 75%,     /* Soft caramel */
-    rgba(245, 225, 195, 0.7) 100%     /* Creamy beige */
-);
-background-size: 200% 200%;
-animation: butteryFlow 16s ease-in-out infinite;
-    color: white;
+    background: rgba(21, 21, 22, 0.15); /* --bg-secondary at 15% opacity */
+    color: rgba(255, 255, 255, 0.6); /* 60% opacity text */
     padding: 0.4rem 0.8rem;
-    border-radius: 20px;
-    font-weight: 700;
+    border-radius: var(--border-radius);
+    font-weight: 500; /* Slightly lighter weight for subheader */
     white-space: nowrap;
     margin-left: auto;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     box-shadow: 
-        0 2px 8px rgba(255, 215, 0, 0.2),
-        0 0 0 1px rgba(255, 255, 255, 0.1);
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        0 0 0 1px rgba(97, 244, 87, 0.05); /* --erin at 5% opacity */
+    transition: var(--transition);
     position: relative;
-    overflow: hidden; /* Crucial for containment */
-    display: inline-block; /* Better boundary control */
-    isolation: isolate; /* Creates new stacking context */
+    overflow: hidden;
+    display: inline-block;
+    isolation: isolate;
+    border: 1px solid rgba(26, 26, 27, 0.3); /* --bg-tertiary at 30% */
+    backdrop-filter: blur(2px);
 }
 
-/* Shine effect (now properly contained) */
+/* Ultra subtle shine effect */
 .venue-promo::before {
     content: '';
     position: absolute;
@@ -3101,7 +3093,7 @@ animation: butteryFlow 16s ease-in-out infinite;
     height: 100%;
     background: linear-gradient(90deg, 
         transparent 0%, 
-        rgba(255, 215, 0, 0.2) 50%, 
+        rgba(97, 244, 87, 0.08) 50%, /* --erin at 8% opacity */
         transparent 100%);
     transition: all 0.7s cubic-bezier(0.19, 1, 0.22, 1);
     pointer-events: none;
@@ -3109,7 +3101,7 @@ animation: butteryFlow 16s ease-in-out infinite;
     z-index: 1;
 }
 
-/* Gradient overlay (contained) */
+/* Minimal gradient overlay */
 .venue-promo::after {
     content: '';
     position: absolute;
@@ -3118,48 +3110,30 @@ animation: butteryFlow 16s ease-in-out infinite;
     right: 0;
     bottom: 0;
     background: linear-gradient(135deg, 
-        rgba(255, 215, 0, 0.05) 0%,
-        rgba(255,255,255,0) 50%,
-        rgba(255, 215, 0, 0.05) 100%);
-    opacity: 0;
+        rgba(8, 254, 255, 0.03) 0%, /* --aqua at 3% */
+        transparent 50%,
+        rgba(253, 2, 253, 0.03) 100%); /* --fuchsia at 3% */
+    opacity: 0.3;
     transition: opacity 0.4s ease;
     z-index: -1;
 }
 
-/* Card hover triggers promo effects */
+/* Hover effects - barely noticeable */
 .tour-date:hover .venue-promo {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
+    color: rgba(255, 255, 255, 0.8); /* Slightly more visible text */
     box-shadow: 
-        0 4px 12px rgba(255, 215, 0, 0.3),
-        0 0 0 1px rgba(255, 255, 255, 0.2);
+        0 1px 3px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(97, 244, 87, 0.1); /* --erin at 10% */
 }
 
 .tour-date:hover .venue-promo::before {
     left: 150%;
-    opacity: 0.8;
+    opacity: 0.3;
 }
 
 .tour-date:hover .venue-promo::after {
-    opacity: 1;
-}
-
-/* Remove any overflow from parent elements */
-.tour-date {
-    overflow: visible; /* Ensures child effects aren't clipped */
-}
-
-.venue-header {
-    position: relative; /* Creates new stacking context */
-    overflow: visible; /* Allows promo effects to show */
-}
-
-/* Mobile adjustments */
-@media (max-width: 768px) {
-    .venue-promo {
-        margin: 0 auto;
-        text-align: center;
-        display: inline-block;
-    }
+    opacity: 0.4;
 }
 
 /* Enhanced Description */
