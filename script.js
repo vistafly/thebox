@@ -32,6 +32,157 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
+    
+document.addEventListener('DOMContentLoaded', function() {
+    initLogo3DEffect();
+    const heroSection = document.getElementById('hero');
+    const logo = document.querySelector('.logo-desktop');
+    
+    if (!heroSection || !logo) return;
+
+    // Check if user already scrolled past hero
+    const isHeroPassed = localStorage.getItem('heroPassed') === 'true';
+    if (isHeroPassed) {
+        document.body.classList.add('hero-passed');
+    }
+
+    // Track scroll position
+    let lastScrollY = window.scrollY;
+    
+    // More reliable scroll handler - adjusted to hide later
+    function checkScroll() {
+        const currentScroll = window.scrollY;
+        
+        // Hide logo if scrolled more than 150px down (increased from 20px)
+        const shouldHide = currentScroll > 150;
+        
+        document.body.classList.toggle('hero-passed', shouldHide);
+        localStorage.setItem('heroPassed', shouldHide ? 'true' : 'false');
+        
+        lastScrollY = currentScroll;
+    }
+
+    // Throttle scroll events for better performance
+    function throttle(func, limit) {
+        let lastFunc;
+        let lastRan;
+        return function() {
+            const context = this;
+            const args = arguments;
+            if (!lastRan) {
+                func.apply(context, args);
+                lastRan = Date.now();
+            } else {
+                clearTimeout(lastFunc);
+                lastFunc = setTimeout(function() {
+                    if ((Date.now() - lastRan) >= limit) {
+                        func.apply(context, args);
+                        lastRan = Date.now();
+                    }
+                }, limit - (Date.now() - lastRan));
+            }
+        }
+    }
+
+    // Use both scroll event and IntersectionObserver
+    window.addEventListener('scroll', throttle(checkScroll, 50));
+    
+    // Adjusted IntersectionObserver to trigger later
+    const observer = new IntersectionObserver((entries) => {
+        const heroEntry = entries[0];
+        // Changed to 0.7 (from 0.9) to trigger later
+        const isVisible = heroEntry.intersectionRatio > 0.7;
+        document.body.classList.toggle('hero-passed', !isVisible);
+    }, {
+        threshold: 0.7, // Changed from 0.9 to trigger later
+        rootMargin: '-100px 0px 0px 0px' // Increased from -20px
+    });
+
+    observer.observe(heroSection);
+    
+    // Initial check
+    checkScroll();
+});
+
+
+function initLogo3DEffect() {
+    const logo = document.querySelector('.logo-desktop');
+    if (!logo) return;
+
+    // Configuration
+    const config = {
+        maxRotation: 20,
+        perspective: 1000,
+        movementFactor: 0.03,
+        smoothness: 0.5,
+        floatAmplitude: 10,
+        floatSpeed: 0.0015
+    };
+
+    // State
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let targetRotationX = 0;
+    let targetRotationY = 0;
+    let currentRotationX = 0;
+    let currentRotationY = 0;
+    let floatOffset = 0;
+    let lastTime = 0;
+
+    // Mouse move handler
+    function handleMouseMove(e) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    }
+
+    // Calculate target rotations
+    function calculateTargetRotations() {
+        const normalizedX = (mouseX / window.innerWidth) * 2 - 1;
+        const normalizedY = (mouseY / window.innerHeight) * 2 - 1;
+        
+        targetRotationY = normalizedX * config.maxRotation;
+        targetRotationX = -normalizedY * config.maxRotation;
+    }
+
+    // Animation loop
+    function animate(time) {
+        if (!lastTime) lastTime = time;
+        const deltaTime = time - lastTime;
+        lastTime = time;
+
+        // Skip animation if logo is hidden
+        if (document.body.classList.contains('hero-passed')) {
+            logo.style.transform = '';
+            requestAnimationFrame(animate);
+            return;
+        }
+
+        floatOffset = Math.sin(time * config.floatSpeed) * config.floatAmplitude;
+        currentRotationX += (targetRotationX - currentRotationX) * config.smoothness;
+        currentRotationY += (targetRotationY - currentRotationY) * config.smoothness;
+
+        logo.style.transform = `
+            perspective(${config.perspective}px)
+            translate(-50%, -50%)
+            translateY(${floatOffset}px)
+            rotateX(${currentRotationX}deg)
+            rotateY(${currentRotationY}deg)
+        `;
+        
+        requestAnimationFrame(animate);
+    }
+
+    // Initialize
+    document.addEventListener('mousemove', handleMouseMove);
+    setInterval(calculateTargetRotations, 16);
+    requestAnimationFrame(animate);
+
+    window.addEventListener('resize', () => {
+        mouseX = window.innerWidth / 2;
+        mouseY = window.innerHeight / 2;
+    });
+}
+
 // Ultra-Responsive Custom Cursor
 function initCustomCursor() {
     const cursorDot = document.querySelector('.cursor-dot');
@@ -461,8 +612,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     }
 });
-
-
 
 // Floating Visualizer (unchanged)
 function initFloatingVisualizer() {

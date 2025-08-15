@@ -57,23 +57,30 @@ body {
 }
 
 ::selection {
-    background: var(--erin-glow);
+    background: var(--fuchsia-glow);
     color: var(--white);
 }
 
-/* Ultra-Responsive Cursor Styles */
+/* Bulletproof Custom Cursor */
+* {
+    cursor: none !important; /* Force hide all native cursors */
+}
+
 .cursor {
     position: fixed;
     top: 0;
     left: 0;
+    width: 100vw;
+    height: 100vh;
     pointer-events: none;
-    z-index: 9999;
+    z-index: 2147483647; /* Maximum z-index */
     mix-blend-mode: difference;
 }
 
 .cursor-dot {
-    width: 8px;
-    height: 8px;
+    --size: 8px;
+    width: var(--size);
+    height: var(--size);
     background: white;
     border-radius: 50%;
     position: absolute;
@@ -82,20 +89,8 @@ body {
         width 0.15s ease-out,
         height 0.15s ease-out;
     will-change: transform;
-}
-
-.cursor-outline {
-    width: 32px;
-    height: 32px;
-    border: 2px solid rgba(97, 244, 87, 0.4);
-    border-radius: 50%;
-    position: absolute;
-    transform: translate(-50%, -50%);
-    transition: 
-        border-color 0.15s ease-out,
-        transform 0.1s linear;
-    will-change: transform;
     backface-visibility: hidden;
+    contain: layout style paint;
 }
 
 /* Hide cursor on touch devices */
@@ -173,7 +168,7 @@ body {
 .progress-fill {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, var(--erin), var(--aqua));
+    background: linear-gradient(90deg, var(--fuchsia), var(--aqua));
     transition: width 0.3s ease;
 }
 
@@ -213,6 +208,98 @@ body {
     position: relative;
     z-index: 2;
     transition: var(--transition);
+}
+
+/* Glowing Section Separator */
+.section {
+    position: relative;
+    overflow: hidden;
+}
+
+.section::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--erin),
+        var(--aqua),
+        var(--fuchsia),
+        var(--yellow),
+        transparent
+    );
+    background-size: 400% 400%;
+    animation: gradientFlow 8s ease infinite;
+    opacity: 0.3;
+    filter: blur(1px);
+}
+
+.section::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--erin-light),
+        var(--aqua-light),
+        var(--fuchsia-light),
+        var(--yellow-light),
+        transparent
+    );
+    background-size: 400% 400%;
+    animation: gradientFlow 12s ease infinite reverse;
+    opacity: 0.15;
+    filter: blur(3px);
+}
+
+@keyframes gradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Enhanced effect on hover */
+.section:hover::after {
+    opacity: 0.5;
+    height: 2px;
+    filter: blur(0.5px);
+}
+
+.section:hover::before {
+    opacity: 0.25;
+    filter: blur(5px);
+}
+
+/* For sections with dark backgrounds */
+.section-dark {
+    background: var(--bg-secondary);
+}
+
+.section-dark::after,
+.section-dark::before {
+    opacity: 0.5;
+}
+
+.section-dark:hover::after {
+    opacity: 0.7;
+}
+
+.section-dark:hover::before {
+    opacity: 0.4;
 }
 
 /* Header */
@@ -281,11 +368,13 @@ body {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10000; /* Extremely high to ensure visibility */
-    width: 350px; /* Match your image dimensions */
-    height: 350px;
+    transform: translate(-50%, -50%) perspective(1000px);
+    z-index: 10000;
+    width: 500px;
+    height: auto;
     pointer-events: none;
+    transform-style: preserve-3d;
+    transition: transform 0.05s linear;
 }
 
 .logo-desktop img {
@@ -295,7 +384,37 @@ body {
     filter: 
         drop-shadow(0 0 15px rgba(97, 244, 87, 0.7))
         drop-shadow(0 0 30px rgba(97, 244, 87, 0.4));
-    animation: float 6s ease-in-out infinite;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Hide logo when tour section is active */
+/* Logo defaults to visible */
+.logo-desktop {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0s;
+}
+
+body.hero-passed .logo-desktop {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0s 0.3s;
+}
+
+/* Initial state - logo visible */
+.logo-desktop {
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+/* When body has 'tour-active' class - hide logo */
+body.tour-active .logo-desktop {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0s 0.5s;
 }
 
 /* Float Animation */
@@ -330,38 +449,27 @@ body {
     }
 }
 
+/* ===== CORE NAVIGATION ===== */
 .nav {
     display: flex;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    gap: 60px;
+    gap: 50px;
 }
 
 .nav-link {
     position: relative;
-    text-decoration: none;
     color: var(--text-secondary);
     font-weight: 500;
     font-size: 0.9rem;
     letter-spacing: 1px;
     text-transform: uppercase;
-    transition: var(--transition);
-    padding: 10px 0;
+    padding: 10px 18px;
+    overflow: hidden;
 }
 
-.nav-text {
-    position: relative;
-    z-index: 2;
-    transition: var(--transition);
-}
-
-.nav-link {
-    position: relative;
-    display: inline-block;
-    padding: 0.5rem 0;
-}
-
+/* ===== ANIMATION ELEMENTS ===== */
 .nav-hover {
     position: absolute;
     top: 0;
@@ -374,23 +482,64 @@ body {
 
 .trace-path {
     stroke: var(--erin);
-    stroke-width: 2;
-    stroke-dasharray: 0, 400;
+    stroke-width: 2px;
+    stroke-dasharray: 0, 1000;
     stroke-dashoffset: 0;
     fill: none;
-    transition: 
-        stroke-dasharray 0.6s cubic-bezier(0.19, 1, 0.22, 1),
-        height 0.4s ease 0.6s,
-        top 0.4s ease 0.6s;
+    transition: stroke-dasharray 0.5s cubic-bezier(0.19, 1, 0.22, 1);
     filter: drop-shadow(0 0 5px rgba(97, 244, 87, 0.7));
 }
 
-.nav-link:hover .trace-path {
-    stroke-dasharray: 400, 0;
+.nav-underline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--erin);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) 0.5s;
 }
 
-.nav-link:hover .nav-hover {
-    animation: settle 1s forwards;
+/* ===== ENHANCED TEXT FLICKER ANIMATION ===== */
+@keyframes textFlicker {
+    0% { opacity: 0.3; }
+    10% { opacity: 1; }
+    20% { opacity: 0.6; }
+    30% { opacity: 1; }
+    40% { opacity: 0.8; }
+    50% { opacity: 0.9; }
+    60% { opacity: 1; }
+    70% { opacity: 0.95; }
+    80% { opacity: 1; }
+    90% { opacity: 0.98; }
+    100% { opacity: 1; color: var(--text-primary); }
+}
+
+.nav-text {
+    position: relative;
+    z-index: 2;
+    will-change: opacity, color; /* Performance optimization */
+}
+
+.nav-link:hover .nav-text {
+    animation: textFlicker 0.7s forwards; /* Slightly longer duration */
+    color: var(--text-primary);
+}
+
+/* ===== MOBILE RESPONSIVENESS ===== */
+@media (max-width: 768px) {
+    .nav {
+        gap: 25px;
+    }
+    .nav-link {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+    .nav-link:hover .nav-text {
+        animation-duration: 0.5s; /* Faster on mobile */
+    }
 }
 
 @keyframes settle {
@@ -439,7 +588,7 @@ body {
 }
 
 /* Mobile Menu */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     /* Show mobile logo */
     .logo-mobile {
         display: block;
