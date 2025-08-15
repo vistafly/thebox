@@ -25,28 +25,43 @@
         </div>
     </div>
 
-   <header class="header">
+<header class="header">
     <div class="nav-container">
+        <!-- Mobile Logo -->
+        <div class="logo-mobile">
+            <img src="images/logo.png" alt="The Box Logo">
+        </div>
+        
         <nav class="nav">
             <a href="#hero" class="nav-link">
                 <span class="nav-text">Home</span>
-                <div class="nav-hover"></div>
+                <svg class="nav-hover" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path class="trace-path" d="M0,0 L100,0 L100,100 L0,100 L0,0" />
+                </svg>
             </a>
             <a href="#about" class="nav-link">
                 <span class="nav-text">About</span>
-                <div class="nav-hover"></div>
+                <svg class="nav-hover" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path class="trace-path" d="M0,0 L100,0 L100,100 L0,100 L0,0" />
+                </svg>
             </a>
             <a href="#music" class="nav-link">
                 <span class="nav-text">Music</span>
-                <div class="nav-hover"></div>
+                <svg class="nav-hover" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path class="trace-path" d="M0,0 L100,0 L100,100 L0,100 L0,0" />
+                </svg>
             </a>
             <a href="#members" class="nav-link">
                 <span class="nav-text">Members</span>
-                <div class="nav-hover"></div>
+                <svg class="nav-hover" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path class="trace-path" d="M0,0 L100,0 L100,100 L0,100 L0,0" />
+                </svg>
             </a>
             <a href="#booking" class="nav-link">
                 <span class="nav-text">Booking</span>
-                <div class="nav-hover"></div>
+                <svg class="nav-hover" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path class="trace-path" d="M0,0 L100,0 L100,100 L0,100 L0,0" />
+                </svg>
             </a>
         </nav>
         <div class="menu-toggle">
@@ -57,50 +72,309 @@
     </div>
 </header>
 
-    <!-- Hero Section -->
-<section id="hero" class="hero">
-    <div class="hero-background">
-        <video autoplay muted loop playsinline>
-            <source src="images/hero.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-        <div class="bg-grid"></div>
-        <div class="bg-particles"></div>
-        <div class="bg-gradient"></div>
-        <div class="bg-noise"></div>
-        <div class="light-effect"></div>
-    </div>
-    
-    
-    <div class="hero-content">
-        <div class="hero-logo">
-            <img src="images/logo.png" alt="The Box Logo" class="logo-image">
-            <div class="logo-glow"></div>
+    <section id="hero" class="hero">
+        <div class="hero-background">
+            <video autoplay muted loop playsinline>
+                <source src="images/hero.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="bg-grid"></div>
+            <div class="bg-particles"></div>
+            <div class="bg-gradient"></div>
+            <div class="bg-noise"></div>
+            <div class="light-effect"></div>
         </div>
         
-        <div class="hero-text">
-            <p class="hero-subtitle">Fresno's Ultimate Throwback Party Band</p>
-            <div class="hero-description">
-                <p>We're the perfect fusion of DJ transitions with live performance energy</p>
+        <div class="hero-content">
+            <!-- Desktop Logo -->
+            <div class="logo-desktop">
+                <img src="images/logo.png" alt="The Box Logo">
             </div>
-            <div class="hero-cta">
-                <a href="#booking" class="cta-button">
-                    <span class="cta-text">Book Now</span>
-                    <div class="cta-bg"></div>
-                </a>
-                <a href="#music" class="secondary-button">
-                    <span>Listen Now</span>
-                    <i class="fas fa-music"></i>
-                </a>
             </div>
         </div>
-    </div>
     
     <div class="scroll-indicator">
         <div class="scroll-line"></div>
         <span class="scroll-text">Explore</span>
     </div>
 </section>
+
+<!-- Tour Dates Section -->
+<div id="tour" class="tour-section">
+    <h2 class="section-title">Where to find us</h2>
+    <div class="tour-grid">
+        <!-- Tour Date 1 (Highlighted) -->
+        <article class="tour-date">
+            <div class="date" aria-label="July 31">
+                <time datetime="2025-08-01">
+                    <span class="month">AUG</span>
+                    <span class="day">1</span>
+                </time>
+            </div>
+            
+            <div class="info">
+                <div class="venue-header">
+                    <h3>School House</h3>
+                    <span class="venue-promo">Restaurant & Tavern</span>
+                </div>
+                <p class="venue-desc"> Enjoy some great food!</p>
+                <div class="event-meta">
+                    <span class="event-time">7:00PM - 10:00PM</span>
+                    <span class="event-age">All Ages</span>
+                </div>
+                <address class="venue-address">1018 S Frankwood Ave, Sanger</address>
+                
+                <div class="venue-map-container">
+    <iframe loading="lazy" 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3197.093104097319!2d-119.45057992426812!3d36.71962497227001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094fe45c380ad37%3A0xf26f96d9e9286007!2sSchool%20House%20Restaurant%20%26%20Tavern!5e0!3m2!1sen!2sus!4v1719529371239!5m2!1sen!2sus" 
+            aria-label="Map location of School House Restaurant & Tavern"
+            style="border:0" allowfullscreen></iframe>
+</div>
+            </div>
+
+        </article>
+        <!-- Tour Date 2 -->
+         <article class="tour-date">
+            <div class="date" aria-label="July 25">
+                <time datetime="2025-08-02">
+                    <span class="month">AUG</span>
+                    <span class="day">2</span>
+                </time>
+            </div>
+            
+            <div class="info">
+            <div class="venue-header">
+                <h3>Station 48</h3>
+                <span class="venue-promo">Restaurant & Bar</span>
+            </div>
+            <p class="venue-desc">An old volunteer fire station transfromed into a pub</p>
+            <div class="event-meta">
+                <span class="event-time">7:00PM - 9:00PM</span>
+                <span class="event-age">All Ages</span>
+            </div>
+            <address class="venue-address">1279 N Wishon Ave, Fresno</address>
+            
+            <div class="venue-map-container">
+                <iframe loading="lazy" 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3197.093104097319!2d-119.45057992426812!3d36.71962497227001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094f11d4930edf5%3A0x31b25aa2cbb059e9!2sRileys%20Brewing%20Taproom!5e0!3m2!1sen!2sus!4v1719529371239!5m2!1sen!2sus" 
+                        aria-label="Map location of Rileys Brewing Taproom"
+                        style="border:0" allowfullscreen></iframe>
+            </div>
+        </div>
+        </article>
+
+        <!-- Tour Date 3 -->
+        <article class="tour-date">
+            <div class="date" aria-label="July 25">
+                <time datetime="2025-08-06">
+                    <span class="month">AUG</span>
+                    <span class="day">6</span>
+                </time>
+            </div>
+            
+            <div class="info">
+            <div class="venue-header">
+                <h3>Rileys Brewing Taproom</h3>
+                <span class="venue-promo">Restaurant & Bar</span>
+            </div>
+            <p class="venue-desc">45 beers on tap & a lineup of live music.</p>
+            <div class="event-meta">
+                <span class="event-time">6:30PM - 8:30PM</span>
+                <span class="event-age">All Ages</span>
+            </div>
+            <address class="venue-address">2940 McCall Ave STE 112, Selma</address>
+            
+            <div class="venue-map-container">
+                <iframe loading="lazy" 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3197.093104097319!2d-119.45057992426812!3d36.71962497227001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094f11d4930edf5%3A0x31b25aa2cbb059e9!2sRileys%20Brewing%20Taproom!5e0!3m2!1sen!2sus!4v1719529371239!5m2!1sen!2sus" 
+                        aria-label="Map location of Rileys Brewing Taproom"
+                        style="border:0" allowfullscreen></iframe>
+            </div>
+        </div>
+        </article>
+
+       <!-- Tour Date 4 -->
+<article class="tour-date">
+    <div class="date" aria-label="July 26">
+        <time datetime="2025-08-08">
+            <span class="month">AUG</span>
+            <span class="day">8</span>
+        </time>
+    </div>
+    
+    <div class="info">
+        <div class="venue-header">
+            <h3>Howlin Wolf</h3>
+            <span class="venue-promo">Bar & Lounge</span>
+        </div>
+        <p class="venue-desc">Visit the nicest bar in tower</p>
+        <div class="event-meta">
+            <span class="event-time">9:00PM - 11:00PM</span>
+            <span class="event-age">21+</span>
+        </div>
+        <address class="venue-address">920 E Olive Ave, Fresno</address>
+        
+        <div class="venue-map-container">
+            <iframe loading="lazy" 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3195.469246341038!2d-119.8024274!3d36.7572347!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80946713cb56fcb9%3A0xfbfcadc49a354757!2sHowlin%20Wolf!5e0!3m2!1sen!2sus!4v1719529371239!5m2!1sen!2sus" 
+                    aria-label="Map location of Howlin Wolf"
+                    style="border:0" allowfullscreen></iframe>
+        </div>
+    </div>
+</article>
+
+        <!-- Tour Date 5 -->
+<article class="tour-date">
+    <div class="date" aria-label="Date">
+        <time datetime="2025-08-14">
+            <span class="month">AUG</span>
+            <span class="day">14</span>
+        </time>
+    </div>
+    
+    <div class="info">
+        <div class="venue-header">
+            <h3>School House</h3>
+            <span class="venue-promo">Restaurant & Tavern</span>
+        </div>
+        <p class="venue-desc">Have a beer and eat some food</p>
+        <div class="event-meta">
+            <span class="event-time">5:00PM - 7:00PM</span>
+            <span class="event-age">All Ages</span>
+        </div>
+        <address class="venue-address">1018 S Frankwood Ave, Sanger</address>
+        
+        <div class="venue-map-container">
+    <iframe loading="lazy" 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3197.373315168003!2d-119.4505746!3d36.719625!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094fe45c380ad37%3A0xf26f96d9e9286007!2sSchool%20House%20Restaurant%20%26%20Tavern!5e0!3m2!1sen!2sus!4v1719791234567!5m2!1sen!2sus" 
+            aria-label="Map location of School House Restaurant & Tavern"
+            style="border:0" allowfullscreen></iframe>
+</div>
+    </div>
+</article>
+
+<!-- Tour Date 6 -->
+<article class="tour-date">
+    <div class="date" aria-label="Date">
+        <time datetime="2025-08-15">
+            <span class="month">AUG</span>
+            <span class="day">15</span>
+        </time>
+    </div>
+    
+    <div class="info">
+        <div class="venue-header">
+            <h3>Lush Fine Wines</h3>
+            <span class="venue-promo">Wine bar and lounge</span>
+        </div>
+        <p class="venue-desc">Premiere wine and beer destination</p>
+        <div class="event-meta">
+            <span class="event-time">8:00PM - 10:00PM</span>
+            <span class="event-age">21+</span>
+        </div>
+        <address class="venue-address">202 W Lacey Blvd, Hanford</address>
+        
+        <div class="venue-map-container">
+    <iframe loading="lazy" 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3204.072422944247!2d-119.6480048!3d36.3281407!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094c378f0be37b5%3A0xa42f8f372f65ab74!2sLush%20Fine%20Wines!5e0!3m2!1sen!2sus!4v1719791234567!5m2!1sen!2sus" 
+            aria-label="Map location of Lush Fine Wines"
+            style="border:0" allowfullscreen></iframe>
+        </div>
+    </div>
+</article>
+
+<!-- Tour Date 7 -->
+<article class="tour-date">
+    <div class="date" aria-label="Date">
+        <time datetime="2025-08-16">
+            <span class="month">AUG</span>
+            <span class="day">16</span>
+        </time>
+    </div>
+    
+    <div class="info">
+        <div class="venue-header">
+            <h3>YFC Blackstone</h3>
+            <span class="venue-promo">Restaurant & Dinner</span>
+        </div>
+        <p class="venue-desc">Serving steak, seafood & sandwiches </p>
+        <div class="event-meta">
+            <span class="event-time">8:30PM - 11:15PM</span>
+            <span class="event-age">All Ages</span>
+        </div>
+        <address class="venue-address">5123 N Blackstone Ave, Fresno</address>
+        
+        <div class="venue-map-container">
+    <iframe loading="lazy" 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3197.123389042784!2d-119.7908477!3d36.8105163!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094678a4087a765%3A0xfa2e1092252670f1!2sYosemite%20Falls%20Cafe%20-%20Blackstone!5e0!3m2!1sen!2sus!4v1711920000000!5m2!1sen!2sus" 
+            aria-label="Map location of Yosemite Falls Cafe"
+            style="border:0" allowfullscreen></iframe>
+</div>
+    </div>
+</article>
+
+<!-- Tour Date 8 -->
+<article class="tour-date">
+    <div class="date" aria-label="Date">
+        <time datetime="2025-08-17">
+            <span class="month">AUG</span>
+            <span class="day">17</span>
+        </time>
+    </div>
+    
+    <div class="info">
+        <div class="venue-header">
+            <h3>Lucy's</h3>
+            <span class="venue-promo">Cocktail Lounge</span>
+        </div>
+        <p class="venue-desc">Handcrafted cocktails</p>
+        <div class="event-meta">
+            <span class="event-time">3:30PM - 6:30PM</span>
+            <span class="event-age">21+</span>
+        </div>
+        <address class="venue-address">733 E Olive Ave, Fresno</address>
+        
+        <div class="venue-map-container">
+        <iframe loading="lazy" 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3198.902658050146!2d-119.8052759!3d36.7578575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094674e658456e7%3A0x75d88bb50740ff08!2sLucy%27s%20Lounge!5e0!3m2!1sen!2sus!4v1711920000000!5m2!1sen!2sus" 
+                aria-label="Map location of Lucy's Lounge"
+                style="border:0" allowfullscreen></iframe>
+    </div>
+    </div>
+</article>
+
+<!-- Tour Date 9 -->
+<article class="tour-date">
+    <div class="date" aria-label="Date">
+        <time datetime="2025-08-27">
+            <span class="month">AUG</span>
+            <span class="day">27</span>
+        </time>
+    </div>
+    
+    <div class="info">
+        <div class="venue-header">
+            <h3>Fowler Farmers Market</h3>
+            <span class="venue-promo">Local Flavors Market</span>
+        </div>
+        <p class="venue-desc">Stop by and get some food</p>
+        <div class="event-meta">
+            <span class="event-time">6:00PM - 9:00PM</span>
+            <span class="event-age">All Ages</span>
+        </div>
+        <address class="venue-address"> 500 E. Merced St., Fowler</address>
+        
+        <div class="venue-map-container">
+    <iframe loading="lazy" 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3193.908721968595!2d-119.6781983!3d36.6334367!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094f6b5cc0d26b3%3A0x495a005fe8f26db1!2sPanzak%20Park!5e0!3m2!1sen!2sus!4v1711920000000!5m2!1sen!2sus" 
+            aria-label="Map location of Panzak Park"
+            style="border:0" allowfullscreen></iframe>
+</div>
+    </div>
+</article>
+
+    </div>
+</div>
 
     <!-- About Section -->
     <section id="about" class="section about-section">

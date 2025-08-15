@@ -15,14 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Hero animations
     initHeroAnimations();
     
-    // Vinyl animation
-    initVinylAnimation();
-    
     // Music player
     initMusicPlayer();
-    
-    // Waveform canvas
-    initWaveform();
     
     // Scroll animations
     initScrollAnimations();
@@ -35,9 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Form interactions
     initFormInteractions();
-    
-    // Floating visualizer
-    initFloatingVisualizer();
+
 });
 
 // Ultra-Responsive Custom Cursor
@@ -205,13 +197,7 @@ function initHeroAnimations() {
     const tl = gsap.timeline({ delay: 0.5 });
     
     // Animate title lines
-    tl.from('.title-line', {
-        y: '100%',
-        duration: 1,
-        ease: 'power3.out',
-        stagger: 0.2
-    })
-    .from('.hero-subtitle', {
+    tl.from('.hero-subtitle', {
         opacity: 0,
         y: 30,
         duration: 0.8,
@@ -229,12 +215,6 @@ function initHeroAnimations() {
         duration: 0.8,
         ease: 'power2.out'
     }, '-=0.3')
-    .from('.hero-visual', {
-        opacity: 0,
-        x: 50,
-        duration: 1,
-        ease: 'power2.out'
-    }, '-=0.8')
     .from('.scroll-indicator', {
         opacity: 0,
         y: 20,
@@ -482,6 +462,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+
+
 // Floating Visualizer (unchanged)
 function initFloatingVisualizer() {
     const visualizer = document.querySelector('.visualizer-bars');
@@ -625,7 +607,6 @@ function initScrollAnimations() {
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     initMusicPlayer();
-    initFloatingVisualizer();
     initScrollAnimations();
 });
     
@@ -877,13 +858,493 @@ window.addEventListener('resize', () => {
     ScrollTrigger.refresh();
 });
 
-// Mobile menu toggle (if needed)
-const menuToggle = document.querySelector('.menu-toggle');
-const nav = document.querySelector('.nav');
+// Guaranteed Working Mobile Menu Toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const nav = document.querySelector('.nav');
+    let scrollPosition = 0;
+    
+    if (!menuToggle || !nav) {
+        console.error("Menu elements not found!");
+        return;
+    }
 
-if (menuToggle && nav) {
-    menuToggle.addEventListener('click', () => {
+    menuToggle.addEventListener('click', function() {
+        const isOpening = !nav.classList.contains('active');
+        
+        if (isOpening) {
+            // Store scroll position before opening menu
+            scrollPosition = window.scrollY;
+            // Apply styles to prevent scrolling
+            document.body.classList.add('menu-open');
+            document.body.style.top = `-${scrollPosition}px`;
+        } else {
+            // Remove scroll prevention styles
+            document.body.classList.remove('menu-open');
+            // INSTANTLY restore scroll position (no smooth scrolling)
+            document.body.style.top = '';
+            document.documentElement.style.scrollBehavior = 'auto'; // Disable smooth scrolling
+            window.scrollTo(0, scrollPosition);
+            // Re-enable smooth scrolling after we're done
+            setTimeout(() => {
+                document.documentElement.style.scrollBehavior = '';
+            }, 0);
+        }
+
+        // Toggle menu classes
+        this.classList.toggle('active');
         nav.classList.toggle('active');
-        menuToggle.classList.toggle('active');
     });
+
+    // Tour Date Highlighting Functions
+function highlightUpcomingDates() {
+    const now = new Date();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    let nextShow = null;
+    let smallestTimeDiff = Infinity;
+    let currentlyPlayingShow = null;
+    
+    // Remove all existing highlights
+    document.querySelectorAll('.tour-date').forEach(dateElement => {
+        dateElement.classList.remove('highlight', 'currently-playing', 'active');
+    });
+    
+    // Process each tour date card
+    document.querySelectorAll('.tour-date').forEach(dateElement => {
+        const timeElement = dateElement.querySelector('time');
+        const eventTimeElement = dateElement.querySelector('.event-time');
+        
+        if (!timeElement || !eventTimeElement) return;
+        
+        const datetime = timeElement.getAttribute('datetime');
+        if (!datetime) return;
+        
+        // Parse event date
+        const eventDate = new Date(datetime + 'T00:00:00');
+        if (isNaN(eventDate.getTime())) return;
+        
+        // Parse event time
+        const timeText = eventTimeElement.textContent.trim();
+        const timeMatch = timeText.match(/(\d{1,2}):(\d{2})\s*(AM|PM)\s*[-–—]\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+        
+        if (!timeMatch) return;
+        
+        const [, startHour, startMin, startPeriod, endHour, endMin, endPeriod] = timeMatch;
+        
+        function parseTime(hour, minute, period, baseDate) {
+            let hours = parseInt(hour);
+            const minutes = parseInt(minute);
+            
+            if (period.toUpperCase() === 'PM' && hours !== 12) {
+                hours += 12;
+            } else if (period.toUpperCase() === 'AM' && hours === 12) {
+                hours = 0;
+            }
+            
+            const date = new Date(baseDate);
+            date.setHours(hours, minutes, 0, 0);
+            return date;
+        }
+        
+        // Create start and end datetime objects
+        const startDateTime = parseTime(startHour, startMin, startPeriod, eventDate);
+        const endDateTime = parseTime(endHour, endMin, endPeriod, eventDate);
+        
+        // Check if show is currently happening
+        if (now >= startDateTime && now <= endDateTime) {
+            currentlyPlayingShow = dateElement;
+        }
+        
+        // Check if show is in the future
+        if (endDateTime > now) {
+            const timeDiff = startDateTime - now;
+            
+            // Find the next upcoming show (closest to now but still in future)
+            if (timeDiff < smallestTimeDiff) {
+                smallestTimeDiff = timeDiff;
+                nextShow = dateElement;
+            }
+        }
+    });
+    
+    // Apply highlighting
+    if (currentlyPlayingShow) {
+        currentlyPlayingShow.classList.add('currently-playing', 'active');
+        
+        // Set timeout to switch when current show ends
+        const eventTimeElement = currentlyPlayingShow.querySelector('.event-time');
+        const timeText = eventTimeElement.textContent.trim();
+        const timeMatch = timeText.match(/(\d{1,2}):(\d{2})\s*(AM|PM)\s*[-–—]\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+        
+        if (timeMatch) {
+            const [, , , , endHour, endMin, endPeriod] = timeMatch;
+            const datetime = currentlyPlayingShow.querySelector('time').getAttribute('datetime');
+            const eventDate = new Date(datetime + 'T00:00:00');
+            const endDateTime = parseTime(endHour, endMin, endPeriod, eventDate);
+            
+            const timeUntilEnd = endDateTime - now;
+            
+            if (timeUntilEnd > 0) {
+                setTimeout(highlightUpcomingDates, timeUntilEnd);
+            }
+        }
+    } else if (nextShow) {
+        nextShow.classList.add('highlight', 'active');
+        
+        // Set timeout to check again at show start time
+        const timeElement = nextShow.querySelector('time');
+        const eventTimeElement = nextShow.querySelector('.event-time');
+        const datetime = timeElement.getAttribute('datetime');
+        const eventDate = new Date(datetime + 'T00:00:00');
+        const timeText = eventTimeElement.textContent.trim();
+        const timeMatch = timeText.match(/(\d{1,2}):(\d{2})\s*(AM|PM)\s*[-–—]\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+        
+        if (timeMatch) {
+            const [startHour, startMin, startPeriod] = timeMatch.slice(1, 4);
+            const startDateTime = parseTime(startHour, startMin, startPeriod, eventDate);
+            const timeUntilStart = startDateTime - now;
+            
+            if (timeUntilStart > 0) {
+                setTimeout(highlightUpcomingDates, timeUntilStart);
+            }
+        }
+    } else {
+        // No future shows, highlight most recent past show
+        let mostRecentPast = null;
+        let smallestPastDiff = Infinity;
+        
+        document.querySelectorAll('.tour-date').forEach(dateElement => {
+            const timeElement = dateElement.querySelector('time');
+            const eventTimeElement = dateElement.querySelector('.event-time');
+            
+            if (!timeElement || !eventTimeElement) return;
+            
+            const datetime = timeElement.getAttribute('datetime');
+            if (!datetime) return;
+            
+            const eventDate = new Date(datetime + 'T00:00:00');
+            if (isNaN(eventDate.getTime())) return;
+            
+            // Parse end time for comparison
+            const timeText = eventTimeElement.textContent.trim();
+            const timeMatch = timeText.match(/(\d{1,2}):(\d{2})\s*(AM|PM)\s*[-–—]\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+            
+            if (timeMatch) {
+                const [, , , , endHour, endMin, endPeriod] = timeMatch;
+                const endDateTime = parseTime(endHour, endMin, endPeriod, eventDate);
+                const timeDiff = now - endDateTime;
+                
+                if (timeDiff > 0 && timeDiff < smallestPastDiff) {
+                    smallestPastDiff = timeDiff;
+                    mostRecentPast = dateElement;
+                }
+            }
+        });
+        
+        if (mostRecentPast) {
+            mostRecentPast.classList.add('highlight', 'active');
+        }
+    }
 }
+
+// Tour Auto-Scroll Class
+class TourAutoScroll {
+    constructor() {
+        this.tourGrid = document.querySelector('.tour-grid');
+        this.tourSection = document.querySelector('.tour-section');
+        this.tourCards = [];
+        this.dotsContainer = null;
+        this.dots = [];
+        this.isActive = false;
+        this.intervalId = null;
+        this.currentIndex = 0;
+        this.isPaused = false;
+        this.lastUserAction = 0;
+        this.hasInteracted = false;
+        
+        // Settings
+        this.scrollSpeed = 3000; // 3 seconds
+        this.pauseTime = 4000; // 4 seconds after user interaction
+        
+        this.init();
+    }
+
+    init() {
+        // Find tour cards
+        this.tourCards = Array.from(document.querySelectorAll('.tour-date'));
+        
+        if (!this.tourGrid || this.tourCards.length === 0) {
+            return;
+        }
+        
+        // Create dots container
+        this.createDots();
+        
+        // Start on mobile only
+        this.checkIfShouldRun();
+        
+        // Listen for resize
+        window.addEventListener('resize', this.checkIfShouldRun.bind(this));
+        
+        // Add interaction listeners
+        this.addTourListeners();
+    }
+
+    createDots() {
+        // Create dots container
+        this.dotsContainer = document.createElement('div');
+        this.dotsContainer.className = 'tour-dots';
+        
+        // Style the dots container (mobile only)
+        this.dotsContainer.style.display = 'none';
+        this.dotsContainer.style.justifyContent = 'center';
+        this.dotsContainer.style.alignItems = 'center';
+        this.dotsContainer.style.marginTop = '.5rem';
+        this.dotsContainer.style.padding = '0 0px';
+        
+        // Create dots
+        this.tourCards.forEach((_, index) => {
+            const dot = document.createElement('button');
+            dot.className = 'tour-dot';
+            dot.setAttribute('aria-label', `Go to card ${index + 1}`);
+            
+            // Style the dots
+            dot.style.width = '10px';
+            dot.style.height = '10px';
+            dot.style.borderRadius = '50%';
+            dot.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+            dot.style.border = 'none';
+            dot.style.cursor = 'pointer';
+            dot.style.padding = '0';
+            dot.style.transition = 'background-color 0.3s ease';
+            
+            dot.addEventListener('click', () => {
+                this.goToCard(index);
+            });
+            
+            this.dotsContainer.appendChild(dot);
+            this.dots.push(dot);
+        });
+        
+        // Add dots container to the tour section
+        if (this.tourSection) {
+            this.tourSection.appendChild(this.dotsContainer);
+        }
+        
+        // Update dot visibility based on screen size
+        this.updateDotsVisibility();
+    }
+
+    updateDotsVisibility() {
+        const isMobile = window.innerWidth <= 768;
+        if (this.dotsContainer) {
+            this.dotsContainer.style.display = isMobile ? 'flex' : 'none';
+        }
+    }
+
+    updateActiveDot() {
+        this.dots.forEach((dot, index) => {
+            if (index === this.currentIndex) {
+                dot.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+                dot.style.transform = 'scale(1.2)';
+            } else {
+                dot.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                dot.style.transform = 'scale(1)';
+            }
+        });
+    }
+
+    goToCard(index) {
+        if (index < 0 || index >= this.tourCards.length) return;
+        
+        this.currentIndex = index;
+        const targetCard = this.tourCards[this.currentIndex];
+        
+        if (!targetCard) return;
+        
+        // Scroll to center the card
+        const cardCenter = targetCard.offsetLeft + (targetCard.offsetWidth / 2);
+        const gridCenter = this.tourGrid.offsetWidth / 2;
+        const scrollTo = cardCenter - gridCenter;
+        
+        this.tourGrid.scrollTo({
+            left: Math.max(0, scrollTo),
+            behavior: 'smooth'
+        });
+        
+        // Update interaction state
+        this.lastUserAction = Date.now();
+        this.hasInteracted = true;
+        if (this.tourSection) {
+            this.tourSection.classList.add('user-interacted');
+        }
+        
+        // Update active dot
+        this.updateActiveDot();
+    }
+
+    checkIfShouldRun() {
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile && !this.isActive) {
+            this.start();
+        } else if (!isMobile && this.isActive) {
+            this.stop();
+        }
+        
+        this.updateDotsVisibility();
+    }
+
+    start() {
+        if (this.isActive || this.tourCards.length <= 1) return;
+        
+        this.isActive = true;
+        
+        // Only reset currentIndex if we haven't interacted yet
+        if (!this.hasInteracted) {
+            this.currentIndex = 0;
+        }
+        
+        // Wait 2 seconds then start scrolling
+        setTimeout(() => {
+            if (this.isActive) {
+                this.intervalId = setInterval(() => {
+                    this.autoScroll();
+                }, this.scrollSpeed);
+            }
+        }, 2000);
+    }
+
+    stop() {
+        this.isActive = false;
+        
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+        }
+    }
+
+    autoScroll() {
+        if (this.isPaused || (Date.now() - this.lastUserAction < this.pauseTime)) {
+            return;
+        }
+
+        // Move to next card
+        this.currentIndex = (this.currentIndex + 1) % this.tourCards.length;
+        const targetCard = this.tourCards[this.currentIndex];
+        
+        if (!targetCard) return;
+        
+        // Scroll to center the card
+        const cardCenter = targetCard.offsetLeft + (targetCard.offsetWidth / 2);
+        const gridCenter = this.tourGrid.offsetWidth / 2;
+        const scrollTo = cardCenter - gridCenter;
+        
+        this.tourGrid.scrollTo({
+            left: Math.max(0, scrollTo),
+            behavior: 'smooth'
+        });
+        
+        // Update active dot
+        this.updateActiveDot();
+    }
+
+    addTourListeners() {
+        if (!this.tourGrid) return;
+
+        const handleInteraction = () => {
+            this.lastUserAction = Date.now();
+            
+            if (!this.hasInteracted && this.tourSection) {
+                this.hasInteracted = true;
+                this.tourSection.classList.add('user-interacted');
+            }
+            
+            // When user interacts, find the current visible card
+            this.updateCurrentIndex();
+        };
+
+        this.tourGrid.addEventListener('touchstart', handleInteraction, { passive: true });
+        this.tourGrid.addEventListener('touchmove', handleInteraction, { passive: true });
+        this.tourGrid.addEventListener('scroll', handleInteraction, { passive: true });
+        this.tourGrid.addEventListener('mousedown', handleInteraction);
+
+        this.tourCards.forEach(card => {
+            card.addEventListener('click', handleInteraction);
+        });
+    }
+
+    updateCurrentIndex() {
+        // Find which card is currently most visible
+        const gridRect = this.tourGrid.getBoundingClientRect();
+        const gridCenter = gridRect.left + (gridRect.width / 2);
+        
+        let closestCardIndex = 0;
+        let smallestDistance = Infinity;
+        
+        this.tourCards.forEach((card, index) => {
+            const cardRect = card.getBoundingClientRect();
+            const cardCenter = cardRect.left + (cardRect.width / 2);
+            const distance = Math.abs(cardCenter - gridCenter);
+            
+            if (distance < smallestDistance) {
+                smallestDistance = distance;
+                closestCardIndex = index;
+            }
+        });
+        
+        this.currentIndex = closestCardIndex;
+        this.updateActiveDot();
+    }
+
+    pause() {
+        this.isPaused = true;
+    }
+
+    resume() {
+        this.isPaused = false;
+    }
+}
+
+// Initialize Tour Functions
+function initTourFunctions() {
+    // Initialize date highlighting
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(highlightUpcomingDates, 100);
+        setInterval(highlightUpcomingDates, 60000); // Check every minute
+    });
+
+    // Backup for window load
+    window.addEventListener('load', function() {
+        setTimeout(highlightUpcomingDates, 100);
+    });
+
+    // Initialize the tour auto-scroll
+    if (document.querySelector('.tour-grid')) {
+        window.tourScroller = new TourAutoScroll();
+    }
+}
+
+// Call the initialization function
+initTourFunctions();
+
+    // Close menu when clicking on links (mobile only)
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                menuToggle.classList.remove('active');
+                nav.classList.remove('active');
+                document.body.classList.remove('menu-open');
+                // INSTANTLY restore scroll position for link clicks too
+                document.body.style.top = '';
+                document.documentElement.style.scrollBehavior = 'auto';
+                window.scrollTo(0, scrollPosition);
+                setTimeout(() => {
+                    document.documentElement.style.scrollBehavior = '';
+                }, 0);
+            }
+        });
+    });
+});
