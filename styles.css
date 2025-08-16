@@ -105,8 +105,8 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     background: var(--bg-primary);
     display: flex;
     justify-content: center;
@@ -959,7 +959,7 @@ body.tour-active .logo-desktop {
     height: 2px;
     background: linear-gradient(90deg, var(--erin), var(--aqua));
     margin: 0 auto;
-    margin-bottom: 10px;
+    margin-bottom: .5rem;
 }
 
 .about-section {
@@ -1043,6 +1043,67 @@ body.tour-active .logo-desktop {
     display: block;
 }
 
+/* HIDE MOBILE TEXT BY DEFAULT */
+.mobile-version {
+    display: none;
+}
+
+/* SHOW MOBILE & HIDE DESKTOP ON SMALL SCREENS */
+@media (max-width: 768px) {
+    .desktop-version {
+        display: none; /* Hide desktop text */
+    }
+    .mobile-version {
+        display: block; /* Show mobile text */
+        font-size: 0.9rem; /* Optional: Adjust size for mobile */
+        line-height: 1.5; /* Tighter spacing */
+    }
+}
+
+/* Mobile styles (typically screens less than 768px wide) */
+@media only screen and (max-width: 768px) {
+    .text-block p {
+        font-size: 1rem; /* Slightly smaller than 1.2rem */
+        line-height: 1.6; /* Tighter line height */
+        text-shadow: 0 0 3px rgba(0,0,0,0.5); /* Smaller shadow */
+    }
+    
+    .about-stats {
+        gap: 30px; /* Reduce gap between items */
+        padding: 30px 20px; /* Smaller padding, especially horizontal */
+    }
+    
+    .stat-number {
+        font-size: 2rem; /* Much smaller numbers */
+    }
+    
+    .stat-label {
+        font-size: 0.8rem; /* Smaller label */
+        margin-top: 8px; /* Reduced spacing */
+    }
+    
+    /* Optional: Adjust animation for mobile */
+    .text-block.animated {
+        transform: translateY(15px); /* Smaller initial translate */
+    }
+}
+
+/* For very small screens (optional) */
+@media only screen and (max-width: 480px) {
+    .text-block p {
+        font-size: 0.9rem; /* Even smaller on tiny screens */
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+    }
+    
+    .about-stats {
+        gap: 25px;
+        padding: 25px 15px;
+    }
+}
+
 /* Slideshow Styles */
 .slideshow-container {
     max-width: 1000px;
@@ -1093,6 +1154,7 @@ body.tour-active .logo-desktop {
     cursor: pointer;
     padding: 5px 15px;
     transition: all 0.3s;
+    padding-bottom: 7px;
 }
 
 .slideshow-prev:hover, .slideshow-next:hover {
@@ -1101,7 +1163,7 @@ body.tour-active .logo-desktop {
 
 .slideshow-dots {
     display: flex;
-    gap: 10px;
+    gap: 15px;
 }
 
 .dot {
@@ -1130,7 +1192,7 @@ body.tour-active .logo-desktop {
     
     /* Optional: Make controls larger on desktop */
     .slideshow-prev, .slideshow-next {
-        font-size: 28px; /* Increased from 20px */
+        font-size: 23px; /* Increased from 20px */
     }
     
     .dot {
@@ -1404,13 +1466,51 @@ body.tour-active .logo-desktop {
     gap: 10px;
 }
 
+/* Default styles (desktop) */
+    .volume-control {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .volume-btn {
+        width: 24px;
+        height: 24px;
+        padding: 4px;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .volume-btn svg {
+        width: 100%;
+        height: 100%;
+    }
+    
+    .volume-slider {
+        width: 80px;
+    }
+    
+    /* Mobile styles */
+    @media (max-width: 767px) {
+        .volume-slider {
+            display: none;
+        }
+        
+        .volume-btn {
+            width: 32px;  /* Larger button */
+            height: 32px; /* Larger button */
+            padding: 6px;
+        }
+    }
+
 /* Mobile Optimizations (applies below 768px) */
 @media only screen and (max-width: 767px) {
     .slideshow-container {
         max-width: 100%;
         width: calc(100% - 10px); /* Subtracts 10px from each side */
         margin: 0 auto; /* Centers the container */
-        border-radius: 0;
+        border-radius: 8px;
         box-shadow: none;
     }
     
@@ -1430,7 +1530,7 @@ body.tour-active .logo-desktop {
     /* Music Player Mobile Styles */
     .music-player {
         max-width: 100%;
-        border-radius: 0;
+        border-radius: 8px;
     }
     
     .player-container {
@@ -1538,8 +1638,8 @@ body.tour-active .logo-desktop {
 /* Extra Small Devices (below 480px) */
 @media only screen and (max-width: 480px) {
     .player-container {
-        padding: 12px;
-        gap: 8px;
+        padding: 15px;
+        gap: 0px;
     }
     
     /* Slightly smaller buttons */
@@ -1570,8 +1670,8 @@ body.tour-active .logo-desktop {
     
     /* Tiny volume controls */
     .volume-btn svg {
-        width: 14px;
-        height: 14px;
+        width: 30px;
+        height: 30px;
     }
     
     .volume-slider {
@@ -2159,7 +2259,7 @@ body.tour-active .logo-desktop {
     
     .about-content {
         grid-template-columns: 1fr;
-        gap: 50px;
+        gap: 40px;
     }
     
     .nav {
@@ -2413,8 +2513,7 @@ body.tour-active .logo-desktop {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     position: relative;
-    margin-bottom: 1.5rem;
-    margin-top: 1.5rem;
+    margin-top: 2rem;
     cursor: pointer;
 }
 
@@ -2562,6 +2661,12 @@ body.tour-active .logo-desktop {
 }
 
 /* Hover effects for the highlighted card */
+.tour-date.highlight {
+    position: relative;
+    overflow: visible; /* Allow glow to overflow */
+    z-index: 10; /* Ensure glow appears above other elements */
+}
+
 .tour-date.highlight:hover {
     transform: scale(1.04);
     box-shadow: 
@@ -2571,35 +2676,34 @@ body.tour-active .logo-desktop {
         inset 0 0 40px rgba(97, 244, 87, 0.3);
 }
 
-.tour-date.highlight:hover::after {
-    transform: scale(1.1);
-}
-
 /* ===== ENHANCED CURRENTLY PLAYING CARD ===== */
 .tour-date.currently-playing {
+    /* Allow glow to overflow */
+    overflow: visible;
+    
     /* Enhanced background with better lighting */
     background: 
     linear-gradient(145deg, 
         rgba(22, 22, 22, 0.98) 0%,
         rgba(35, 35, 35, 0.98) 30%,
-        rgba(255, 255, 255, 0.02) 50%,  /* Nearly invisible white whisper */
-        rgba(255, 255, 255, 0.01) 70%,  /* Barely there */
+        rgba(255, 255, 255, 0.02) 50%,
+        rgba(255, 255, 255, 0.01) 70%,
         rgba(28, 28, 28, 0.98) 100%
     );
     
-    /* Enhanced shadow system */
+    /* Enhanced shadow system - increased spread values */
     box-shadow: 
         0 10px 35px rgba(0, 0, 0, 0.6),
         0 5px 15px rgba(0, 0, 0, 0.4),
-        0 0 30px rgba(253, 2, 253, 0.15),
-        0 0 60px rgba(8, 254, 255, 0.08),
+        0 0 60px rgba(253, 2, 253, 0.25), /* Increased spread */
+        0 0 120px rgba(8, 254, 255, 0.15), /* Increased spread */
         inset 0 1px 3px rgba(255, 255, 255, 0.08),
         inset 0 -2px 4px rgba(0, 0, 0, 0.3);
     
     /* Enhanced border with glow */
     border: 2px solid var(--erin);
     position: relative;
-    z-index: 10;
+    z-index: 20; /* Higher than other cards */
     
     /* Stable transform for smooth animation */
     transform: translateZ(0);
@@ -2621,8 +2725,8 @@ body.tour-active .logo-desktop {
         box-shadow: 
             0 10px 35px rgba(0, 0, 0, 0.6),
             0 5px 15px rgba(0, 0, 0, 0.4),
-            0 0 30px rgba(253, 2, 253, 0.15),
-            0 0 60px rgba(8, 254, 255, 0.08),
+            0 0 60px rgba(253, 2, 253, 0.25),
+            0 0 120px rgba(8, 254, 255, 0.15),
             inset 0 1px 3px rgba(255, 255, 255, 0.08),
             inset 0 -2px 4px rgba(0, 0, 0, 0.3);
     }
@@ -2631,11 +2735,18 @@ body.tour-active .logo-desktop {
         box-shadow: 
             0 15px 50px rgba(0, 0, 0, 0.7),
             0 8px 25px rgba(0, 0, 0, 0.5),
-            0 0 40px rgba(253, 2, 253, 0.25),
-            0 0 80px rgba(8, 254, 255, 0.15),
+            0 0 80px rgba(253, 2, 253, 0.35), /* Increased spread */
+            0 0 160px rgba(8, 254, 255, 0.2), /* Increased spread */
             inset 0 2px 5px rgba(255, 255, 255, 0.12),
             inset 0 -3px 6px rgba(0, 0, 0, 0.4);
     }
+}
+
+/* Ensure parent containers don't clip the glow */
+.tour-dates-container, 
+.tour-date-wrapper, 
+.any-parent-container {
+    overflow: visible !important;
 }
 
 /* ===== SUPER RED EMISSIVE "LIVE NOW" BADGE ===== */
