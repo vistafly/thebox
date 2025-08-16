@@ -1293,9 +1293,6 @@ body.tour-active .logo-desktop {
     transform: scale(1.1);
 }
 
-.control-btn:hover svg {
-    fill: var(--aqua);
-}
 
 .play-btn {
     width: 70px;
