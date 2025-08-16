@@ -381,7 +381,6 @@
     <section id="about" class="section about-section">
         <div class="container">
             <div class="section-header">
-                <span class="section-label">0</span>
                 <h2 class="section-title">About The Band</h2>
                 <div class="section-line"></div>
             </div>
@@ -414,7 +413,6 @@
     <!-- Music Player Section -->
 <section id="music" class="section music-section">
     <div class="section-header">
-        <span class="section-label">01</span>
         <h2 class="section-title">Box's Music</h2>
         <div class="section-line"></div>
     </div>
@@ -503,11 +501,11 @@
         </div>
     </div>
 </section>
+
   <!-- Members Section -->
 <section id="members" class="section members-section">
     <div class="container">
         <div class="section-header">
-            <span class="section-label">03</span>
             <h2 class="section-title">Meet The Band</h2>
             <div class="section-line"></div>
         </div>
@@ -610,7 +608,6 @@
     <section id="booking" class="section booking-section">
         <div class="container">
             <div class="section-header">
-                <span class="section-label">04</span>
                 <h2 class="section-title">Book The Box</h2>
                 <div class="section-line"></div>
             </div>
@@ -646,32 +643,17 @@
                 </div>
                 
                 <div class="booking-form">
-                    <form id="bookingForm">
-                        <div class="form-group">
-                            <input type="text" id="name" name="name" required>
-                            <label for="name">Your Name</label>
-                            <div class="form-line"></div>
-                        </div>
-                        <div class="form-group">
-                            <input type="email" id="email" name="email" required>
-                            <label for="email">Email Address</label>
-                            <div class="form-line"></div>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" id="event" name="event" required>
-                            <label for="event">Event Type</label>
-                            <div class="form-line"></div>
-                        </div>
-                        <div class="form-group">
-                            <textarea id="message" name="message" rows="3" required></textarea>
-                            <label for="message">Event Details</label>
-                            <div class="form-line"></div>
-                        </div>
-                        <button type="submit" class="cta-button">
-                            <span class="cta-text">Send Inquiry</span>
-                            <div class="cta-bg"></div>
-                        </button>
-                    </form>
+    <div class="fillout-embed-wrapper">
+        <!-- Fillout iframe with responsive attributes -->
+        <iframe src="https://forms.fillout.com/t/kvPTtsL2Z7us" 
+                title="Booking Form"
+                class="fillout-iframe"
+                frameborder="0"
+                allowfullscreen
+                sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation-by-user-activation">
+        </iframe>
+    </div>
+</div>
                 </div>
             </div>
         </div>

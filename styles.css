@@ -1044,88 +1044,135 @@ body.tour-active .logo-desktop {
 }
 
 /* Slideshow Styles */
+.slideshow-container {
+    max-width: 1000px;
+    margin: 0 auto 20px;
+    position: relative;
+    background: #1a1a1a;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 14px;
+}
+
+.slideshow {
+    position: relative;
+    height: 400px;
+}
+
+.slide {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+.slide.active {
+    opacity: 1;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.slideshow-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.slideshow-prev, .slideshow-next {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px 15px;
+    transition: all 0.3s;
+}
+
+.slideshow-prev:hover, .slideshow-next:hover {
+    color: #1db954;
+}
+
+.slideshow-dots {
+    display: flex;
+    gap: 10px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.dot.active {
+    background: #1db954;
+    transform: scale(1.2);
+}
+
+/* Desktop-specific styles */
+@media screen and (min-width: 1024px) {
     .slideshow-container {
-        max-width: 800px;
-        margin: 0 auto 20px;
-        position: relative;
-        background: #1a1a1a;
-        border-radius: 12px 12px 0 0;
-        overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        max-width: 1400px; /* Increased from 1000px */
     }
     
     .slideshow {
-        position: relative;
-        height: 400px;
+        height: 800px; /* Increased from 400px */
     }
     
-    .slide {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        transition: opacity 1s ease-in-out;
-    }
-    
-    .slide.active {
-        opacity: 1;
-    }
-    
-    .slide img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    
-    .slideshow-controls {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 10px;
-        background: rgba(0, 0, 0, 0.5);
-    }
-    
+    /* Optional: Make controls larger on desktop */
     .slideshow-prev, .slideshow-next {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 20px;
-        cursor: pointer;
-        padding: 5px 15px;
-        transition: all 0.3s;
-    }
-    
-    .slideshow-prev:hover, .slideshow-next:hover {
-        color: #1db954;
-    }
-    
-    .slideshow-dots {
-        display: flex;
-        gap: 10px;
+        font-size: 28px; /* Increased from 20px */
     }
     
     .dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.5);
-        cursor: pointer;
-        transition: all 0.3s;
+        width: 12px; /* Increased from 10px */
+        height: 12px; /* Increased from 10px */
+    }
+}
+
+    /* Hide prev/next buttons on mobile devices */
+@media (max-width: 768px) {
+    .slideshow-prev, 
+    .slideshow-next {
+        display: none;
     }
     
+    /* Optional: Adjust dots container to take full width when buttons are hidden */
+    .slideshow-dots {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .dot {
+        width: 9px;        /* Larger for better touch targets */
+        height: 9px;       /* Larger for better touch targets */
+        background: rgba(255, 255, 255, 0.7); /* More visible opacity */
+    }
+
     .dot.active {
-        background: #1db954;
-        transform: scale(1.2);
+        transform: scale(1.3); /* More prominent active state */
     }
-    
-    /* Music Player adjustments to match slideshow */
-    .music-player {
-        border-radius: 0 0 12px 12px;
+
+    /* Optional: Add more spacing between dots for mobile */
+    .slideshow-dots {
+        gap: 15px;
     }
+}
 
 /* Music Player*/
 .music-player {
-    max-width: 800px;
+    max-width: 1400px;
     margin: 0 auto;
 }
 
@@ -1153,7 +1200,7 @@ body.tour-active .logo-desktop {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
+    gap: 60px;
     margin-bottom: 30px;
     position: relative;
 }
@@ -1361,8 +1408,9 @@ body.tour-active .logo-desktop {
 @media only screen and (max-width: 767px) {
     .slideshow-container {
         max-width: 100%;
+        width: calc(100% - 10px); /* Subtracts 10px from each side */
+        margin: 0 auto; /* Centers the container */
         border-radius: 0;
-        margin-bottom: 0;
         box-shadow: none;
     }
     
@@ -1370,6 +1418,7 @@ body.tour-active .logo-desktop {
         height: 45vh; /* More compact height */
         max-height: 300px;
         min-height: 220px;
+        width: 100%; /* Ensures it fills the container */
     }
     
     /* Bigger navigation buttons */
@@ -1385,54 +1434,93 @@ body.tour-active .logo-desktop {
     }
     
     .player-container {
-        padding: 15px 15px;
+        padding: 15px;
         border-radius: 0;
         border-left: none;
         border-right: none;
+        display: grid;
+        grid-template-areas:
+            "progress progress"
+            "controls controls"
+            "info volume";
+        grid-template-columns: 1fr auto;
+        gap: 10px;
     }
     
-    /* Bigger control buttons */
+    /* Bigger control buttons with better spacing */
     .player-controls {
+        grid-area: controls;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         gap: 10px;
-        margin-bottom: 20px;
+        margin: 10px 0;
     }
     
     .control-btn {
-        width: 52px; /* Larger skip buttons */
-        height: 52px;
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
     }
     
     .control-btn svg {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
     }
     
     .play-btn {
-        width: 72px; /* Much larger play button */
-        height: 72px;
+        width: 60px;
+        height: 60px;
     }
     
     .play-btn svg {
-        width: 28px;
-        height: 28px;
+        width: 24px;
+        height: 24px;
     }
     
-    /* Smaller text elements */
+    /* Track info section */
+    .track-info {
+        grid-area: info;
+        align-self: center;
+    }
+    
     .track-title {
         font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 180px;
     }
     
     .track-artist, .track-time {
         font-size: 0.75rem;
     }
     
-    /* Compact volume controls */
+    /* Progress bar adjustments */
+    .progress-container {
+        grid-area: progress;
+        margin-bottom: 0;
+    }
+    
+    .progress-slider {
+        height: 3px;
+    }
+    
+    /* Volume controls - integrated into main layout */
     .volume-control {
+        grid-area: volume;
         position: static;
-        justify-content: center;
-        margin-top: 15px;
-        width: 100%;
-        max-width: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        margin: 0;
+        width: auto;
+        max-width: none;
+    }
+    
+    .volume-btn {
+        padding: 6px;
     }
     
     .volume-btn svg {
@@ -1441,37 +1529,39 @@ body.tour-active .logo-desktop {
     }
     
     .volume-slider {
-        width: 70%; /* Narrower volume bar */
+        width: 70px;
         height: 3px;
         opacity: 1;
-    }
-    
-    /* Progress bar adjustments */
-    .progress-container {
-        margin-bottom: 15px;
-    }
-    
-    .progress-slider {
-        height: 3px;
     }
 }
 
 /* Extra Small Devices (below 480px) */
 @media only screen and (max-width: 480px) {
-    /* Even larger touch targets */
+    .player-container {
+        padding: 12px;
+        gap: 8px;
+    }
+    
+    /* Slightly smaller buttons */
     .control-btn {
-        width: 48px;
-        height: 48px;
+        width: 40px;
+        height: 40px;
     }
     
     .play-btn {
-        width: 64px;
-        height: 64px;
+        width: 54px;
+        height: 54px;
+    }
+    
+    .play-btn svg {
+        width: 22px;
+        height: 22px;
     }
     
     /* More compact text */
     .track-title {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
+        max-width: 150px;
     }
     
     .track-artist, .track-time {
@@ -1485,8 +1575,133 @@ body.tour-active .logo-desktop {
     }
     
     .volume-slider {
-        width: 70%;
+        width: 60px;
     }
+}
+
+/* Members Section */
+.members-section {
+    background: linear-gradient(135deg, 
+        rgba(21, 21, 22, 0.2) 0%, 
+        rgba(10, 10, 11, 0.9) 50%, 
+        rgba(21, 21, 22, 0.2) 100%);
+}
+
+.members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.member-card {
+    background: rgba(21, 21, 22, 0.3);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: var(--transition);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: var(--blur);
+    position: relative;
+    cursor: pointer;
+    min-height: 500px;
+}
+
+.member-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--erin);
+    box-shadow: 0 20px 40px rgba(97, 244, 87, 0.1);
+}
+
+.member-image {
+    position: relative;
+    height: 400px; /* Increased height as per your code */
+    overflow: hidden;
+}
+
+.member-photo {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.member-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 34%; /* Changed from 'center' to 'center 30%' */
+    transition: var(--transition);
+}
+
+.member-card:hover .member-photo img {
+    transform: scale(1.05);
+}
+
+.member-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 10, 11, 0.8);
+    backdrop-filter: var(--blur);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.member-card:hover .member-overlay {
+    opacity: 1;
+}
+
+/* Rest of your existing CSS remains the same */
+.member-bio {
+    padding: 20px;
+    text-align: center;
+}
+
+.member-bio p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-size: 0.9rem;
+}
+
+.member-info {
+    padding: 25px;
+    text-align: center;
+    position: relative;
+}
+
+.member-name {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.member-role {
+    color: var(--aqua);
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.member-accent {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--erin), var(--aqua));
+    transition: var(--transition);
+}
+
+.member-card:hover .member-accent {
+    width: 60px;
 }
 
 /* Members Section */
@@ -1737,72 +1952,35 @@ body.tour-active .logo-desktop {
 .booking-form {
     background: rgba(21, 21, 22, 0.3);
     border-radius: var(--border-radius);
-    padding: 40px;
     backdrop-filter: var(--blur);
     border: 1px solid rgba(97, 244, 87, 0.1);
     margin-top: 40px;
 }
 
-.form-group {
-    position: relative;
-    margin-bottom: 30px;
-}
-
-.form-group input,
-.form-group textarea {
-    width: 100%;
-    padding: 15px 0;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
-    font-size: 1rem;
-    transition: var(--transition);
-}
-
-.form-group textarea {
-    resize: none;
-    min-height: 100px;
-}
-
-.form-group label {
-    position: absolute;
-    top: 15px;
-    left: 0;
-    color: var(--text-muted);
-    transition: var(--transition);
-    pointer-events: none;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-bottom-color: var(--aqua);
-}
-
-.form-group input:focus + label,
-.form-group textarea:focus + label,
-.form-group input:not(:placeholder-shown) + label,
-.form-group textarea:not(:placeholder-shown) + label {
-    top: -10px;
-    font-size: 0.8rem;
-    color: var(--aqua);
-}
-
-.form-line {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 1px;
-    background: linear-gradient(90deg, var(--erin), var(--aqua));
-    transition: var(--transition);
-}
-
-.form-group input:focus ~ .form-line,
-.form-group textarea:focus ~ .form-line {
-    width: 100%;
-}
+.fillout-embed-wrapper {
+        width: 100%;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+    
+    .fillout-iframe {
+        width: 100%;
+        height: 650px; /* Adjust based on your form height */
+        border: none;
+        background: transparent;
+        margin: -10px 0; /* Compensates for Fillout's default padding */
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .booking-form {
+            padding: 25px;
+        }
+        
+        .fillout-iframe {
+            height: 800px; /* More height for mobile as forms stack */
+        }
+    }
 
 /* Footer */
 .footer {
@@ -2015,10 +2193,6 @@ body.tour-active .logo-desktop {
         padding: 45px 20px;
     }
     
-    .section-header {
-        margin-bottom: 50px;
-    }
-    
     .contact-grid {
         grid-template-columns: 1fr;
     }
@@ -2158,7 +2332,6 @@ body.tour-active .logo-desktop {
 /* ===== Tour Section ===== */
 .tour-section {
     background: var(--bg-primary);
-    border-top: 3px solid rgba(97, 244, 87, 0.4);
     color: var(--text-primary);
     padding: 100px;
     margin: 0 auto;
@@ -2189,7 +2362,6 @@ body.tour-active .logo-desktop {
     
     .section-title {
         padding: 0 1rem;
-        margin-bottom: 2rem;
         font-size: 2rem;
     }
     
@@ -2215,13 +2387,9 @@ body.tour-active .logo-desktop {
 
 /* Extra small mobile */
 @media (max-width: 480px) {
-    .tour-section {
-        padding: 1.5rem 0;
-    }
     
     .section-title {
         font-size: 1.8rem;
-        margin-bottom: 1.5rem;
     }
     
     .tour-grid {
@@ -2411,19 +2579,13 @@ body.tour-active .logo-desktop {
 .tour-date.currently-playing {
     /* Enhanced background with better lighting */
     background: 
-        linear-gradient(145deg, 
-            rgba(20, 20, 20, 0.98) 0%,
-            rgba(35, 35, 35, 0.98) 30%,
-            rgba(253, 2, 253, 0.03) 50%,
-            rgba(254, 255, 5, 0.02) 70%,
-            rgba(25, 25, 25, 0.98) 100%
-        ),
-        radial-gradient(
-            circle at 35% 45%,
-            rgba(253, 2, 253, 0.12) 0%,
-            rgba(8, 254, 255, 0.08) 40%,
-            transparent 70%
-        );
+    linear-gradient(145deg, 
+        rgba(22, 22, 22, 0.98) 0%,
+        rgba(35, 35, 35, 0.98) 30%,
+        rgba(255, 255, 255, 0.02) 50%,  /* Nearly invisible white whisper */
+        rgba(255, 255, 255, 0.01) 70%,  /* Barely there */
+        rgba(28, 28, 28, 0.98) 100%
+    );
     
     /* Enhanced shadow system */
     box-shadow: 
@@ -2435,7 +2597,7 @@ body.tour-active .logo-desktop {
         inset 0 -2px 4px rgba(0, 0, 0, 0.3);
     
     /* Enhanced border with glow */
-    border: 1px solid rgba(253, 2, 253, 0.3);
+    border: 2px solid var(--erin);
     position: relative;
     z-index: 10;
     
@@ -2476,7 +2638,7 @@ body.tour-active .logo-desktop {
     }
 }
 
-/* ===== REDESIGNED "LIVE NOW" BADGE ===== */
+/* ===== SUPER RED EMISSIVE "LIVE NOW" BADGE ===== */
 .tour-date.currently-playing::after {
     content: '● LIVE';
     position: absolute;
@@ -2485,40 +2647,41 @@ body.tour-active .logo-desktop {
     padding: 8px 16px;
     min-width: 50px;
     
-    /* Modern glass morphism background */
+    /* Intense red gradient background */
     background: 
         linear-gradient(135deg, 
-            rgba(253, 2, 253, 0.8) 0%,
-            rgba(254, 255, 5, 0.7) 30%,
-            rgba(97, 244, 87, 0.6) 60%,
-            rgba(8, 254, 255, 0.8) 100%
+            rgba(255, 0, 0, 0.9) 0%,
+            rgba(255, 50, 50, 0.9) 50%,
+            rgba(255, 0, 0, 0.9) 100%
         );
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     
-    /* Text styling */
-    color: rgba(3, 2, 5, 0.95);
+    /* Bright text styling */
+    color: white;
     font-size: 0.9rem;
-    font-weight: 550;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 3.5px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    text-shadow: 
+        0 0 5px rgba(255, 255, 255, 0.8),
+        0 0 10px rgba(255, 100, 100, 0.8);
     
     /* Rounded modern style */
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    z-index: 9999; /* Increased to ensure it shows above other elements */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    z-index: 9999;
     
-    /* Subtle shadow with multi-color glow */
+    /* Intense red glow effect */
     box-shadow: 
-        0 4px 15px rgba(0, 0, 0, 0.4),
-        0 0 20px rgba(253, 2, 253, 0.2),
-        0 0 30px rgba(8, 254, 255, 0.1),
-        inset 0 1px 2px rgba(255, 255, 255, 0.3),
-        inset 0 -1px 3px rgba(0, 0, 0, 0.2);
+        0 0 15px rgba(255, 0, 0, 0.8),
+        0 0 30px rgba(255, 50, 50, 0.6),
+        0 0 45px rgba(255, 0, 0, 0.4),
+        inset 0 1px 2px rgba(255, 255, 255, 0.6),
+        inset 0 -1px 3px rgba(0, 0, 0, 0.3);
     
-    /* Pulsing live indicator animation */
-    animation: live-indicator-pulse 2.5s ease-in-out infinite;
+    /* Stronger pulsing animation */
+    animation: live-indicator-pulse 1.5s ease-in-out infinite;
     
     /* Crisp text rendering */
     -webkit-font-smoothing: antialiased;
@@ -2526,17 +2689,10 @@ body.tour-active .logo-desktop {
     transform: translateZ(0);
     
     /* Flex for perfect centering */
-    display: flex !important; /* Added !important to ensure display */
+    display: flex !important;
     align-items: center;
     justify-content: center;
     gap: 4px;
-}
-
-/* Mobile-specific z-index boost */
-@media (max-width: 768px) {
-    .tour-date.currently-playing::after {
-        z-index: 9999;
-    }
 }
 
 @keyframes live-indicator-pulse {
@@ -2544,25 +2700,30 @@ body.tour-active .logo-desktop {
         opacity: 1;
         transform: translateZ(0) scale(1);
         box-shadow: 
-            0 4px 15px rgba(0, 0, 0, 0.4),
-            0 0 20px rgba(253, 2, 253, 0.2),
-            0 0 30px rgba(8, 254, 255, 0.1),
-            inset 0 1px 2px rgba(255, 255, 255, 0.3),
-            inset 0 -1px 3px rgba(0, 0, 0, 0.2);
+            0 0 15px rgba(255, 0, 0, 0.8),
+            0 0 30px rgba(255, 50, 50, 0.6),
+            0 0 45px rgba(255, 0, 0, 0.4);
     }
     50% { 
-        opacity: 0.95;
-        transform: translateZ(0) scale(1.03);
+        opacity: 0.9;
+        transform: translateZ(0) scale(1.05);
         box-shadow: 
-            0 6px 20px rgba(0, 0, 0, 0.5),
-            0 0 25px rgba(253, 2, 253, 0.3),
-            0 0 40px rgba(8, 254, 255, 0.2),
-            0 0 50px rgba(97, 244, 87, 0.1),
-            inset 0 2px 4px rgba(255, 255, 255, 0.4),
-            inset 0 -2px 5px rgba(0, 0, 0, 0.3);
+            0 0 25px rgba(255, 0, 0, 1),
+            0 0 50px rgba(255, 50, 50, 0.8),
+            0 0 75px rgba(255, 0, 0, 0.6),
+            0 0 100px rgba(255, 100, 100, 0.3);
     }
 }
 
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+    .tour-date.currently-playing::after {
+        z-index: 9999;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        letter-spacing: 2px;
+    }
+}
 /* ===== INFO SECTION LIGHTING EFFECTS ===== */
 .tour-date.currently-playing .info {
     position: relative;
@@ -2631,14 +2792,13 @@ body.tour-active .logo-desktop {
     }
 }
 
-/* ===== ENHANCED DATE COMPONENT FOR LIVE CARD ===== */
+/* ===== SUBDUED BUT VISIBLE DATE COMPONENT ===== */
 .tour-date.currently-playing .date {
     background: linear-gradient(135deg,
-        rgba(254, 255, 5, 0.9) 0%,
-        rgba(97, 244, 87, 0.8) 25%,
-        rgba(8, 254, 255, 0.7) 50%,
-        rgba(253, 2, 253, 0.6) 75%,
-        rgba(254, 255, 5, 0.8) 100%
+        rgba(220, 220, 100, 0.6) 0%,       /* Soft muted gold */
+        rgba(120, 200, 120, 0.5) 33%,      /* Muted green */
+        rgba(100, 180, 220, 0.5) 66%,      /* Soft blue */
+        rgba(200, 120, 200, 0.4) 100%      /* Light lavender */
     );
     
     /* Enhanced 3D metallic effect */
@@ -2694,7 +2854,6 @@ body.tour-active .logo-desktop {
         inset 0 3px 8px rgba(255, 255, 255, 0.15),
         inset 0 -4px 10px rgba(0, 0, 0, 0.5);
     
-    border-color: rgba(253, 2, 253, 0.4);
 }
 
 .tour-date.currently-playing:hover .info::before {
@@ -3418,9 +3577,7 @@ animation: subtleGlow 8s ease-in-out infinite alternate;
 
 
 @media (max-width: 768px) {
-    .tour-section {
-        padding: 2rem 0.5rem;
-    }
+
     
     .tour-grid {
         grid-template-columns: 1fr;
@@ -3437,7 +3594,6 @@ animation: subtleGlow 8s ease-in-out infinite alternate;
 @media (max-width: 480px) {
     .section-title {
         font-size: 1.75rem;
-        margin-bottom: 1.5rem;
     }
     
     .info {
@@ -3641,7 +3797,7 @@ animation: subtleGlow 8s ease-in-out infinite alternate;
 /* Responsive Fixes */
 @media (max-width: 768px) {
     .section {
-        padding: 70px 0;
+        padding: 30px 0;
     }
 
     .nav-links {
