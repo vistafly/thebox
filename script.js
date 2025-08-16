@@ -1198,6 +1198,7 @@ function highlightUpcomingDates() {
     }
 }
 
+
 // Tour Auto-Scroll Class
 class TourAutoScroll {
     constructor() {
