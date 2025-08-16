@@ -1045,7 +1045,7 @@ document.addEventListener('DOMContentLoaded', function() {
         nav.classList.toggle('active');
     });
 
-    // Tour Date Highlighting Functions
+   // Tour Date Highlighting Functions (UNCHANGED)
 function highlightUpcomingDates() {
     const now = new Date();
     const today = new Date();
@@ -1198,8 +1198,7 @@ function highlightUpcomingDates() {
     }
 }
 
-
-// Tour Auto-Scroll Class
+// Optimized Tour Auto-Scroll Class
 class TourAutoScroll {
     constructor() {
         this.tourGrid = document.querySelector('.tour-grid');
@@ -1217,6 +1216,7 @@ class TourAutoScroll {
         // Settings
         this.scrollSpeed = 3000; // 3 seconds
         this.pauseTime = 4000; // 4 seconds after user interaction
+        this.mobileBreakpoint = 768; // Breakpoint for mobile
         
         this.init();
     }
@@ -1235,8 +1235,12 @@ class TourAutoScroll {
         // Start on mobile only
         this.checkIfShouldRun();
         
-        // Listen for resize
-        window.addEventListener('resize', this.checkIfShouldRun.bind(this));
+        // Optimized resize handler with debounce
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => this.checkIfShouldRun(), 100);
+        });
         
         // Add interaction listeners
         this.addTourListeners();
@@ -1248,27 +1252,34 @@ class TourAutoScroll {
         this.dotsContainer.className = 'tour-dots';
         
         // Style the dots container (mobile only)
-        this.dotsContainer.style.display = 'none';
-        this.dotsContainer.style.justifyContent = 'center';
-        this.dotsContainer.style.alignItems = 'center';
-        this.dotsContainer.style.marginTop = '.5rem';
-        this.dotsContainer.style.padding = '0 0px';
+        Object.assign(this.dotsContainer.style, {
+            display: 'none',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: '.5rem',
+            padding: '0 0px',
+            gap: '8px'
+        });
         
         // Create dots
         this.tourCards.forEach((_, index) => {
             const dot = document.createElement('button');
             dot.className = 'tour-dot';
             dot.setAttribute('aria-label', `Go to card ${index + 1}`);
+            dot.setAttribute('aria-current', 'false');
             
             // Style the dots
-            dot.style.width = '10px';
-            dot.style.height = '10px';
-            dot.style.borderRadius = '50%';
-            dot.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
-            dot.style.border = 'none';
-            dot.style.cursor = 'pointer';
-            dot.style.padding = '0';
-            dot.style.transition = 'background-color 0.3s ease';
+            Object.assign(dot.style, {
+                width: '10px',
+                height: '10px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '0',
+                transition: 'background-color 0.3s ease, transform 0.3s ease',
+                outline: 'none'
+            });
             
             dot.addEventListener('click', () => {
                 this.goToCard(index);
@@ -1288,7 +1299,7 @@ class TourAutoScroll {
     }
 
     updateDotsVisibility() {
-        const isMobile = window.innerWidth <= 768;
+        const isMobile = window.innerWidth <= this.mobileBreakpoint;
         if (this.dotsContainer) {
             this.dotsContainer.style.display = isMobile ? 'flex' : 'none';
         }
@@ -1299,9 +1310,11 @@ class TourAutoScroll {
             if (index === this.currentIndex) {
                 dot.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
                 dot.style.transform = 'scale(1.2)';
+                dot.setAttribute('aria-current', 'true');
             } else {
                 dot.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
                 dot.style.transform = 'scale(1)';
+                dot.setAttribute('aria-current', 'false');
             }
         });
     }
@@ -1336,7 +1349,7 @@ class TourAutoScroll {
     }
 
     checkIfShouldRun() {
-        const isMobile = window.innerWidth <= 768;
+        const isMobile = window.innerWidth <= this.mobileBreakpoint;
         
         if (isMobile && !this.isActive) {
             this.start();
@@ -1355,6 +1368,7 @@ class TourAutoScroll {
         // Only reset currentIndex if we haven't interacted yet
         if (!this.hasInteracted) {
             this.currentIndex = 0;
+            this.goToCard(0); // Immediately show first card when starting
         }
         
         // Wait 2 seconds then start scrolling
@@ -1416,17 +1430,28 @@ class TourAutoScroll {
             this.updateCurrentIndex();
         };
 
-        this.tourGrid.addEventListener('touchstart', handleInteraction, { passive: true });
-        this.tourGrid.addEventListener('touchmove', handleInteraction, { passive: true });
-        this.tourGrid.addEventListener('scroll', handleInteraction, { passive: true });
+        // Passive event listeners for better performance
+        const passiveOptions = { passive: true };
+        this.tourGrid.addEventListener('touchstart', handleInteraction, passiveOptions);
+        this.tourGrid.addEventListener('touchmove', handleInteraction, passiveOptions);
+        this.tourGrid.addEventListener('scroll', handleInteraction, passiveOptions);
         this.tourGrid.addEventListener('mousedown', handleInteraction);
 
         this.tourCards.forEach(card => {
             card.addEventListener('click', handleInteraction);
+            card.addEventListener('touchstart', handleInteraction, passiveOptions);
         });
+
+        // Pause on hover for desktop
+        if (window.innerWidth > this.mobileBreakpoint) {
+            this.tourGrid.addEventListener('mouseenter', () => this.pause());
+            this.tourGrid.addEventListener('mouseleave', () => this.resume());
+        }
     }
 
     updateCurrentIndex() {
+        if (!this.tourGrid || this.tourCards.length === 0) return;
+        
         // Find which card is currently most visible
         const gridRect = this.tourGrid.getBoundingClientRect();
         const gridCenter = gridRect.left + (gridRect.width / 2);
@@ -1455,30 +1480,45 @@ class TourAutoScroll {
 
     resume() {
         this.isPaused = false;
+        this.lastUserAction = Date.now(); // Reset interaction time when resuming
     }
 }
 
 // Initialize Tour Functions
 function initTourFunctions() {
-    // Initialize date highlighting
+    // Initialize date highlighting (unchanged)
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(highlightUpcomingDates, 100);
         setInterval(highlightUpcomingDates, 60000); // Check every minute
     });
 
-    // Backup for window load
+    // Backup for window load (unchanged)
     window.addEventListener('load', function() {
         setTimeout(highlightUpcomingDates, 100);
     });
 
-    // Initialize the tour auto-scroll
+    // Initialize the tour auto-scroll with performance optimization
     if (document.querySelector('.tour-grid')) {
-        window.tourScroller = new TourAutoScroll();
+        // Use requestIdleCallback if available for better performance
+        if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(() => {
+                window.tourScroller = new TourAutoScroll();
+            }, { timeout: 1000 });
+        } else {
+            // Fallback for browsers that don't support requestIdleCallback
+            setTimeout(() => {
+                window.tourScroller = new TourAutoScroll();
+            }, 300);
+        }
     }
 }
 
 // Call the initialization function
-initTourFunctions();
+if (document.readyState !== 'loading') {
+    initTourFunctions();
+} else {
+    document.addEventListener('DOMContentLoaded', initTourFunctions);
+}
 
     // Close menu when clicking on links (mobile only)
     document.querySelectorAll('.nav-link').forEach(link => {

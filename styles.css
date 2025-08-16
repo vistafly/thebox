@@ -105,8 +105,8 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     background: var(--bg-primary);
     display: flex;
     justify-content: center;
@@ -259,7 +259,7 @@ body {
 }
 
 .logo-mobile img {
-    height: 50px; /* Smaller size for mobile header */
+    height: 80px; /* Smaller size for mobile header */
     width: auto;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
     transition: transform 0.3s ease;
@@ -352,7 +352,7 @@ body.tour-active .logo-desktop {
     
     /* Adjust mobile logo size if needed */
     .logo-mobile img {
-        height: 60px; /* Slightly smaller on very small devices */
+        height: 80px; /* Slightly smaller on very small devices */
     }
 }
 
@@ -2483,11 +2483,7 @@ body.tour-active .logo-desktop {
     .tour-grid::-webkit-scrollbar {
         display: none;
     }
-}
 
-/* Extra small mobile */
-@media (max-width: 480px) {
-    
     .section-title {
         font-size: 1.8rem;
     }
@@ -2513,6 +2509,7 @@ body.tour-active .logo-desktop {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     position: relative;
+    margin-bottom: 1.5rem;
     margin-top: 2rem;
     cursor: pointer;
 }
@@ -3690,12 +3687,7 @@ animation: subtleGlow 8s ease-in-out infinite alternate;
 @media (max-width: 768px) {
 
     
-    .tour-grid {
-        grid-template-columns: 1fr;
-        max-width: 600px;
-        margin: 0 auto;
-    }
-    
+
     .tour-date.highlight::after {
         top: 1rem;
         right: 1rem;
