@@ -32,6 +32,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
+document.getElementById('current-year').textContent = new Date().getFullYear();
+
     
 document.addEventListener('DOMContentLoaded', function() {
     initLogo3DEffect();
@@ -331,6 +333,57 @@ function initPreloader() {
         }
     });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const header = document.querySelector('.header');
+    if (!header) return;
+    
+    let lastScroll = 0;
+    const scrollThreshold = 10; // Increased threshold for better UX
+    const mobileBreakpoint = 768;
+    
+    function handleScroll() {
+        if (window.innerWidth > mobileBreakpoint) {
+            header.classList.remove('header--hidden', 'header--revealed');
+            return;
+        }
+        
+        const currentScroll = window.pageYOffset;
+        
+        // Skip minimal scroll movements
+        if (Math.abs(currentScroll - lastScroll) < scrollThreshold) return;
+        
+        if (currentScroll > lastScroll && currentScroll > 50) {
+            // Scrolling DOWN
+            header.classList.add('header--hidden');
+            header.classList.remove('header--revealed');
+        } else {
+            // Scrolling UP or at top
+            header.classList.remove('header--hidden');
+            if (currentScroll > 10) {
+                header.classList.add('header--revealed');
+            } else {
+                header.classList.remove('header--revealed');
+            }
+        }
+        
+        lastScroll = currentScroll;
+    }
+    
+    // Debounced resize handler
+    let resizeTimeout;
+    function handleResize() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (window.innerWidth > mobileBreakpoint) {
+                header.classList.remove('header--hidden', 'header--revealed');
+            }
+        }, 100);
+    }
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
+});
 
 // Header Effects
 function initHeaderEffects() {
