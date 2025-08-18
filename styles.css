@@ -2171,8 +2171,8 @@ body.tour-active .logo-desktop {
 }
 
 .social-link {
-    width: 42px;
-    height: 42px;
+    width: 65px;
+    height: 65px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.08);
     display: flex;
@@ -2180,15 +2180,38 @@ body.tour-active .logo-desktop {
     justify-content: center;
     transition: all 0.3s ease;
     color: var(--text-secondary);
-    font-size: 1.1rem;
+    font-size: 1.4rem;
+    text-decoration: none;
 }
 
+/* Instagram */
+.social-link[aria-label="Instagram"]:hover {
+    background: #E1306C; /* Instagram gradient would require more complex CSS */
+    color: white;
+}
+
+/* Facebook */
+.social-link[aria-label="Facebook"]:hover {
+    background: #1877F2;
+    color: white;
+}
+
+/* YouTube */
+.social-link[aria-label="YouTube"]:hover {
+    background: #FF0000;
+    color: white;
+}
+
+/* Spotify */
+.social-link[aria-label="Spotify"]:hover {
+    background: #1DB954;
+    color: white;
+}
+
+/* Keep the transform effect on all hovers */
 .social-link:hover {
-    background: var(--erin);
-    color: var(--black);
     transform: translateY(-3px);
 }
-
 /* Footer Bottom */
 .footer-bottom {
     padding-top: 2rem;
@@ -2282,8 +2305,8 @@ body.tour-active .logo-desktop {
     }
     
     .social-link {
-        width: 38px;
-        height: 38px;
+        width: 55px;
+        height: 55px;
         font-size: 1rem;
     }
 }
