@@ -2460,6 +2460,13 @@ body.tour-active .logo-desktop {
 }
 
 /* Responsive Design */
+@media (max-width: 600px) {
+    .about-content {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+}
+/* Responsive Design */
 @media (max-width: 1024px) {
     .hero-content {
         grid-template-columns: 1fr;
@@ -2468,8 +2475,7 @@ body.tour-active .logo-desktop {
     }
     
     .about-content {
-        grid-template-columns: 1fr;
-        gap: 40px;
+        gap: 45px;
     }
     
     .nav {
