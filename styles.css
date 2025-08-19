@@ -388,30 +388,64 @@ body.tour-active .logo-desktop {
     transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) 0.5s;
 }
 
-/* ===== ENHANCED TEXT FLICKER ANIMATION ===== */
-@keyframes textFlicker {
-    0% { opacity: 0.3; }
-    10% { opacity: 1; }
-    20% { opacity: 0.6; }
-    30% { opacity: 1; }
-    40% { opacity: 0.8; }
-    50% { opacity: 0.9; }
-    60% { opacity: 1; }
-    70% { opacity: 0.95; }
-    80% { opacity: 1; }
-    90% { opacity: 0.98; }
-    100% { opacity: 1; color: var(--text-primary); }
+/* ===== INTENSE GLITCHING TEXT FLICKER ===== */
+@keyframes intenseFlicker {
+    0% { opacity: 0.2; text-shadow: 0 0 10px rgba(255,0,255,0.8); }
+    5% { opacity: 1; color: #fff; transform: translateX(-2px); }
+    10% { opacity: 0.3; color: #0ff; transform: translateX(3px); }
+    15% { opacity: 0.8; text-shadow: 0 0 15px rgba(0,255,255,0.9); }
+    20% { opacity: 0.1; color: #f0f; }
+    25% { opacity: 0.9; transform: skew(-5deg); }
+    30% { opacity: 0.4; text-shadow: 0 0 5px rgba(255,255,0,0.7); }
+    35% { opacity: 1; color: #ff0; transform: translateX(-1px); }
+    40% { opacity: 0.2; transform: skew(7deg); }
+    45% { opacity: 0.7; color: #0f0; }
+    50% { opacity: 0.1; text-shadow: 0 0 20px rgba(0,255,0,0.6); }
+    55% { opacity: 0.9; transform: translateX(4px); }
+    60% { opacity: 0.3; color: #f00; }
+    65% { opacity: 1; text-shadow: 0 0 8px rgba(255,0,0,0.8); }
+    70% { opacity: 0.5; transform: skew(-3deg); }
+    75% { opacity: 0.8; color: #fff; }
+    80% { opacity: 0.2; text-shadow: 0 0 25px rgba(255,255,255,1); }
+    85% { opacity: 1; transform: translateX(-3px); }
+    90% { opacity: 0.6; color: var(--text-primary); }
+    95% { opacity: 0.3; transform: skew(5deg); }
+    100% { opacity: 1; color: var(--text-primary); text-shadow: none; transform: none; }
 }
 
 .nav-text {
     position: relative;
     z-index: 2;
-    will-change: opacity, color; /* Performance optimization */
+    will-change: opacity, color, transform, text-shadow;
+    transition: all 0.3s ease;
 }
 
 .nav-link:hover .nav-text {
-    animation: textFlicker 0.7s forwards; /* Slightly longer duration */
-    color: var(--text-primary);
+    animation: intenseFlicker 1.2s forwards cubic-bezier(0.4, 0, 0.2, 1);
+    text-shadow: 0 0 5px currentColor;
+}
+
+/* Optional: Add a subtle afterglow effect */
+.nav-text::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    color: rgba(255,255,255,0.3);
+    z-index: -1;
+    transition: opacity 0.4s;
+}
+
+.nav-link:hover .nav-text::after {
+    opacity: 0.7;
+    animation: afterFlicker 1.4s forwards;
+}
+
+@keyframes afterFlicker {
+    0% { opacity: 0; transform: translateX(0); }
+    50% { opacity: 0.9; transform: translateX(5px); }
+    100% { opacity: 0.7; transform: translateX(0); }
 }
 
 /* ===== MOBILE RESPONSIVENESS ===== */
@@ -903,7 +937,7 @@ body.tour-active .logo-desktop {
 
 /* Sections */
 .section {
-    padding: 100px 0;
+    padding: 100px 20px;
     position: relative;
 }
 
@@ -953,7 +987,7 @@ body.tour-active .logo-desktop {
 .about-content {
     display: grid;
     grid-template-columns: 2fr 1fr;
-    gap: 80px;
+    gap: 120px;
     align-items: center;
 }
 
@@ -1086,7 +1120,7 @@ body.tour-active .logo-desktop {
 /* Slideshow Styles */
 .slideshow-container {
     max-width: 1000px;
-    margin: 0 auto 20px;
+    margin: 0 auto 10px;
     position: relative;
     background: #1a1a1a;
     overflow: hidden;
@@ -1121,7 +1155,7 @@ body.tour-active .logo-desktop {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10px;
+    padding: 5px;
     background: rgba(0, 0, 0, 0.5);
 }
 
@@ -1220,7 +1254,7 @@ body.tour-active .logo-desktop {
 .player-container {
     background: rgba(21, 21, 22, 0.3);
     border-radius: var(--border-radius);
-    padding: 40px;
+    padding: 20px;
     backdrop-filter: var(--blur);
     border: 1px solid rgba(8, 254, 255, 0.2);
     position: relative;
@@ -1911,7 +1945,7 @@ body.tour-active .logo-desktop {
 }
 
 .booking-content {
-    max-width: 800px;
+    max-width: 1400px;
     margin: 0 auto;
     text-align: center;
 }
@@ -2050,7 +2084,7 @@ body.tour-active .logo-desktop {
     /* Mobile responsiveness */
     @media (max-width: 768px) {
         .booking-form {
-            padding: 25px;
+            padding: 0px;
         }
         
         .fillout-iframe {
@@ -2065,9 +2099,10 @@ body.tour-active .logo-desktop {
     background: rgba(21, 21, 22, 0.85);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
-    padding: 4rem 0 2rem;
     color: var(--text-muted);
     font-size: 0.95rem;
+    display: flex;
+    flex-direction: column;
 }
 
 .container {
@@ -2088,7 +2123,11 @@ body.tour-active .logo-desktop {
 .footer-brand {
     display: flex;
     flex-direction: column;
-    gap: .5rem;
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+    text-align: center; /* Center text */
+    gap: 25px;
+    height: 100%; /* Ensure it takes full height of parent */
 }
 
 .logo-img {
@@ -2103,20 +2142,23 @@ body.tour-active .logo-desktop {
 
 .footer-tagline {
     line-height: 1.6;
-    max-width: 280px;
+    max-width: 300px;
     opacity: 0.8;
+    margin: 0 auto; /* Center the tagline block */
 }
 
 /* Links Section */
 .footer-links-col {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    align-items: center; /* Center horizontally */
+    text-align: center; /* Center text */
+    gap: .5rem;
 }
 
 .links-heading, .social-heading {
     color: var(--text-primary);
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
 }
@@ -2127,41 +2169,56 @@ body.tour-active .logo-desktop {
     margin: 0;
     display: flex;
     flex-direction: column;
+    align-items: center; /* Center list items */
     gap: 0.75rem;
+    font-size: 1.1rem; /* Increased base font size for the list */
 }
 
-.footer-link {
-    color: var(--text-secondary);
-    text-decoration: none;
-    transition: color 0.3s ease;
+/* Shared flicker animation for both nav and footer links */
+@keyframes textFlicker {
+    0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 72%, 100% {
+        opacity: 0.99;
+        text-shadow: 0 0 6px rgba(255, 255, 255, 0.5); /* Soft white glow */
+    }
+    20%, 21.999%, 63%, 63.999%, 65%, 71.999% {
+        opacity: 0.8;
+        text-shadow: none;
+    }
+}
+
+/* Base link styling (common for both nav and footer) */
+.nav-text, .footer-link {
     position: relative;
-    padding-bottom: 2px;
+    z-index: 2;
+    will-change: opacity, color; /* Optimize for animation */
+    transition: color 0.3s ease;
 }
 
-.footer-link::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 1px;
-    background: var(--aqua);
-    transition: width 0.3s ease;
-}
-
-.footer-link:hover {
+/* Navigation links (keep existing structure) */
+.nav-link:hover .nav-text {
+    animation: textFlicker 0.7s forwards;
     color: var(--text-primary);
 }
 
-.footer-link:hover::after {
-    width: 100%;
+/* Footer links (remove underline, add flicker) */
+.footer-link {
+    color: var(--text-secondary);
+    text-decoration: none; /* No underline */
+    font-size: inherit;
+}
+
+.footer-link:hover {
+    animation: textFlicker 0.7s forwards;
+    color: var(--text-primary);
 }
 
 /* Social Section */
 .footer-social-col {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    align-items: center; /* Center horizontally */
+    text-align: center; /* Center text */
+    gap: .5rem;
 }
 
 .social-links {
@@ -2214,15 +2271,12 @@ body.tour-active .logo-desktop {
 }
 /* Footer Bottom */
 .footer-bottom {
-    padding-top: 2rem;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 2rem 1.5rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
+    width: 100%;
+    margin-top: auto;
 }
-
 .copyright {
     opacity: 0.7;
 }
@@ -2240,6 +2294,24 @@ body.tour-active .logo-desktop {
 
 .pulse {
     animation: pulse 1.5s infinite;
+}
+.footer-content {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 45px 0px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2.5rem;
+}
+.footer-bottom-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 @keyframes pulse {
@@ -2290,10 +2362,38 @@ body.tour-active .logo-desktop {
     }
 }
 
+@media (max-width: 768px) {
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 0rem 0rem 1rem;
+    }
+    
+    .footer-bottom {
+        padding: 1.5rem;
+    }
+    
+    .footer-bottom-container {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-content {
+        padding: 20px;
+    }
+    
+    .footer-bottom {
+        padding: 1.25rem 1rem;
+    }
+}
+
 /* Small mobile devices */
 @media (max-width: 480px) {
     .footer {
-        padding: 2.5rem 0 1.25rem;
+        padding: 0px;
     }
     
     .logo-img {
@@ -2388,7 +2488,7 @@ body.tour-active .logo-desktop {
 
 @media (max-width: 768px) {
     .container {
-        padding: 0 20px;
+        padding: 0 8px;
     }
     
     .nav-container {
@@ -2658,9 +2758,9 @@ body.tour-active .logo-desktop {
     /* MASSIVE shadow and glow effects */
     box-shadow: 
         0 12px 32px rgba(0, 0, 0, 0.4),
-        0 0 50px rgba(97, 244, 87, 0.6),
-        0 0 100px rgba(97, 244, 87, 0.3),
-        inset 0 0 30px rgba(97, 244, 87, 0.2),
+        0 0 50px rgba(255, 255, 255, 0.6),
+        0 0 100px rgba(255, 255, 255, 0.3),
+        inset 0 0 30px rgba(255, 255, 255, 0.2),
         inset 0 2px 5px rgba(255, 255, 255, 0.3);
     
     /* Scale up the card slightly */
@@ -2677,17 +2777,17 @@ body.tour-active .logo-desktop {
     0%, 100% {
         box-shadow: 
             0 12px 32px rgba(0, 0, 0, 0.4),
-            0 0 50px rgba(97, 244, 87, 0.6),
-            0 0 100px rgba(97, 244, 87, 0.3),
-            inset 0 0 30px rgba(97, 244, 87, 0.2),
+            0 0 50px rgba(255, 255, 255, 0.6),
+            0 0 100px rgba(255, 255, 255, 0.3),
+            inset 0 0 30px rgba(255, 255, 255, 0.2),
             inset 0 2px 5px rgba(255, 255, 255, 0.3);
     }
     50% {
         box-shadow: 
             0 15px 40px rgba(0, 0, 0, 0.5),
-            0 0 70px rgba(97, 244, 87, 0.8),
-            0 0 140px rgba(97, 244, 87, 0.4),
-            inset 0 0 40px rgba(97, 244, 87, 0.3),
+            0 0 70px rgba(255, 255, 255, 0.8),
+            0 0 140px rgba(255, 255, 255, 0.4),
+            inset 0 0 40px rgba(255, 255, 255, 0.3),
             inset 0 2px 5px rgba(255, 255, 255, 0.4);
     }
 }
@@ -2697,23 +2797,14 @@ body.tour-active .logo-desktop {
     100% { background-position: 200% 0; }
 }
 
-/* SUPER BRIGHT "NEXT SHOW" BUTTON */
+/* NEXT SHOW BUTTON - BLACK TEXT WITH HOVER WHITE */
 .tour-date.highlight::after {
+    /* Keep all original properties */
     content: 'NEXT SHOW';
     position: absolute;
-    top: 1.5rem;
+    top: 1.3rem;
     right: 1.5rem;
-    
-    /* MAXIMUM brightness gradient */
-    background: linear-gradient(
-        135deg,
-        rgba(97, 244, 87, 1.0) 0%,
-        rgba(8, 254, 255, 1.0) 50%,
-        rgba(254, 255, 5, 1.0) 100%
-    );
-    
-    color: #000;
-    padding: 0.6rem 1.6rem;
+    padding: 0.35rem .9rem;
     border-radius: 8px;
     font-size: 0.85rem;
     font-weight: 900;
@@ -2721,37 +2812,50 @@ body.tour-active .logo-desktop {
     letter-spacing: 1.5px;
     z-index: 12;
     
-    /* MASSIVE button shadows and effects */
+    /* Modified properties */
+    background: rgba(255, 255, 255, 0.062) !important; /* Light background for black text */
+    color: #000000 !important; /* Black text by default */
+    
+    /* Original shadows with enhanced glow */
     box-shadow: 
         0 4px 0 rgba(0, 0, 0, 0.4),
         0 8px 20px rgba(0, 0, 0, 0.3),
-        0 0 30px rgba(97, 244, 87, 0.7),
-        0 0 60px rgba(97, 244, 87, 0.4),
+        0 0 30px rgba(255, 255, 255, 0.452),
+        0 0 60px rgba(255, 255, 255, 0.4),
         inset 0 2px 5px rgba(255, 255, 255, 0.6),
         inset 0 -2px 3px rgba(0, 0, 0, 0.2);
-    
-    border: 2px solid rgba(97, 244, 87, 0.8);
-    
-    text-shadow: 
-        0 1px 2px rgba(255, 255, 255, 0.5),
-        0 -1px 1px rgba(0, 0, 0, 0.3);
-    
+
+    /* Added color transition */
     transition: 
         transform 0.2s ease,
-        box-shadow 0.2s ease;
+        box-shadow 0.2s ease,
+        color 0.2s ease,
+        background 0.2s ease,
+        text-shadow 0.2s ease;
     
-    /* Button pulsing */
+    /* Original animation */
     animation: buttonPulse 2s ease-in-out infinite;
 }
 
+/* HOVER STATE - WHITE TEXT WITH STRONG GLOW */
+.tour-date.highlight:hover::after {
+    background: rgba(0, 0, 0, 0.13) !important;
+    color: #ffffff !important; /* White text on hover */
+    text-shadow: 
+        0 0 8px rgba(255, 255, 255, 0.9),
+        0 0 15px rgba(255, 255, 255, 0.7),
+        0 0 25px rgba(255, 255, 255, 0.4);
+}
+
+/* PULSE ANIMATION WITH COLOR CHANGE */
 @keyframes buttonPulse {
     0%, 100% {
         transform: scale(1);
         box-shadow: 
             0 4px 0 rgba(0, 0, 0, 0.4),
             0 8px 20px rgba(0, 0, 0, 0.3),
-            0 0 30px rgba(97, 244, 87, 0.7),
-            0 0 60px rgba(97, 244, 87, 0.4),
+            0 0 30px rgba(255, 255, 255, 0.7),
+            0 0 60px rgba(255, 255, 255, 0.4),
             inset 0 2px 5px rgba(255, 255, 255, 0.6),
             inset 0 -2px 3px rgba(0, 0, 0, 0.2);
     }
@@ -2760,10 +2864,50 @@ body.tour-active .logo-desktop {
         box-shadow: 
             0 6px 0 rgba(0, 0, 0, 0.4),
             0 12px 25px rgba(0, 0, 0, 0.4),
-            0 0 40px rgba(97, 244, 87, 0.9),
-            0 0 80px rgba(97, 244, 87, 0.6),
+            0 0 40px rgba(255, 255, 255, 0.9),
+            0 0 80px rgba(255, 255, 255, 0.6),
             inset 0 2px 5px rgba(255, 255, 255, 0.7),
             inset 0 -2px 3px rgba(0, 0, 0, 0.2);
+        /* More intense glow at pulse peak */
+        text-shadow: 
+            0 0 10px rgba(255, 255, 255, 0.664),
+            0 0 20px rgba(255, 255, 255, 0.281),
+            0 0 35px rgba(255, 255, 255, 0.116);
+    }
+}
+
+@keyframes buttonPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 
+            /* Base shadow (contact shadow) */
+            0 2px 0 rgba(0, 0, 0, 0.5),
+            /* Primary depth shadow */
+            0 6px 12px rgba(0, 0, 0, 0.3),
+            /* Ambient glow */
+            0 12px 24px rgba(0, 0, 0, 0.2),
+            /* Top light reflection */
+            inset 0 1px 2px rgba(255, 255, 255, 0.8),
+            /* Bottom shading */
+            inset 0 -4px 6px rgba(0, 0, 0, 0.3),
+            /* Inner core shadow */
+            inset 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+    50% {
+        transform: scale(1.03);
+        box-shadow: 
+            /* Enhanced base shadow */
+            0 4px 0 rgba(0, 0, 0, 0.5),
+            /* Deeper primary shadow */
+            0 10px 18px rgba(0, 0, 0, 0.35),
+            /* Stronger ambient glow */
+            0 18px 36px rgba(0, 0, 0, 0.25),
+            /* Brighter top reflection */
+            inset 0 2px 3px rgba(255, 255, 255, 0.9),
+            /* Deeper bottom shading */
+            inset 0 -6px 8px rgba(0, 0, 0, 0.4),
+            /* More pronounced inner shadow */
+            inset 0 0 15px rgba(0, 0, 0, 0.3);
     }
 }
 
@@ -3174,7 +3318,7 @@ body.tour-active .logo-desktop {
     .tour-date.highlight::after {
         top: 1rem;
         right: 1rem;
-        padding: 0.2rem 0.5rem;
+        padding: 0.4rem 0.55rem;
         font-size: 0.7rem;
         letter-spacing: 0.5px;
     }
@@ -3185,9 +3329,8 @@ body.tour-active .logo-desktop {
     transform: translateY(-5px);
     box-shadow: 
         0 8px 20px rgba(0, 0, 0, 0.2),
-        0 0 25px rgba(8, 254, 255, 0.15),
-        0 0 40px rgba(97, 244, 87, 0.08);
-        border-color: #FEFF05;
+        0 0 25px rgba(255, 255, 255, 0.15),
+        0 0 40px rgba(255, 255, 255, 0.08);
         border-width: 3.5px;
         border-radius: 16px;
 }
@@ -3794,12 +3937,9 @@ animation: subtleGlow 8s ease-in-out infinite alternate;
 /* Responsive Adjustments */
 
 
-@media (max-width: 768px) {
-
-    
-
+@media (max-width: 768px) { 
     .tour-date.highlight::after {
-        top: 1rem;
+        top: 1.75rem;
         right: 1rem;
     }
 }
