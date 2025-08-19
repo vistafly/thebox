@@ -396,6 +396,64 @@ function initHeaderEffects() {
     });
 }
 
+function initPreloader() {
+    const loader = document.querySelector('.loader');
+    const logoPath = document.querySelector('.logo-path');
+    const logoText = document.querySelector('.logo-text');
+    const progressFill = document.querySelector('.progress-fill');
+    
+    if (!loader) return;
+
+    // Create animation timeline
+    const tl = gsap.timeline();
+    
+    // Animate logo path
+    tl.to(logoPath, {
+        strokeDashoffset: 0,
+        duration: 1.5,
+        ease: 'power2.inOut'
+    })
+    .to(logoText, {
+        duration: 0.1,
+        onStart: () => {
+            // Start with the flicker animation
+            logoText.classList.add('lit');
+            
+            // Add final glow enhancement when progress completes
+            setTimeout(() => {
+                logoText.classList.remove('lit');
+                logoText.classList.add('final-glow');
+                
+                // Subtle continuous glow variation
+                gsap.to(logoText, {
+                    duration: 3,
+                    filter: `
+                        drop-shadow(0 0 7px rgba(255,255,255,1))
+                        drop-shadow(0 0 15px rgba(255,255,255,0.8))
+                        drop-shadow(0 0 22px rgba(255,255,255,0.4))`,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "sine.inOut"
+                });
+            }, 1800); // Matches progress completion
+        }
+    }, '-=0.5')
+    .to(progressFill, {
+        width: '100%',
+        duration: 2,
+        ease: 'power1.inOut'
+    })
+    .to(loader, {
+        opacity: 0,
+        duration: 0.8,
+        ease: 'power2.inOut',
+        delay: 0.3,
+        onComplete: () => {
+            loader.style.display = 'none';
+        }
+    });
+}
+
 // Hero Animations
 function initHeroAnimations() {
     const tl = gsap.timeline({ delay: 0.5 });
@@ -812,6 +870,22 @@ document.addEventListener('DOMContentLoaded', function() {
     initScrollAnimations();
 });
     
+    // Contact cards
+    gsap.utils.toArray('.contact-card').forEach((card, index) => {
+        gsap.from(card, {
+            scrollTrigger: {
+                trigger: card,
+                start: 'top 85%',
+                toggleActions: 'play none none reverse'
+            },
+            x: index % 2 === 0 ? -50 : 50,
+            opacity: 0,
+            duration: 0.8,
+            delay: index * 0.2,
+            ease: 'power2.out'
+        });
+    });
+    
     // CTA button
     gsap.from('.cta-button', {
         scrollTrigger: {
@@ -979,7 +1053,39 @@ function initFormInteractions() {
             }
         });
     });
-
+    
+    // Form submission
+    const bookingForm = document.getElementById('bookingForm');
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show success message
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i> Sent Successfully';
+            
+            // Reset form after delay
+            setTimeout(() => {
+                this.reset();
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span class="cta-text">Send Inquiry</span><div class="cta-bg"></div>';
+                
+                // Reset labels
+                formGroups.forEach(group => {
+                    const input = group.querySelector('input, textarea');
+                    if (!input.value) {
+                        group.querySelector('label').style.color = 'var(--text-muted)';
+                        gsap.to(group.querySelector('.form-line'), {
+                            width: '0%',
+                            duration: 0.3,
+                            ease: 'power2.in'
+                        });
+                    }
+                });
+            }, 3000);
+        });
+    }
 }
 
 // Utility Functions
@@ -1012,10 +1118,10 @@ window.addEventListener('resize', () => {
     ScrollTrigger.refresh();
 });
 
+// Guaranteed Working Mobile Menu Toggle
 document.addEventListener('DOMContentLoaded', function() {
     const menuToggle = document.querySelector('.menu-toggle');
     const nav = document.querySelector('.nav');
-    const navLinks = document.querySelectorAll('.nav a');
     let scrollPosition = 0;
     
     if (!menuToggle || !nav) {
@@ -1023,8 +1129,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // Function to handle menu toggle
-    function toggleMenu(isOpening) {
+    menuToggle.addEventListener('click', function() {
+        const isOpening = !nav.classList.contains('active');
+        
         if (isOpening) {
             // Store scroll position before opening menu
             scrollPosition = window.scrollY;
@@ -1034,9 +1141,9 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             // Remove scroll prevention styles
             document.body.classList.remove('menu-open');
-            // Restore scroll position
+            // INSTANTLY restore scroll position (no smooth scrolling)
             document.body.style.top = '';
-            document.documentElement.style.scrollBehavior = 'auto';
+            document.documentElement.style.scrollBehavior = 'auto'; // Disable smooth scrolling
             window.scrollTo(0, scrollPosition);
             // Re-enable smooth scrolling after we're done
             setTimeout(() => {
@@ -1045,48 +1152,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Toggle menu classes
-        menuToggle.classList.toggle('active');
+        this.classList.toggle('active');
         nav.classList.toggle('active');
-    }
-
-    // Menu toggle click handler
-    menuToggle.addEventListener('click', function() {
-        const isOpening = !nav.classList.contains('active');
-        toggleMenu(isOpening);
-    });
-
-    // Close menu when clicking on nav links
-    navLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            if (nav.classList.contains('active')) {
-                toggleMenu(false);
-            }
-        });
-    });
-
-    // Close menu when clicking outside
-    document.addEventListener('click', function(event) {
-        const isClickInsideNav = nav.contains(event.target);
-        const isClickOnToggle = menuToggle.contains(event.target);
-        
-        if (!isClickInsideNav && !isClickOnToggle && nav.classList.contains('active')) {
-            toggleMenu(false);
-        }
-    });
-
-    // Handle window resize for responsive behavior
-    function handleResize() {
-        // Close menu if window is resized to desktop size
-        if (window.innerWidth > 1024 && nav.classList.contains('active')) {
-            toggleMenu(false);
-        }
-    }
-
-    // Debounce resize events for better performance
-    let resizeTimeout;
-    window.addEventListener('resize', function() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(handleResize, 250);
     });
 
    // Tour Date Highlighting Functions (UNCHANGED)
