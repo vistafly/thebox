@@ -1134,7 +1134,10 @@ body.tour-active .logo-desktop {
 
 /* Slideshow Styles */
 .slideshow-container {
-    max-width: 1000px;
+    /* CSS Custom Property for controlling slideshow size */
+    --slideshow-scale: 1;
+    
+    max-width: calc(1000px * var(--slideshow-scale));
     margin: 0 auto 10px;
     position: relative;
     background: #1a1a1a;
@@ -1145,7 +1148,7 @@ body.tour-active .logo-desktop {
 
 .slideshow {
     position: relative;
-    height: 400px;
+    height: calc(400px * var(--slideshow-scale));
 }
 
 .slide {
@@ -1170,33 +1173,33 @@ body.tour-active .logo-desktop {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 5px;
+    padding: 2.5pxpx;
     background: rgba(0, 0, 0, 0.5);
 }
 
 .slideshow-prev, .slideshow-next {
     background: none;
     border: none;
-    color: white;
-    font-size: 20px;
+    color: rgb(110, 110, 110);
+    font-size: calc(10px * var(--slideshow-scale));
     cursor: pointer;
-    padding: 5px 15px;
+    padding: calc(5px * var(--slideshow-scale)) calc(15px * var(--slideshow-scale));
     transition: all 0.3s;
-    padding-bottom: 7px;
+    padding-bottom: calc(7px * var(--slideshow-scale));
 }
 
 .slideshow-prev:hover, .slideshow-next:hover {
-    color: #1db954;
+    color: #ffffff;
 }
 
 .slideshow-dots {
     display: flex;
-    gap: 15px;
+    gap: calc(15px * var(--slideshow-scale));
 }
 
 .dot {
-    width: 10px;
-    height: 10px;
+    width: calc(10px * var(--slideshow-scale));
+    height: calc(10px * var(--slideshow-scale));
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.5);
     cursor: pointer;
@@ -1204,18 +1207,19 @@ body.tour-active .logo-desktop {
 }
 
 .dot.active {
-    background: #1db954;
-    transform: scale(1.2);
+    background: #ffffffd5;
+    transform: scale(calc(1 * var(--slideshow-scale)));
 }
 
 /* Desktop-specific styles */
 @media screen and (min-width: 1024px) {
     .slideshow-container {
+        --slideshow-scale: 1.4; /* Scale up by 40% on desktop */
         max-width: 1400px; /* Increased from 1000px */
     }
     
     .slideshow {
-        height: 600px; /* Increased from 400px */
+        height: 800px; /* Increased from 400px */
     }
     
     /* Optional: Make controls larger on desktop */
@@ -1226,6 +1230,13 @@ body.tour-active .logo-desktop {
     .dot {
         width: 12px; /* Increased from 10px */
         height: 12px; /* Increased from 10px */
+    }
+}
+
+/* Large screen scaling for screens wider than 1800px */
+@media screen and (min-width: 1800px) {   
+    .slideshow {
+        height: 800px;
     }
 }
 
@@ -1245,8 +1256,8 @@ body.tour-active .logo-desktop {
 
 @media (max-width: 768px) {
     .dot {
-        width: 9px;        /* Larger for better touch targets */
-        height: 9px;       /* Larger for better touch targets */
+        width: 10.5px;        /* Larger for better touch targets */
+        height: 10.5px;       /* Larger for better touch targets */
         background: rgba(255, 255, 255, 0.7); /* More visible opacity */
     }
 
@@ -1257,6 +1268,7 @@ body.tour-active .logo-desktop {
     /* Optional: Add more spacing between dots for mobile */
     .slideshow-dots {
         gap: 15px;
+        padding: 15px;
     }
 }
 
@@ -2002,6 +2014,10 @@ body.tour-active .logo-desktop {
     backdrop-filter: var(--blur);
     position: relative;
     overflow: hidden;
+    /* REMOVE SLIDE ANIMATIONS - Ensure cards are always visible */
+    transform: none !important;
+    opacity: 1 !important;
+    animation: none !important;
 }
 
 .contact-card::before {
@@ -2079,6 +2095,16 @@ body.tour-active .logo-desktop {
     backdrop-filter: var(--blur);
     border: 1px solid rgba(97, 244, 87, 0.1);
     margin-top: 40px;
+}
+
+/* Remove any scroll-triggered animation classes */
+.contact-card.animate-in,
+.contact-card.is-visible,
+.contact-card.in-view,
+.contact-card[data-animate] {
+    transform: none !important;
+    opacity: 1 !important;
+    animation: none !important;
 }
 
 .fillout-embed-wrapper {
@@ -2834,7 +2860,7 @@ body.tour-active .logo-desktop {
     
     /* Modified properties */
     background: rgba(255, 255, 255, 0.062) !important; /* Light background for black text */
-    color: #000000 !important; /* Black text by default */
+    color: #0000009f !important; /* Black text by default */
     
     /* Original shadows with enhanced glow */
     box-shadow: 
