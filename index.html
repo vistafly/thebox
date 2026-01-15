@@ -911,7 +911,7 @@
     const state = {
         currentStep: 1,
         selectedDate: null,
-        selectedDuration: 4,
+        selectedDuration: null, // Will be set by user input
         selectedTime: null,
         timeSlots: [],
         isLoadingSlots: false,
@@ -1068,7 +1068,16 @@
     function handleDateSelect(date) {
         state.selectedDate = date;
         elements.durationSection.classList.remove('hidden');
-        if (state.selectedDuration) fetchTimeSlots();
+
+        // Hide time slots until duration is entered
+        elements.timeslotSection.classList.add('hidden');
+        state.selectedTime = null;
+
+        // Only fetch slots if duration is already entered and valid
+        if (state.selectedDuration && state.selectedDuration >= 1 && state.selectedDuration <= 12) {
+            fetchTimeSlots();
+        }
+
         updateContinueButton();
     }
 
