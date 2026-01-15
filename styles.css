@@ -1203,12 +1203,12 @@ body.tour-active .logo-desktop {
 /* Desktop-specific styles */
 @media screen and (min-width: 1024px) {
     .slideshow-container {
-        --slideshow-scale: 0.9; /* Reduced scale for laptop screens */
-        max-width: 900px; /* Reduced from 1400px for laptop displays */
+        --slideshow-scale: 1.4; /* Scale up by 40% on desktop */
+        max-width: 1400px; /* Increased from 1000px */
     }
 
     .slideshow {
-        height: 500px; /* Reduced from 800px for better laptop fit */
+        height: 800px; /* Increased from 400px */
     }
 
     /* Optional: Make controls larger on desktop */

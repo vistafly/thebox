@@ -3,7 +3,14 @@
  * Returns available time slots for a given date and duration
  */
 
-const { getAvailableSlots } = require('../lib/google-calendar');
+let getAvailableSlots;
+try {
+  const googleCalendar = require('../lib/google-calendar');
+  getAvailableSlots = googleCalendar.getAvailableSlots;
+} catch (error) {
+  console.error('Failed to load google-calendar module:', error);
+  getAvailableSlots = null;
+}
 
 // CORS headers
 const CORS_HEADERS = {
@@ -25,6 +32,11 @@ module.exports = async (req, res) => {
   Object.entries(CORS_HEADERS).forEach(([key, value]) => {
     res.setHeader(key, value);
   });
+
+  // Check if module loaded correctly
+  if (!getAvailableSlots) {
+    return res.status(500).json({ error: 'Server configuration error: google-calendar module failed to load' });
+  }
 
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });

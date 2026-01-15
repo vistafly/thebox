@@ -4,7 +4,7 @@
   "description": "Band booking system with Google Calendar integration for The Box",
   "main": "index.js",
   "scripts": {
-    "dev": "node node_modules/vercel/dist/index.js dev",
+    "start": "set NODE_OPTIONS= && vercel dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

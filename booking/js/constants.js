@@ -2,11 +2,11 @@
  * Configuration constants for band booking
  */
 
-// API Configuration - UPDATE THESE AFTER DEPLOYMENT
-export const API_BASE_URL = 'http://localhost:3001'; // Update to Vercel URL after deployment
+// API Configuration - Uses relative paths to work in both dev and production
+export const API_BASE_URL = ''; // Empty string = relative paths to same origin
 
-// Google Places API Key (exposed in frontend, restricted by domain)
-export const PLACES_API_KEY = 'AIzaSyAFfAO2wxU8NcFmhJL63Kmw8mVQVdOgBRA';
+// Note: Google Places API key is NOT exposed in frontend
+// All Places API calls are proxied through our backend at /api/places
 
 // Event Types
 export const EVENT_TYPES = [

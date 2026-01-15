@@ -914,16 +914,33 @@ function initSmoothScrolling() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            
+            const href = this.getAttribute('href');
+
+            // Special handling for home/hero - always scroll to very top
+            if (href === '#hero') {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+                return;
+            }
+
+            const target = document.querySelector(href);
+
             if (target) {
-                gsap.to(window, {
-                    duration: 1.5,
-                    scrollTo: {
-                        y: target,
-                        offsetY: 100
-                    },
-                    ease: 'power2.inOut'
+                // Get header height
+                const header = document.querySelector('.header');
+                const headerHeight = header ? header.offsetHeight : 0;
+
+                // For other sections, position higher - increase offset
+                const offset = 40 - headerHeight;
+
+                // Calculate position
+                const targetPosition = target.offsetTop + offset;
+
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
                 });
             }
         });
