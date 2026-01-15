@@ -14,7 +14,7 @@ import { formatPhoneNumber, formatTime, formatDate, formatMonthYear, dateToStrin
 const state = {
   currentStep: 1,
   selectedDate: null,
-  selectedDuration: 4, // Default to 4 hours
+  selectedDuration: null, // Will be set by user input
   selectedTime: null,
   timeSlots: [],
   isLoadingSlots: false,
@@ -40,7 +40,7 @@ const elements = {
 
   // Duration
   durationSection: document.getElementById('durationSection'),
-  durationGrid: document.getElementById('durationGrid'),
+  durationInput: document.getElementById('durationInput'),
 
   // Time Slots
   timeslotSection: document.getElementById('timeslotSection'),
@@ -133,10 +133,29 @@ function attachEventListeners() {
   });
 
   // Duration selection
-  elements.durationGrid.querySelectorAll('.duration-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      handleDurationSelect(parseInt(btn.dataset.duration));
-    });
+  // Duration input handler with validation
+  elements.durationInput.addEventListener('input', (e) => {
+    const duration = parseFloat(e.target.value);
+    const inputWrapper = e.target.parentElement;
+
+    // Remove any existing error styling
+    inputWrapper.classList.remove('error');
+
+    if (e.target.value === '') {
+      // Clear duration if input is empty
+      state.selectedDuration = null;
+      elements.timeslotSection.classList.add('hidden');
+      updateContinueButton();
+    } else if (duration >= 1 && duration <= 12) {
+      // Valid duration
+      handleDurationSelect(duration);
+    } else {
+      // Invalid duration
+      inputWrapper.classList.add('error');
+      state.selectedDuration = null;
+      elements.timeslotSection.classList.add('hidden');
+      updateContinueButton();
+    }
   });
 
   // Phone number formatting
@@ -217,8 +236,12 @@ function handleDateSelect(date) {
   // Show duration section
   elements.durationSection.classList.remove('hidden');
 
-  // If duration already selected, fetch slots
-  if (state.selectedDuration) {
+  // Clear time slots until duration is entered
+  elements.timeslotSection.classList.add('hidden');
+  state.selectedTime = null;
+
+  // Only fetch slots if duration is already entered
+  if (state.selectedDuration && state.selectedDuration >= 1 && state.selectedDuration <= 12) {
     fetchTimeSlots();
   }
 
@@ -232,17 +255,7 @@ function handleDateSelect(date) {
 function handleDurationSelect(hours) {
   state.selectedDuration = hours;
 
-  // Update UI
-  elements.durationGrid.querySelectorAll('.duration-btn').forEach(btn => {
-    btn.classList.remove('selected');
-  });
-
-  const selectedBtn = elements.durationGrid.querySelector(`[data-duration="${hours}"]`);
-  if (selectedBtn) {
-    selectedBtn.classList.add('selected');
-  }
-
-  // Fetch time slots
+  // Fetch time slots if a date is already selected
   if (state.selectedDate) {
     fetchTimeSlots();
   }
@@ -458,7 +471,7 @@ function resetForm() {
   // Reset state
   state.currentStep = 1;
   state.selectedDate = null;
-  state.selectedDuration = 4;
+  state.selectedDuration = null;
   state.selectedTime = null;
   state.timeSlots = [];
 
@@ -470,10 +483,8 @@ function resetForm() {
   elements.timeslotSection.classList.add('hidden');
   elements.successState.classList.add('hidden');
 
-  // Clear selections
-  elements.durationGrid.querySelectorAll('.duration-btn').forEach(btn => {
-    btn.classList.remove('selected');
-  });
+  // Clear duration input
+  elements.durationInput.value = '';
 
   // Go back to step 1
   goToStep(1);
