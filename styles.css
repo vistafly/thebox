@@ -376,12 +376,12 @@ body.tour-active .logo-desktop {
     .logo-mobile {
         display: block;
     }
-    
-    /* Hide desktop logo */
+
+    /* Keep desktop logo visible but smaller on mobile */
     .logo-desktop {
-        display: none;
+        width: 250px; /* Even smaller for mobile devices */
     }
-    
+
     /* Adjust mobile logo size if needed */
     .logo-mobile img {
         height: 80px; /* Slightly smaller on very small devices */
@@ -518,10 +518,10 @@ body.tour-active .logo-desktop {
         display: block;
         z-index: 1001;
     }
-    
-    /* Hide desktop logo */
+
+    /* Keep desktop logo visible on smaller screens */
     .logo-desktop {
-        display: none;
+        width: 300px; /* Smaller size for tablets and smaller laptops */
     }
     
     /* Adjust header layout */
@@ -1203,19 +1203,19 @@ body.tour-active .logo-desktop {
 /* Desktop-specific styles */
 @media screen and (min-width: 1024px) {
     .slideshow-container {
-        --slideshow-scale: 1.4; /* Scale up by 40% on desktop */
-        max-width: 1400px; /* Increased from 1000px */
+        --slideshow-scale: 0.9; /* Reduced scale for laptop screens */
+        max-width: 900px; /* Reduced from 1400px for laptop displays */
     }
-    
+
     .slideshow {
-        height: 800px; /* Increased from 400px */
+        height: 500px; /* Reduced from 800px for better laptop fit */
     }
-    
+
     /* Optional: Make controls larger on desktop */
     .slideshow-prev, .slideshow-next {
         font-size: 23px; /* Increased from 20px */
     }
-    
+
     .dot {
         width: 12px; /* Increased from 10px */
         height: 12px; /* Increased from 10px */
@@ -4592,32 +4592,59 @@ animation: subtleGlow 8s ease-in-out infinite alternate;
     margin-bottom: 1rem;
 }
 
-.booking-duration-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 1rem;
+/* Duration Input Field */
+.booking-duration-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.booking-duration-btn {
+.booking-duration-input {
     padding: 1rem;
     border: 2px solid rgba(255, 255, 255, 0.2);
-    background: transparent;
+    background: rgba(0, 0, 0, 0.3);
     color: #fff;
     border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
     transition: all 0.2s;
+    max-width: 300px;
 }
 
-.booking-duration-btn:hover {
-    border-color: #61F457;
-    background: rgba(97, 244, 87, 0.1);
+.booking-duration-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
 }
 
-.booking-duration-btn.selected {
+.booking-duration-input:focus {
+    outline: none;
     border-color: #61F457;
-    background: #61F457;
-    color: #0a0a0a;
+    box-shadow: 0 0 0 3px rgba(97, 244, 87, 0.1);
+}
+
+.booking-duration-input:hover:not(:focus) {
+    border-color: #61F457;
+}
+
+.booking-duration-input-wrapper.error .booking-duration-input {
+    border-color: #ef4444;
+}
+
+.booking-duration-input-wrapper.error .booking-duration-input:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.booking-input-hint {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+}
+
+.booking-duration-input-wrapper.error .booking-input-hint {
+    color: #ef4444;
+}
+
+.booking-duration-input-wrapper.error .booking-input-hint::before {
+    content: '⚠ ';
 }
 
 /* Time Slots */

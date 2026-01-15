@@ -724,13 +724,19 @@
 
                             <!-- Duration Selection -->
                             <div class="booking-duration-section hidden" id="durationSection">
-                                <label class="booking-section-label">Select Duration</label>
-                                <div class="booking-duration-grid" id="durationGrid">
-                                    <button type="button" class="booking-duration-btn" data-duration="2">2 Hours</button>
-                                    <button type="button" class="booking-duration-btn" data-duration="3">3 Hours</button>
-                                    <button type="button" class="booking-duration-btn" data-duration="4">4 Hours</button>
-                                    <button type="button" class="booking-duration-btn" data-duration="6">6 Hours</button>
-                                    <button type="button" class="booking-duration-btn" data-duration="8">Full Day (8hrs)</button>
+                                <label class="booking-section-label" for="durationInput">Event Duration (Hours) *</label>
+                                <div class="booking-duration-input-wrapper">
+                                    <input
+                                        type="number"
+                                        id="durationInput"
+                                        class="booking-duration-input"
+                                        placeholder="Enter hours (e.g., 2, 3, 4, 6)"
+                                        min="1"
+                                        max="12"
+                                        step="0.5"
+                                        required
+                                    >
+                                    <span class="booking-input-hint">Enter the number of hours you need (1-12 hours)</span>
                                 </div>
                             </div>
 
@@ -890,8 +896,7 @@
         </div>
     </section>
 
-    <!-- Google Places API for venue address autocomplete -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAFfAO2wxU8NcFmhJL63Kmw8mVQVdOgBRA&libraries=places" async defer></script>
+    <!-- Google Places API - Using secure backend proxy -->
 
     <!-- Inline Booking Form Script -->
     <script type="module">
@@ -925,7 +930,7 @@
         prevMonthBtn: document.getElementById('prevMonth'),
         nextMonthBtn: document.getElementById('nextMonth'),
         durationSection: document.getElementById('durationSection'),
-        durationGrid: document.getElementById('durationGrid'),
+        durationInput: document.getElementById('durationInput'),
         timeslotSection: document.getElementById('timeslotSection'),
         timeslotLoading: document.getElementById('timeslotLoading'),
         timeslotGrid: document.getElementById('timeslotGrid'),
@@ -995,10 +1000,24 @@
             elements.monthDropdown.classList.toggle('hidden');
         });
 
-        elements.durationGrid?.querySelectorAll('.booking-duration-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                handleDurationSelect(parseInt(btn.dataset.duration));
-            });
+        elements.durationInput?.addEventListener('input', (e) => {
+            const duration = parseFloat(e.target.value);
+            const inputWrapper = e.target.parentElement;
+
+            inputWrapper.classList.remove('error');
+
+            if (e.target.value === '') {
+                state.selectedDuration = null;
+                elements.timeslotSection.classList.add('hidden');
+                updateContinueButton();
+            } else if (duration >= 1 && duration <= 12) {
+                handleDurationSelect(duration);
+            } else {
+                inputWrapper.classList.add('error');
+                state.selectedDuration = null;
+                elements.timeslotSection.classList.add('hidden');
+                updateContinueButton();
+            }
         });
 
         elements.contactPhone?.addEventListener('input', (e) => {
@@ -1055,9 +1074,6 @@
 
     function handleDurationSelect(hours) {
         state.selectedDuration = hours;
-        elements.durationGrid.querySelectorAll('.booking-duration-btn').forEach(btn => btn.classList.remove('selected'));
-        const selectedBtn = elements.durationGrid.querySelector(`[data-duration="${hours}"]`);
-        if (selectedBtn) selectedBtn.classList.add('selected');
         if (state.selectedDate) fetchTimeSlots();
         updateContinueButton();
     }
@@ -1185,14 +1201,14 @@
     function resetForm() {
         state.currentStep = 1;
         state.selectedDate = null;
-        state.selectedDuration = 4;
+        state.selectedDuration = null;
         state.selectedTime = null;
         state.timeSlots = [];
         elements.form.reset();
         elements.durationSection.classList.add('hidden');
         elements.timeslotSection.classList.add('hidden');
         elements.successState.classList.add('hidden');
-        elements.durationGrid.querySelectorAll('.booking-duration-btn').forEach(btn => btn.classList.remove('selected'));
+        if (elements.durationInput) elements.durationInput.value = '';
         goToStep(1);
         calendar.selectedDate = null;
         calendar.render();
