@@ -638,29 +638,27 @@
 
     <!-- Booking Section -->
     <section id="booking" class="section booking-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Book The Box</h2>
-                <div class="section-line"></div>
-            </div>
-            
-            <div class="booking-content">
-                <div class="booking-text">
-                    <p>From corporate events to private parties, weddings to festivals - we bring the energy that transforms any gathering into an unforgettable experience.</p>
-                </div>
-                
-                <div class="contact-grid">
+        <div class="section-header">
+            <h2 class="section-title">Book The Box</h2>
+            <div class="section-line"></div>
+            <p class="booking-intro">From corporate events to private parties, weddings to festivals - we bring the energy that transforms any gathering into an unforgettable experience.</p>
+        </div>
+
+        <div class="booking-layout">
+            <!-- Contact Sidebar -->
+            <aside class="booking-sidebar">
+                <div class="contact-methods">
+                    <h3>Quick Contact</h3>
                     <a href="mailto:booking@thebox.band" class="contact-card email-card">
-                    <div class="contact-icon">
-                        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                    </div>
-                    <div class="contact-info">
-                        <span class="contact-label">Email</span>
-                        <span class="contact-value">booking@thebox.band</span>
-                    </div>
-                    <div class="contact-arrow">→</div>
-                </a>
-                    
+                        <div class="contact-icon">
+                            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                        </div>
+                        <div class="contact-info">
+                            <span class="contact-label">Email</span>
+                            <span class="contact-value">booking@thebox.band</span>
+                        </div>
+                    </a>
+
                     <a href="tel:5599172975" class="contact-card phone-card">
                         <div class="contact-icon">
                             <svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
@@ -669,26 +667,545 @@
                             <span class="contact-label">Phone</span>
                             <span class="contact-value">(559) 917-2975</span>
                         </div>
-                        <div class="contact-arrow">→</div>
                     </a>
                 </div>
-                
-                <div class="booking-form">
-    <div class="fillout-embed-wrapper">
-        <!-- Fillout iframe with responsive attributes -->
-        <iframe src="https://forms.fillout.com/t/kvPTtsL2Z7us" 
-                title="Booking Form"
-                class="fillout-iframe"
-                frameborder="0"
-                allowfullscreen
-                sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation-by-user-activation">
-        </iframe>
-    </div>
-</div>
+            </aside>
+
+            <!-- Inline Booking Form -->
+            <div class="booking-form-inline">
+                <!-- Progress Steps -->
+                <div class="booking-progress-steps" id="progressSteps">
+                    <div class="booking-step active" data-step="1">
+                        <span class="booking-step-number">1</span>
+                        <span class="booking-step-label">Date & Time</span>
+                    </div>
+                    <div class="booking-step-divider"></div>
+                    <div class="booking-step" data-step="2">
+                        <span class="booking-step-number">2</span>
+                        <span class="booking-step-label">Event Details</span>
+                    </div>
                 </div>
+
+                <!-- Booking Form -->
+                <form id="bookingForm" class="inline-booking-form">
+                    <!-- Step 1: Date/Time Selection -->
+                    <div class="booking-form-step active" id="step1">
+                        <div class="booking-step-content">
+                            <!-- Month Navigation -->
+                            <div class="booking-calendar-header">
+                                <button type="button" class="booking-month-nav-btn" id="prevMonth" disabled>
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </button>
+                                <div class="booking-month-selector">
+                                    <button type="button" id="currentMonthBtn" class="booking-current-month-btn">
+                                        <span id="currentMonthLabel">Loading...</span>
+                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    </button>
+                                    <div class="booking-month-dropdown hidden" id="monthDropdown"></div>
+                                </div>
+                                <button type="button" class="booking-month-nav-btn" id="nextMonth">
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </button>
+                            </div>
+
+                            <!-- Calendar Grid -->
+                            <div class="booking-calendar-grid">
+                                <div class="booking-calendar-weekdays">
+                                    <div class="booking-weekday">Sun</div>
+                                    <div class="booking-weekday">Mon</div>
+                                    <div class="booking-weekday">Tue</div>
+                                    <div class="booking-weekday">Wed</div>
+                                    <div class="booking-weekday">Thu</div>
+                                    <div class="booking-weekday">Fri</div>
+                                    <div class="booking-weekday">Sat</div>
+                                </div>
+                                <div class="booking-calendar-days" id="calendarDays"></div>
+                            </div>
+
+                            <!-- Duration Selection -->
+                            <div class="booking-duration-section hidden" id="durationSection">
+                                <label class="booking-section-label">Select Duration</label>
+                                <div class="booking-duration-grid" id="durationGrid">
+                                    <button type="button" class="booking-duration-btn" data-duration="2">2 Hours</button>
+                                    <button type="button" class="booking-duration-btn" data-duration="3">3 Hours</button>
+                                    <button type="button" class="booking-duration-btn" data-duration="4">4 Hours</button>
+                                    <button type="button" class="booking-duration-btn" data-duration="6">6 Hours</button>
+                                    <button type="button" class="booking-duration-btn" data-duration="8">Full Day (8hrs)</button>
+                                </div>
+                            </div>
+
+                            <!-- Time Slot Selection -->
+                            <div class="booking-timeslot-section hidden" id="timeslotSection">
+                                <label class="booking-section-label">Select Time</label>
+                                <div class="booking-timeslot-loading hidden" id="timeslotLoading">
+                                    <div class="booking-spinner"></div>
+                                    <p>Loading available times...</p>
+                                </div>
+                                <div class="booking-timeslot-grid" id="timeslotGrid"></div>
+                            </div>
+
+                            <div class="booking-form-actions">
+                                <button type="button" class="booking-btn booking-btn-primary" id="continueToDetails" disabled>
+                                    Continue to Event Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Event Details -->
+                    <div class="booking-form-step" id="step2">
+                        <div class="booking-step-content">
+                            <div class="booking-form-grid">
+                                <div class="booking-form-group full-width">
+                                    <label for="eventType">Event Type *</label>
+                                    <select id="eventType" name="eventType" class="booking-form-input" required>
+                                        <option value="">Select event type</option>
+                                        <option value="Wedding">Wedding</option>
+                                        <option value="Corporate Event">Corporate Event</option>
+                                        <option value="Private Party">Private Party</option>
+                                        <option value="Festival">Festival</option>
+                                        <option value="Bar/Club">Bar/Club</option>
+                                        <option value="Restaurant">Restaurant</option>
+                                        <option value="Birthday Party">Birthday Party</option>
+                                        <option value="Anniversary">Anniversary</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    <span class="booking-error-message"></span>
+                                </div>
+
+                                <div class="booking-form-group">
+                                    <label for="contactName">Contact Name *</label>
+                                    <input type="text" id="contactName" name="contactName" class="booking-form-input" placeholder="John Doe" required>
+                                    <span class="booking-error-message"></span>
+                                </div>
+
+                                <div class="booking-form-group">
+                                    <label for="contactPhone">Phone Number *</label>
+                                    <input type="tel" id="contactPhone" name="contactPhone" class="booking-form-input" placeholder="(555) 123-4567" required>
+                                    <span class="booking-error-message"></span>
+                                </div>
+
+                                <div class="booking-form-group full-width">
+                                    <label for="contactEmail">Email Address *</label>
+                                    <input type="email" id="contactEmail" name="contactEmail" class="booking-form-input" placeholder="john@example.com" required>
+                                    <span class="booking-error-message"></span>
+                                </div>
+
+                                <div class="booking-form-group full-width">
+                                    <label for="venueName">Venue Name *</label>
+                                    <input type="text" id="venueName" name="venueName" class="booking-form-input" placeholder="Grand Ballroom" required>
+                                    <span class="booking-error-message"></span>
+                                </div>
+
+                                <div class="booking-form-group full-width">
+                                    <label for="venueAddress">Venue Address *</label>
+                                    <input type="text" id="venueAddress" name="venueAddress" class="booking-form-input" placeholder="123 Main St, City, State ZIP" required>
+                                    <span class="booking-error-message"></span>
+                                </div>
+
+                                <div class="booking-form-group">
+                                    <label for="expectedAttendance">Expected Attendance</label>
+                                    <input type="number" id="expectedAttendance" name="expectedAttendance" class="booking-form-input" placeholder="100" min="1">
+                                </div>
+
+                                <div class="booking-form-group">
+                                    <label for="budgetRange">Budget Range</label>
+                                    <select id="budgetRange" name="budgetRange" class="booking-form-input">
+                                        <option value="">Select budget range</option>
+                                        <option value="Under $1,000">Under $1,000</option>
+                                        <option value="$1,000 - $2,500">$1,000 - $2,500</option>
+                                        <option value="$2,500 - $5,000">$2,500 - $5,000</option>
+                                        <option value="$5,000+">$5,000+</option>
+                                        <option value="Prefer to discuss">Prefer to discuss</option>
+                                    </select>
+                                </div>
+
+                                <div class="booking-form-group">
+                                    <label for="soundSystem">Sound System at Venue?</label>
+                                    <select id="soundSystem" name="soundSystem" class="booking-form-input">
+                                        <option value="Unknown">Unknown</option>
+                                        <option value="Yes">Yes</option>
+                                        <option value="No">No</option>
+                                    </select>
+                                </div>
+
+                                <div class="booking-form-group">
+                                    <label for="stageSize">Stage Size (if known)</label>
+                                    <input type="text" id="stageSize" name="stageSize" class="booking-form-input" placeholder="e.g., 20ft x 15ft">
+                                </div>
+
+                                <div class="booking-form-group full-width">
+                                    <label for="eventDescription">Event Description *</label>
+                                    <textarea id="eventDescription" name="eventDescription" class="booking-form-input" rows="4" placeholder="Tell us about your event, music preferences, atmosphere, special requests, etc." required></textarea>
+                                    <span class="booking-error-message"></span>
+                                </div>
+
+                                <div class="booking-form-group full-width">
+                                    <label for="referralSource">How did you hear about us?</label>
+                                    <select id="referralSource" name="referralSource" class="booking-form-input">
+                                        <option value="">Select source</option>
+                                        <option value="Google Search">Google Search</option>
+                                        <option value="Instagram">Instagram</option>
+                                        <option value="Facebook">Facebook</option>
+                                        <option value="Friend/Family Referral">Friend/Family Referral</option>
+                                        <option value="Venue Recommendation">Venue Recommendation</option>
+                                        <option value="Saw you perform">Saw you perform</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="booking-form-actions">
+                                <button type="button" class="booking-btn booking-btn-secondary" id="backToDateTime">Back to Date & Time</button>
+                                <button type="submit" class="booking-btn booking-btn-primary" id="submitBooking">
+                                    <span class="booking-btn-text">Submit Booking Request</span>
+                                    <span class="booking-btn-loading hidden">
+                                        <div class="booking-spinner-small"></div>
+                                        Submitting...
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Success State -->
+                    <div class="booking-success-state hidden" id="successState">
+                        <div class="booking-success-content">
+                            <div class="booking-success-icon">
+                                <svg width="64" height="64" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="32" fill="#61F457"/><path d="M20 32L28 40L44 24" stroke="#0a0a0a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                            <h2>Booking Request Submitted!</h2>
+                            <p class="booking-success-message">
+                                We've received your booking request for <strong id="successEventType"></strong> on
+                                <strong id="successDate"></strong> at <strong id="successTime"></strong>.
+                            </p>
+                            <p class="booking-success-note">We'll review your request and get back to you within 24 hours.</p>
+                            <div class="booking-success-actions">
+                                <button type="button" class="booking-btn booking-btn-primary" id="newBooking">Book Another Event</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </section>
+
+    <!-- Google Places API for venue address autocomplete -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAFfAO2wxU8NcFmhJL63Kmw8mVQVdOgBRA&libraries=places" async defer></script>
+
+    <!-- Inline Booking Form Script -->
+    <script type="module">
+    import { AVAILABILITY_CONFIG } from './booking/js/constants.js';
+    import { apiClient } from './booking/js/api-client.js';
+    import { CalendarRenderer } from './booking/js/calendar-renderer.js';
+    import { formValidator } from './booking/js/form-validator.js';
+    import { GooglePlacesAutocomplete } from './booking/js/google-places.js';
+    import { formatPhoneNumber, formatTime, formatDate, formatMonthYear, dateToString } from './booking/js/utils.js';
+
+    // Application State
+    const state = {
+        currentStep: 1,
+        selectedDate: null,
+        selectedDuration: 4,
+        selectedTime: null,
+        timeSlots: [],
+        isLoadingSlots: false,
+    };
+
+    // DOM Elements (using new booking- prefixed classes)
+    const elements = {
+        step1: document.getElementById('step1'),
+        step2: document.getElementById('step2'),
+        successState: document.getElementById('successState'),
+        progressSteps: document.querySelectorAll('.booking-progress-steps .booking-step'),
+        calendarDays: document.getElementById('calendarDays'),
+        currentMonthLabel: document.getElementById('currentMonthLabel'),
+        currentMonthBtn: document.getElementById('currentMonthBtn'),
+        monthDropdown: document.getElementById('monthDropdown'),
+        prevMonthBtn: document.getElementById('prevMonth'),
+        nextMonthBtn: document.getElementById('nextMonth'),
+        durationSection: document.getElementById('durationSection'),
+        durationGrid: document.getElementById('durationGrid'),
+        timeslotSection: document.getElementById('timeslotSection'),
+        timeslotLoading: document.getElementById('timeslotLoading'),
+        timeslotGrid: document.getElementById('timeslotGrid'),
+        continueBtn: document.getElementById('continueToDetails'),
+        backBtn: document.getElementById('backToDateTime'),
+        submitBtn: document.getElementById('submitBooking'),
+        newBookingBtn: document.getElementById('newBooking'),
+        form: document.getElementById('bookingForm'),
+        contactName: document.getElementById('contactName'),
+        contactPhone: document.getElementById('contactPhone'),
+        contactEmail: document.getElementById('contactEmail'),
+        eventType: document.getElementById('eventType'),
+        venueName: document.getElementById('venueName'),
+        venueAddress: document.getElementById('venueAddress'),
+        expectedAttendance: document.getElementById('expectedAttendance'),
+        budgetRange: document.getElementById('budgetRange'),
+        soundSystem: document.getElementById('soundSystem'),
+        stageSize: document.getElementById('stageSize'),
+        eventDescription: document.getElementById('eventDescription'),
+        referralSource: document.getElementById('referralSource'),
+        successEventType: document.getElementById('successEventType'),
+        successDate: document.getElementById('successDate'),
+        successTime: document.getElementById('successTime'),
+    };
+
+    let calendar;
+    let placesAutocomplete;
+
+    async function initialize() {
+        if (!elements.calendarDays) return; // Exit if booking section not present
+
+        calendar = new CalendarRenderer(elements.calendarDays, {
+            advanceMonths: AVAILABILITY_CONFIG.advanceBookingMonths,
+            onDateSelect: handleDateSelect,
+        });
+
+        calendar.render();
+        updateMonthLabel();
+        updateMonthDropdown();
+        updateNavButtons();
+
+        try {
+            placesAutocomplete = new GooglePlacesAutocomplete(elements.venueAddress);
+            await placesAutocomplete.initialize();
+        } catch (error) {
+            console.error('Failed to initialize Google Places:', error);
+        }
+
+        attachEventListeners();
+        console.log('Inline booking form initialized');
+    }
+
+    function attachEventListeners() {
+        elements.prevMonthBtn?.addEventListener('click', () => {
+            calendar.prevMonth();
+            updateMonthLabel();
+            updateNavButtons();
+        });
+
+        elements.nextMonthBtn?.addEventListener('click', () => {
+            calendar.nextMonth();
+            updateMonthLabel();
+            updateNavButtons();
+        });
+
+        elements.currentMonthBtn?.addEventListener('click', () => {
+            elements.monthDropdown.classList.toggle('hidden');
+        });
+
+        elements.durationGrid?.querySelectorAll('.booking-duration-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                handleDurationSelect(parseInt(btn.dataset.duration));
+            });
+        });
+
+        elements.contactPhone?.addEventListener('input', (e) => {
+            e.target.value = formatPhoneNumber(e.target.value);
+        });
+
+        elements.continueBtn?.addEventListener('click', () => goToStep(2));
+        elements.backBtn?.addEventListener('click', () => goToStep(1));
+        elements.newBookingBtn?.addEventListener('click', resetForm);
+        elements.form?.addEventListener('submit', handleSubmit);
+    }
+
+    function updateMonthLabel() {
+        const month = calendar.getCurrentMonth();
+        elements.currentMonthLabel.textContent = formatMonthYear(month);
+    }
+
+    function updateMonthDropdown() {
+        const months = calendar.getAvailableMonths();
+        const currentMonth = calendar.getCurrentMonth();
+
+        const html = months.map(month => {
+            const isActive = month.getTime() === currentMonth.getTime();
+            return `<div class="booking-month-option ${isActive ? 'active' : ''}" data-month="${month.toISOString()}">${formatMonthYear(month)}</div>`;
+        }).join('');
+
+        elements.monthDropdown.innerHTML = html;
+
+        elements.monthDropdown.querySelectorAll('.booking-month-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const month = new Date(option.dataset.month);
+                calendar.goToMonth(month);
+                updateMonthLabel();
+                updateNavButtons();
+                elements.monthDropdown.classList.add('hidden');
+            });
+        });
+    }
+
+    function updateNavButtons() {
+        const availableMonths = calendar.getAvailableMonths();
+        const currentMonth = calendar.getCurrentMonth();
+        const currentIndex = availableMonths.findIndex(m => m.getTime() === currentMonth.getTime());
+        elements.prevMonthBtn.disabled = currentIndex === 0;
+        elements.nextMonthBtn.disabled = currentIndex === availableMonths.length - 1;
+    }
+
+    function handleDateSelect(date) {
+        state.selectedDate = date;
+        elements.durationSection.classList.remove('hidden');
+        if (state.selectedDuration) fetchTimeSlots();
+        updateContinueButton();
+    }
+
+    function handleDurationSelect(hours) {
+        state.selectedDuration = hours;
+        elements.durationGrid.querySelectorAll('.booking-duration-btn').forEach(btn => btn.classList.remove('selected'));
+        const selectedBtn = elements.durationGrid.querySelector(`[data-duration="${hours}"]`);
+        if (selectedBtn) selectedBtn.classList.add('selected');
+        if (state.selectedDate) fetchTimeSlots();
+        updateContinueButton();
+    }
+
+    async function fetchTimeSlots() {
+        if (!state.selectedDate || !state.selectedDuration) return;
+
+        state.isLoadingSlots = true;
+        elements.timeslotSection.classList.remove('hidden');
+        elements.timeslotLoading.classList.remove('hidden');
+        elements.timeslotGrid.innerHTML = '';
+
+        try {
+            const dateStr = dateToString(state.selectedDate);
+            const data = await apiClient.getAvailability(dateStr, state.selectedDuration);
+            state.timeSlots = data.slots;
+            renderTimeSlots();
+        } catch (error) {
+            console.error('Error fetching time slots:', error);
+            elements.timeslotGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: rgba(255,255,255,0.6);">Failed to load available times. Please try again.</div>';
+        } finally {
+            state.isLoadingSlots = false;
+            elements.timeslotLoading.classList.add('hidden');
+        }
+    }
+
+    function renderTimeSlots() {
+        const html = state.timeSlots.map(slot => {
+            const classes = ['booking-timeslot-btn'];
+            if (slot.available) classes.push('available');
+            if (!slot.available) classes.push('unavailable');
+            if (state.selectedTime === slot.start) classes.push('selected');
+            return `<button type="button" class="${classes.join(' ')}" data-time="${slot.start}" ${!slot.available ? 'disabled' : ''}>${formatTime(slot.start)}</button>`;
+        }).join('');
+
+        elements.timeslotGrid.innerHTML = html;
+        elements.timeslotGrid.querySelectorAll('.booking-timeslot-btn.available').forEach(btn => {
+            btn.addEventListener('click', () => handleTimeSelect(btn.dataset.time));
+        });
+    }
+
+    function handleTimeSelect(time) {
+        state.selectedTime = time;
+        renderTimeSlots();
+        updateContinueButton();
+    }
+
+    function updateContinueButton() {
+        const isValid = state.selectedDate && state.selectedDuration && state.selectedTime;
+        elements.continueBtn.disabled = !isValid;
+    }
+
+    function goToStep(step) {
+        state.currentStep = step;
+        elements.step1.classList.remove('active');
+        elements.step2.classList.remove('active');
+        if (step === 1) elements.step1.classList.add('active');
+        else if (step === 2) elements.step2.classList.add('active');
+
+        elements.progressSteps.forEach((stepEl, index) => {
+            if (index < step) stepEl.classList.add('active');
+            else stepEl.classList.remove('active');
+        });
+
+        document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function handleSubmit(e) {
+        e.preventDefault();
+
+        const formData = {
+            date: dateToString(state.selectedDate),
+            time: state.selectedTime,
+            duration: state.selectedDuration,
+            contactName: elements.contactName.value.trim(),
+            contactPhone: elements.contactPhone.value.trim(),
+            contactEmail: elements.contactEmail.value.trim(),
+            eventType: elements.eventType.value,
+            venueName: elements.venueName.value.trim(),
+            venueAddress: elements.venueAddress.value.trim(),
+            expectedAttendance: elements.expectedAttendance.value || null,
+            budgetRange: elements.budgetRange.value || null,
+            soundSystem: elements.soundSystem.value || 'Unknown',
+            stageSize: elements.stageSize.value.trim() || null,
+            eventDescription: elements.eventDescription.value.trim(),
+            referralSource: elements.referralSource.value || null,
+        };
+
+        const validation = formValidator.validate(formData);
+        if (!validation.isValid) {
+            formValidator.displayErrors(validation.errors);
+            return;
+        }
+
+        formValidator.clearErrors();
+
+        const submitBtnText = elements.submitBtn.querySelector('.booking-btn-text');
+        const submitBtnLoading = elements.submitBtn.querySelector('.booking-btn-loading');
+        submitBtnText.classList.add('hidden');
+        submitBtnLoading.classList.remove('hidden');
+        elements.submitBtn.disabled = true;
+
+        try {
+            await apiClient.createBooking(formData);
+            showSuccessState(formData);
+        } catch (error) {
+            console.error('Booking error:', error);
+            alert(error.message || 'Failed to submit booking. Please try again.');
+            submitBtnText.classList.remove('hidden');
+            submitBtnLoading.classList.add('hidden');
+            elements.submitBtn.disabled = false;
+        }
+    }
+
+    function showSuccessState(formData) {
+        elements.step1.classList.remove('active');
+        elements.step2.classList.remove('active');
+        elements.successState.classList.remove('hidden');
+        elements.successEventType.textContent = formData.eventType;
+        elements.successDate.textContent = formatDate(state.selectedDate);
+        elements.successTime.textContent = formatTime(state.selectedTime);
+        document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetForm() {
+        state.currentStep = 1;
+        state.selectedDate = null;
+        state.selectedDuration = 4;
+        state.selectedTime = null;
+        state.timeSlots = [];
+        elements.form.reset();
+        elements.durationSection.classList.add('hidden');
+        elements.timeslotSection.classList.add('hidden');
+        elements.successState.classList.add('hidden');
+        elements.durationGrid.querySelectorAll('.booking-duration-btn').forEach(btn => btn.classList.remove('selected'));
+        goToStep(1);
+        calendar.selectedDate = null;
+        calendar.render();
+        formValidator.clearErrors();
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initialize);
+    } else {
+        initialize();
+    }
+    </script>
 
     <footer class="footer">
     <!-- Main footer content in grid -->

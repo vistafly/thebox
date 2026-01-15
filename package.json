@@ -1,0 +1,26 @@
+{
+  "name": "thebox-booking",
+  "version": "1.0.0",
+  "description": "Band booking system with Google Calendar integration for The Box",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node node_modules/vercel/dist/index.js dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "booking",
+    "calendar",
+    "band"
+  ],
+  "author": "The Box",
+  "license": "ISC",
+  "dependencies": {
+    "date-fns": "^3.0.0",
+    "googleapis": "^128.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "http-server": "^14.1.1",
+    "vercel": "^41.0.2"
+  }
+}

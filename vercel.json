@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "env": {
+    "GOOGLE_SERVICE_ACCOUNT_EMAIL": "@google-service-account-email",
+    "GOOGLE_PRIVATE_KEY": "@google-private-key",
+    "GOOGLE_CALENDAR_ID": "@google-calendar-id",
+    "ALLOWED_ORIGIN": "@allowed-origin"
+  },
+  "build": {
+    "env": {
+      "GOOGLE_SERVICE_ACCOUNT_EMAIL": "@google-service-account-email",
+      "GOOGLE_PRIVATE_KEY": "@google-private-key",
+      "GOOGLE_CALENDAR_ID": "@google-calendar-id",
+      "ALLOWED_ORIGIN": "@allowed-origin"
+    }
+  }
+}

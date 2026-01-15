@@ -39,69 +39,109 @@ document.addEventListener('DOMContentLoaded', function() {
     initLogo3DEffect();
     const heroSection = document.getElementById('hero');
     const logo = document.querySelector('.logo-desktop');
-    
+
     if (!heroSection || !logo) return;
 
     // Check if user already scrolled past hero
     const isHeroPassed = localStorage.getItem('heroPassed') === 'true';
     if (isHeroPassed) {
         document.body.classList.add('hero-passed');
+        document.body.classList.add('fast-scroll'); // Extra safety on load
     }
 
-    // Track scroll position
-    let lastScrollY = window.scrollY;
-    
-    // More reliable scroll handler - adjusted to hide later
+    // Track animation state and scroll velocity
+    let ticking = false;
+    let lastScroll = window.scrollY;
+    let lastScrollTime = Date.now();
+    let fastScrollTimeout = null;
+    let showLogoTimeout = null;
+
+    // Aggressive scroll handler - instant hide with no tolerance
     function checkScroll() {
         const currentScroll = window.scrollY;
-        
-        // Hide logo if scrolled more than 150px down (increased from 20px)
-        const shouldHide = currentScroll > 150;
-        
-        document.body.classList.toggle('hero-passed', shouldHide);
-        localStorage.setItem('heroPassed', shouldHide ? 'true' : 'false');
-        
-        lastScrollY = currentScroll;
+        const currentTime = Date.now();
+
+        // Calculate scroll velocity
+        const scrollDelta = Math.abs(currentScroll - lastScroll);
+        const timeDelta = currentTime - lastScrollTime;
+        const scrollVelocity = timeDelta > 0 ? scrollDelta / timeDelta : 0;
+
+        // ALWAYS hide logo when ANY scroll is detected (instant, no threshold)
+        const shouldHide = currentScroll > 0;
+
+        if (shouldHide) {
+            // Force hero-passed class immediately - NO REMOVAL of inline styles
+            document.body.classList.add('hero-passed');
+
+            // Add fast-scroll for any velocity to ensure instant hide
+            if (scrollVelocity > 0.5) {
+                document.body.classList.add('fast-scroll');
+
+                // Keep fast-scroll class for 200ms after scrolling stops to prevent flashing
+                clearTimeout(fastScrollTimeout);
+                fastScrollTimeout = setTimeout(() => {
+                    // Only remove if still scrolled (not at top)
+                    if (window.scrollY > 0) {
+                        document.body.classList.remove('fast-scroll');
+                    }
+                }, 200);
+            }
+
+            localStorage.setItem('heroPassed', 'true');
+        } else {
+            // Only show logo when at ABSOLUTE top (scrollY === 0)
+            // Clear all timeouts to prevent conflicts
+            clearTimeout(fastScrollTimeout);
+            clearTimeout(showLogoTimeout);
+
+            // Delay showing logo slightly to prevent flash during rapid scrolling
+            showLogoTimeout = setTimeout(() => {
+                if (window.scrollY === 0) {
+                    document.body.classList.remove('hero-passed', 'fast-scroll');
+                    localStorage.setItem('heroPassed', 'false');
+                }
+            }, 50); // 50ms delay before showing
+        }
+
+        lastScroll = currentScroll;
+        lastScrollTime = currentTime;
+        ticking = false;
     }
 
-    // Throttle scroll events for better performance
-    function throttle(func, limit) {
-        let lastFunc;
-        let lastRan;
-        return function() {
-            const context = this;
-            const args = arguments;
-            if (!lastRan) {
-                func.apply(context, args);
-                lastRan = Date.now();
-            } else {
-                clearTimeout(lastFunc);
-                lastFunc = setTimeout(function() {
-                    if ((Date.now() - lastRan) >= limit) {
-                        func.apply(context, args);
-                        lastRan = Date.now();
-                    }
-                }, limit - (Date.now() - lastRan));
-            }
+    // Use requestAnimationFrame for smoother performance
+    function requestTick() {
+        if (!ticking) {
+            requestAnimationFrame(checkScroll);
+            ticking = true;
         }
     }
 
-    // Use both scroll event and IntersectionObserver
-    window.addEventListener('scroll', throttle(checkScroll, 50));
-    
-    // Adjusted IntersectionObserver to trigger later
+    // Use optimized scroll event with rAF
+    window.addEventListener('scroll', requestTick, { passive: true });
+
+    // IntersectionObserver for backup detection
     const observer = new IntersectionObserver((entries) => {
         const heroEntry = entries[0];
-        // Changed to 0.7 (from 0.9) to trigger later
-        const isVisible = heroEntry.intersectionRatio > 0.7;
-        document.body.classList.toggle('hero-passed', !isVisible);
+        // Force hide when ANY part of hero is scrolled out
+        const isFullyVisible = heroEntry.intersectionRatio >= 1;
+
+        if (!isFullyVisible && window.scrollY > 0) {
+            // Force hide immediately - double check scroll position
+            document.body.classList.add('hero-passed');
+            // Add fast-scroll as extra safety during intersection changes
+            document.body.classList.add('fast-scroll');
+        } else if (window.scrollY === 0) {
+            // Only show if at absolute top - clear timeout first
+            clearTimeout(fastScrollTimeout);
+            document.body.classList.remove('hero-passed', 'fast-scroll');
+        }
     }, {
-        threshold: 0.7, // Changed from 0.9 to trigger later
-        rootMargin: '-100px 0px 0px 0px' // Increased from -20px
+        threshold: [0, 0.05, 0.1, 0.5, 1], // Multiple thresholds for accuracy
+        rootMargin: '0px 0px 0px 0px'
     });
 
     observer.observe(heroSection);
-    
+
     // Initial check
     checkScroll();
 });
@@ -152,9 +192,15 @@ function initLogo3DEffect() {
         const deltaTime = time - lastTime;
         lastTime = time;
 
-        // Skip animation if logo is hidden
+        // Stop animation completely if logo is hidden
         if (document.body.classList.contains('hero-passed')) {
-            logo.style.transform = '';
+            // Reset transform to simple translation only (no 3D effects)
+            logo.style.transform = 'translate(-50%, -50%)';
+            // Reset rotation values
+            currentRotationX = 0;
+            currentRotationY = 0;
+            targetRotationX = 0;
+            targetRotationY = 0;
             requestAnimationFrame(animate);
             return;
         }
@@ -170,7 +216,7 @@ function initLogo3DEffect() {
             rotateX(${currentRotationX}deg)
             rotateY(${currentRotationY}deg)
         `;
-        
+
         requestAnimationFrame(animate);
     }
 
@@ -457,33 +503,15 @@ function initPreloader() {
 // Hero Animations
 function initHeroAnimations() {
     const tl = gsap.timeline({ delay: 0.5 });
-    
-    // Animate title lines
-    tl.from('.hero-subtitle', {
-        opacity: 0,
-        y: 30,
-        duration: 0.8,
-        ease: 'power2.out'
-    }, '-=0.5')
-    .from('.hero-description', {
-        opacity: 0,
-        y: 20,
-        duration: 0.8,
-        ease: 'power2.out'
-    }, '-=0.3')
-    .from('.hero-cta', {
-        opacity: 0,
-        y: 20,
-        duration: 0.8,
-        ease: 'power2.out'
-    }, '-=0.3')
-    .from('.scroll-indicator', {
+
+    // Animate scroll indicator
+    tl.from('.scroll-indicator', {
         opacity: 0,
         y: 20,
         duration: 0.6,
         ease: 'power2.out'
-    }, '-=0.3');
-    
+    });
+
     // Parallax effect for hero background
     gsap.to('.bg-particles', {
         yPercent: -50,
@@ -561,7 +589,7 @@ function initHeroAnimations() {
     });
 
 // Music Player
-document.addEventListener('DOMContentLoaded', function() {
+function initMusicPlayer() {
     const audio = new Audio();
     const playBtn = document.querySelector('.play-btn');
     const playIcon = document.querySelector('.play-icon');
@@ -722,7 +750,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const secs = Math.floor(seconds % 60);
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     }
-});
+}
 
 // Floating Visualizer (unchanged)
 function initFloatingVisualizer() {
@@ -864,12 +892,6 @@ function initScrollAnimations() {
     });
 }
 
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    initMusicPlayer();
-    initScrollAnimations();
-});
-    
     // Contact cards
     gsap.utils.toArray('.contact-card').forEach((card, index) => {
         gsap.from(card, {
@@ -884,19 +906,6 @@ document.addEventListener('DOMContentLoaded', function() {
             delay: index * 0.2,
             ease: 'power2.out'
         });
-    });
-    
-    // CTA button
-    gsap.from('.cta-button', {
-        scrollTrigger: {
-            trigger: '.cta-button',
-            start: 'top 85%',
-            toggleActions: 'play none none reverse'
-        },
-        scale: 0.8,
-        opacity: 0,
-        duration: 0.6,
-        ease: 'back.out(1.7)'
     });
 
 
@@ -1161,7 +1170,23 @@ function highlightUpcomingDates() {
     const now = new Date();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
+    // Helper function to parse time strings into Date objects
+    function parseTime(hour, minute, period, baseDate) {
+        let hours = parseInt(hour);
+        const minutes = parseInt(minute);
+
+        if (period.toUpperCase() === 'PM' && hours !== 12) {
+            hours += 12;
+        } else if (period.toUpperCase() === 'AM' && hours === 12) {
+            hours = 0;
+        }
+
+        const date = new Date(baseDate);
+        date.setHours(hours, minutes, 0, 0);
+        return date;
+    }
+
     let nextShow = null;
     let smallestTimeDiff = Infinity;
     let currentlyPlayingShow = null;
@@ -1192,22 +1217,7 @@ function highlightUpcomingDates() {
         if (!timeMatch) return;
         
         const [, startHour, startMin, startPeriod, endHour, endMin, endPeriod] = timeMatch;
-        
-        function parseTime(hour, minute, period, baseDate) {
-            let hours = parseInt(hour);
-            const minutes = parseInt(minute);
-            
-            if (period.toUpperCase() === 'PM' && hours !== 12) {
-                hours += 12;
-            } else if (period.toUpperCase() === 'AM' && hours === 12) {
-                hours = 0;
-            }
-            
-            const date = new Date(baseDate);
-            date.setHours(hours, minutes, 0, 0);
-            return date;
-        }
-        
+
         // Create start and end datetime objects
         const startDateTime = parseTime(startHour, startMin, startPeriod, eventDate);
         const endDateTime = parseTime(endHour, endMin, endPeriod, eventDate);
