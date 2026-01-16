@@ -15,16 +15,28 @@ export class FormValidator {
       this.errors.contactName = 'Contact name is required (minimum 2 characters)';
     }
 
-    // Phone
-    const phoneDigits = formData.contactPhone.replace(/\D/g, '');
-    if (phoneDigits.length !== 10) {
-      this.errors.contactPhone = 'Please enter a valid 10-digit phone number';
-    }
+    // Phone and Email - at least one required
+    const hasPhone = formData.contactPhone && formData.contactPhone.trim();
+    const hasEmail = formData.contactEmail && formData.contactEmail.trim();
 
-    // Email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.contactEmail || !emailRegex.test(formData.contactEmail)) {
-      this.errors.contactEmail = 'Please enter a valid email address';
+    if (!hasPhone && !hasEmail) {
+      this.errors.contactPhone = 'Please provide phone or email';
+    } else {
+      // Validate phone format if provided
+      if (hasPhone) {
+        const phoneDigits = formData.contactPhone.replace(/\D/g, '');
+        if (phoneDigits.length !== 10) {
+          this.errors.contactPhone = 'Please enter a valid 10-digit phone number';
+        }
+      }
+
+      // Validate email format if provided
+      if (hasEmail) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.contactEmail)) {
+          this.errors.contactEmail = 'Please enter a valid email address';
+        }
+      }
     }
 
     // Event Type
@@ -55,13 +67,13 @@ export class FormValidator {
 
   displayErrors(errors) {
     // Clear all previous errors
-    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-    document.querySelectorAll('.form-input').forEach(el => el.classList.remove('error'));
+    document.querySelectorAll('.booking-error-message').forEach(el => el.textContent = '');
+    document.querySelectorAll('.booking-form-input').forEach(el => el.classList.remove('error'));
 
     // Display new errors
     Object.entries(errors).forEach(([field, message]) => {
       const input = document.getElementById(field);
-      const errorSpan = input?.parentElement.querySelector('.error-message');
+      const errorSpan = input?.parentElement.querySelector('.booking-error-message');
 
       if (input) {
         input.classList.add('error');
@@ -73,7 +85,7 @@ export class FormValidator {
     });
 
     // Scroll to first error
-    const firstErrorInput = document.querySelector('.form-input.error');
+    const firstErrorInput = document.querySelector('.booking-form-input.error');
     if (firstErrorInput) {
       firstErrorInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
       firstErrorInput.focus();
@@ -81,8 +93,8 @@ export class FormValidator {
   }
 
   clearErrors() {
-    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-    document.querySelectorAll('.form-input').forEach(el => el.classList.remove('error'));
+    document.querySelectorAll('.booking-error-message').forEach(el => el.textContent = '');
+    document.querySelectorAll('.booking-form-input').forEach(el => el.classList.remove('error'));
   }
 }
 

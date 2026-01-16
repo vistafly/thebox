@@ -109,6 +109,46 @@
 <div id="tour" class="tour-section">
     <h2 class="section-title">Where to find us</h2>
             <div class="section-line"></div>
+
+    <!-- View Toggle Controls -->
+    <div class="tour-view-controls">
+        <button class="view-toggle-btn active" data-view="list">
+            <i class="fas fa-list"></i> List View
+        </button>
+        <button class="view-toggle-btn" data-view="calendar">
+            <i class="fas fa-calendar-alt"></i> Calendar View
+        </button>
+    </div>
+
+    <!-- Calendar View (hidden by default) -->
+    <div class="tour-calendar-view" style="display: none;">
+        <div class="calendar-header">
+            <button class="calendar-nav-btn prev-month">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <h3 class="calendar-month-year"></h3>
+            <button class="calendar-nav-btn next-month">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="calendar-grid">
+            <div class="calendar-weekdays">
+                <div class="weekday">Sun</div>
+                <div class="weekday">Mon</div>
+                <div class="weekday">Tue</div>
+                <div class="weekday">Wed</div>
+                <div class="weekday">Thu</div>
+                <div class="weekday">Fri</div>
+                <div class="weekday">Sat</div>
+            </div>
+            <div class="calendar-days"></div>
+        </div>
+
+        <!-- Shared Popup -->
+        <div class="calendar-event-popup" id="calendar-popup"></div>
+    </div>
+
+    <!-- List View (default) -->
     <div class="tour-grid">
         <!-- Tour Date 1 (Highlighted) -->
         <article class="tour-date">
@@ -132,11 +172,11 @@
                 <address class="venue-address">1018 S Frankwood Ave, Sanger</address>
                 
                 <div class="venue-map-container">
-    <iframe loading="lazy" 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3197.093104097319!2d-119.45057992426812!3d36.71962497227001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094fe45c380ad37%3A0xf26f96d9e9286007!2sSchool%20House%20Restaurant%20%26%20Tavern!5e0!3m2!1sen!2sus!4v1719529371239!5m2!1sen!2sus" 
-            aria-label="Map location of School House Restaurant & Tavern"
-            style="border:0" allowfullscreen></iframe>
-</div>
+                    <iframe class="lazy-map"
+                            data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3197.093104097319!2d-119.45057992426812!3d36.71962497227001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094fe45c380ad37%3A0xf26f96d9e9286007!2sSchool%20House%20Restaurant%20%26%20Tavern!5e0!3m2!1sen!2sus!4v1719529371239!5m2!1sen!2sus"
+                            aria-label="Map location of School House Restaurant & Tavern"
+                            style="border:0" allowfullscreen></iframe>
+                </div>
             </div>
 
         </article>
@@ -162,9 +202,9 @@
             <address class="venue-address">1279 N Wishon Ave, Fresno</address>
             
             <div class="venue-map-container">
-                <iframe loading="lazy" 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3197.093104097319!2d-119.45057992426812!3d36.71962497227001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094f11d4930edf5%3A0x31b25aa2cbb059e9!2sRileys%20Brewing%20Taproom!5e0!3m2!1sen!2sus!4v1719529371239!5m2!1sen!2sus" 
-                        aria-label="Map location of Rileys Brewing Taproom"
+                <iframe class="lazy-map"
+                        data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3197.093104097319!2d-119.45057992426812!3d36.71962497227001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094f11d4930edf5%3A0x31b25aa2cbb059e9!2sRileys%20Brewing%20Taproom!5e0!3m2!1sen!2sus!4v1719529371239!5m2!1sen!2sus"
+                        aria-label="Map location of Station 48"
                         style="border:0" allowfullscreen></iframe>
             </div>
         </div>
@@ -192,8 +232,8 @@
             <address class="venue-address">2940 McCall Ave STE 112, Selma</address>
             
             <div class="venue-map-container">
-                <iframe loading="lazy" 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3197.093104097319!2d-119.45057992426812!3d36.71962497227001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094f11d4930edf5%3A0x31b25aa2cbb059e9!2sRileys%20Brewing%20Taproom!5e0!3m2!1sen!2sus!4v1719529371239!5m2!1sen!2sus" 
+                <iframe class="lazy-map"
+                        data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3197.093104097319!2d-119.45057992426812!3d36.71962497227001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094f11d4930edf5%3A0x31b25aa2cbb059e9!2sRileys%20Brewing%20Taproom!5e0!3m2!1sen!2sus!4v1719529371239!5m2!1sen!2sus"
                         aria-label="Map location of Rileys Brewing Taproom"
                         style="border:0" allowfullscreen></iframe>
             </div>
@@ -222,8 +262,8 @@
         <address class="venue-address">920 E Olive Ave, Fresno</address>
         
         <div class="venue-map-container">
-            <iframe loading="lazy" 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3195.469246341038!2d-119.8024274!3d36.7572347!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80946713cb56fcb9%3A0xfbfcadc49a354757!2sHowlin%20Wolf!5e0!3m2!1sen!2sus!4v1719529371239!5m2!1sen!2sus" 
+            <iframe class="lazy-map"
+                    data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3195.469246341038!2d-119.8024274!3d36.7572347!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80946713cb56fcb9%3A0xfbfcadc49a354757!2sHowlin%20Wolf!5e0!3m2!1sen!2sus!4v1719529371239!5m2!1sen!2sus"
                     aria-label="Map location of Howlin Wolf"
                     style="border:0" allowfullscreen></iframe>
         </div>
@@ -252,11 +292,11 @@
         <address class="venue-address">1018 S Frankwood Ave, Sanger</address>
         
         <div class="venue-map-container">
-    <iframe loading="lazy" 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3197.373315168003!2d-119.4505746!3d36.719625!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094fe45c380ad37%3A0xf26f96d9e9286007!2sSchool%20House%20Restaurant%20%26%20Tavern!5e0!3m2!1sen!2sus!4v1719791234567!5m2!1sen!2sus" 
-            aria-label="Map location of School House Restaurant & Tavern"
-            style="border:0" allowfullscreen></iframe>
-</div>
+            <iframe class="lazy-map"
+                    data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3197.373315168003!2d-119.4505746!3d36.719625!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094fe45c380ad37%3A0xf26f96d9e9286007!2sSchool%20House%20Restaurant%20%26%20Tavern!5e0!3m2!1sen!2sus!4v1719791234567!5m2!1sen!2sus"
+                    aria-label="Map location of School House Restaurant & Tavern"
+                    style="border:0" allowfullscreen></iframe>
+        </div>
     </div>
 </article>
 
@@ -282,10 +322,10 @@
         <address class="venue-address">202 W Lacey Blvd, Hanford</address>
         
         <div class="venue-map-container">
-    <iframe loading="lazy" 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3204.072422944247!2d-119.6480048!3d36.3281407!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094c378f0be37b5%3A0xa42f8f372f65ab74!2sLush%20Fine%20Wines!5e0!3m2!1sen!2sus!4v1719791234567!5m2!1sen!2sus" 
-            aria-label="Map location of Lush Fine Wines"
-            style="border:0" allowfullscreen></iframe>
+            <iframe class="lazy-map"
+                    data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3204.072422944247!2d-119.6480048!3d36.3281407!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094c378f0be37b5%3A0xa42f8f372f65ab74!2sLush%20Fine%20Wines!5e0!3m2!1sen!2sus!4v1719791234567!5m2!1sen!2sus"
+                    aria-label="Map location of Lush Fine Wines"
+                    style="border:0" allowfullscreen></iframe>
         </div>
     </div>
 </article>
@@ -312,11 +352,11 @@
         <address class="venue-address">5123 N Blackstone Ave, Fresno</address>
         
         <div class="venue-map-container">
-    <iframe loading="lazy" 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3197.123389042784!2d-119.7908477!3d36.8105163!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094678a4087a765%3A0xfa2e1092252670f1!2sYosemite%20Falls%20Cafe%20-%20Blackstone!5e0!3m2!1sen!2sus!4v1711920000000!5m2!1sen!2sus" 
-            aria-label="Map location of Yosemite Falls Cafe"
-            style="border:0" allowfullscreen></iframe>
-</div>
+            <iframe class="lazy-map"
+                    data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3197.123389042784!2d-119.7908477!3d36.8105163!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094678a4087a765%3A0xfa2e1092252670f1!2sYosemite%20Falls%20Cafe%20-%20Blackstone!5e0!3m2!1sen!2sus!4v1711920000000!5m2!1sen!2sus"
+                    aria-label="Map location of Yosemite Falls Cafe"
+                    style="border:0" allowfullscreen></iframe>
+        </div>
     </div>
 </article>
 
@@ -342,11 +382,11 @@
         <address class="venue-address">733 E Olive Ave, Fresno</address>
         
         <div class="venue-map-container">
-        <iframe loading="lazy" 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3198.902658050146!2d-119.8052759!3d36.7578575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094674e658456e7%3A0x75d88bb50740ff08!2sLucy%27s%20Lounge!5e0!3m2!1sen!2sus!4v1711920000000!5m2!1sen!2sus" 
-                aria-label="Map location of Lucy's Lounge"
-                style="border:0" allowfullscreen></iframe>
-    </div>
+            <iframe class="lazy-map"
+                    data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3198.902658050146!2d-119.8052759!3d36.7578575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094674e658456e7%3A0x75d88bb50740ff08!2sLucy%27s%20Lounge!5e0!3m2!1sen!2sus!4v1711920000000!5m2!1sen!2sus"
+                    aria-label="Map location of Lucy's Lounge"
+                    style="border:0" allowfullscreen></iframe>
+        </div>
     </div>
 </article>
 
@@ -372,16 +412,171 @@
         <address class="venue-address"> 500 E. Merced St., Fowler</address>
         
         <div class="venue-map-container">
-    <iframe loading="lazy" 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3193.908721968595!2d-119.6781983!3d36.6334367!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094f6b5cc0d26b3%3A0x495a005fe8f26db1!2sPanzak%20Park!5e0!3m2!1sen!2sus!4v1711920000000!5m2!1sen!2sus" 
-            aria-label="Map location of Panzak Park"
-            style="border:0" allowfullscreen></iframe>
-</div>
+            <iframe class="lazy-map"
+                    data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3193.908721968595!2d-119.6781983!3d36.6334367!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8094f6b5cc0d26b3%3A0x495a005fe8f26db1!2sPanzak%20Park!5e0!3m2!1sen!2sus!4v1711920000000!5m2!1sen!2sus"
+                    aria-label="Map location of Fowler Farmers Market"
+                    style="border:0" allowfullscreen></iframe>
+        </div>
     </div>
 </article>
 
     </div>
 </div>
+
+    <!-- Tour Booking Modal -->
+    <div id="tourBookingModal" class="tour-booking-modal">
+        <div class="tour-booking-modal-backdrop"></div>
+        <div class="tour-booking-modal-container">
+            <button type="button" class="tour-booking-modal-close" aria-label="Close booking modal">&times;</button>
+
+            <div class="tour-booking-modal-header">
+                <h3>Book The Box</h3>
+                <p class="tour-booking-selected-date">Selected date: <strong id="modalSelectedDate">-</strong></p>
+            </div>
+
+            <div class="tour-booking-modal-content">
+                <!-- Progress Steps -->
+                <div class="modal-booking-progress-steps">
+                    <div class="modal-booking-step active" data-step="1">
+                        <span class="modal-booking-step-number">1</span>
+                        <span class="modal-booking-step-label">Time</span>
+                    </div>
+                    <div class="modal-booking-step-divider"></div>
+                    <div class="modal-booking-step" data-step="2">
+                        <span class="modal-booking-step-number">2</span>
+                        <span class="modal-booking-step-label">Contact</span>
+                    </div>
+                    <div class="modal-booking-step-divider"></div>
+                    <div class="modal-booking-step" data-step="3">
+                        <span class="modal-booking-step-number">3</span>
+                        <span class="modal-booking-step-label">Details</span>
+                    </div>
+                </div>
+
+                <!-- Step 1: Duration & Time -->
+                <div class="modal-form-step active" id="modalStep1">
+                    <label class="modal-section-label">Event Duration (Hours) *</label>
+                    <div class="modal-duration-row">
+                        <div class="modal-duration-quick">
+                            <button type="button" class="modal-duration-btn" data-duration="2">2 hrs</button>
+                            <button type="button" class="modal-duration-btn" data-duration="3">3 hrs</button>
+                            <button type="button" class="modal-duration-btn" data-duration="4">4 hrs</button>
+                            <button type="button" class="modal-duration-btn" data-duration="6">6 hrs</button>
+                        </div>
+                        <div class="modal-duration-divider"><span>or</span></div>
+                        <div class="modal-duration-input-wrapper">
+                            <input type="number" id="modalDurationInput" class="modal-duration-input" placeholder="Custom" min="1" max="12" step="0.5">
+                            <span class="modal-duration-unit">hrs</span>
+                        </div>
+                    </div>
+
+                    <div class="modal-timeslot-section hidden" id="modalTimeslotSection">
+                        <label class="modal-section-label">Select Start Time *</label>
+                        <div class="modal-timeslot-loading hidden" id="modalTimeslotLoading">Loading available times...</div>
+                        <div class="modal-timeslot-grid" id="modalTimeslotGrid"></div>
+                    </div>
+
+                    <div class="modal-form-actions">
+                        <button type="button" class="modal-btn modal-btn-primary" id="modalContinueToContact" disabled>Continue to Contact Info</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Contact Info -->
+                <div class="modal-form-step" id="modalStep2">
+                    <div class="modal-form-grid">
+                        <div class="modal-form-group full-width">
+                            <label for="modalContactName">Contact Name *</label>
+                            <input type="text" id="modalContactName" class="modal-form-input" placeholder="Your name">
+                            <span class="modal-error-message"></span>
+                        </div>
+                        <div class="modal-form-group">
+                            <label for="modalContactPhone">Phone Number</label>
+                            <input type="tel" id="modalContactPhone" class="modal-form-input" placeholder="(555) 123-4567">
+                            <span class="modal-error-message"></span>
+                        </div>
+                        <div class="modal-form-group">
+                            <label for="modalContactEmail">Email Address</label>
+                            <input type="email" id="modalContactEmail" class="modal-form-input" placeholder="your@email.com">
+                            <span class="modal-error-message"></span>
+                        </div>
+                    </div>
+                    <p class="modal-contact-note">Please provide at least one contact method (phone or email).</p>
+
+                    <div class="modal-form-actions">
+                        <button type="button" class="modal-btn modal-btn-secondary" id="modalBackToTime">Back</button>
+                        <button type="button" class="modal-btn modal-btn-primary" id="modalContinueToDetails">Continue to Event Details</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Event Details -->
+                <div class="modal-form-step" id="modalStep3">
+                    <div class="modal-form-grid">
+                        <div class="modal-form-group full-width">
+                            <label for="modalEventType">Event Type *</label>
+                            <select id="modalEventType" class="modal-form-input">
+                                <option value="">Select event type</option>
+                                <option value="Wedding">Wedding</option>
+                                <option value="Corporate Event">Corporate Event</option>
+                                <option value="Private Party">Private Party</option>
+                                <option value="Festival">Festival</option>
+                                <option value="Bar/Club">Bar/Club</option>
+                                <option value="Birthday Party">Birthday Party</option>
+                                <option value="Anniversary">Anniversary</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <span class="modal-error-message"></span>
+                        </div>
+                        <div class="modal-form-group full-width">
+                            <label for="modalVenueName">Venue Name *</label>
+                            <input type="text" id="modalVenueName" class="modal-form-input" placeholder="Venue name">
+                            <span class="modal-error-message"></span>
+                        </div>
+                        <div class="modal-form-group full-width">
+                            <label for="modalVenueAddress">Venue Address *</label>
+                            <input type="text" id="modalVenueAddress" class="modal-form-input" placeholder="Full venue address">
+                            <span class="modal-error-message"></span>
+                        </div>
+                        <div class="modal-form-group">
+                            <label for="modalAttendance">Expected Attendance</label>
+                            <input type="number" id="modalAttendance" class="modal-form-input" placeholder="100" min="1">
+                        </div>
+                        <div class="modal-form-group">
+                            <label for="modalBudget">Budget Range</label>
+                            <select id="modalBudget" class="modal-form-input">
+                                <option value="">Select budget</option>
+                                <option value="Under $1,000">Under $1,000</option>
+                                <option value="$1,000 - $2,500">$1,000 - $2,500</option>
+                                <option value="$2,500 - $5,000">$2,500 - $5,000</option>
+                                <option value="$5,000+">$5,000+</option>
+                                <option value="Prefer to discuss">Prefer to discuss</option>
+                            </select>
+                        </div>
+                        <div class="modal-form-group full-width">
+                            <label for="modalDescription">Event Description *</label>
+                            <textarea id="modalDescription" class="modal-form-input" rows="3" placeholder="Tell us about your event, music preferences, special requests..."></textarea>
+                            <span class="modal-error-message"></span>
+                        </div>
+                    </div>
+
+                    <div class="modal-form-actions">
+                        <button type="button" class="modal-btn modal-btn-secondary" id="modalBackToContact">Back</button>
+                        <button type="button" class="modal-btn modal-btn-primary" id="modalSubmit">Submit Booking Request</button>
+                    </div>
+                </div>
+
+                <!-- Success State -->
+                <div class="modal-form-step modal-success-state" id="modalSuccessState">
+                    <div class="modal-success-icon">
+                        <svg width="64" height="64" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="32" fill="#61F457"/><path d="M20 32L28 40L44 24" stroke="#0a0a0a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <h2>Booking Request Submitted!</h2>
+                    <p class="modal-success-message">We've received your booking request for <strong id="modalSuccessDate">-</strong>.</p>
+                    <p class="modal-success-note">We'll review your request and get back to you within 24 hours.</p>
+                    <button type="button" class="modal-btn modal-btn-primary" id="modalClose">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- About Section -->
     <section id="about" class="section about-section">
@@ -516,120 +711,68 @@
     </div>
 </section>
 
-  <!-- Members Section -->
-<section id="members" class="section members-section">
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">Members</h2>
-            <div class="section-line"></div>
-        </div>
-        
-        <div class="members-grid">
-            <div class="member-card" data-member="alejo">
-                <div class="member-image">
-                    <div class="member-photo">
-                        <img src="images/alejo.jpg" alt="Alejo Delgado">
-                    </div>
-                    <div class="member-overlay">
-                        <div class="member-bio">
-                            <p>Bringing the low-end foundation with years of groove experience</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="member-info">
-                    <h3 class="member-name">Alejo Delgado</h3>
-                    <p class="member-role">Bass</p>
-                    <div class="member-accent"></div>
-                </div>
-            </div>
-            
-            <div class="member-card" data-member="christopher">
-                <div class="member-image">
-                    <div class="member-photo">
-                        <img src="images/reyes.jpg" alt="Christopher Reyes">
-                    </div>
-                    <div class="member-overlay">
-                        <div class="member-bio">
-                            <p>The heartbeat of The Box, keeping the rhythm tight and the crowd moving</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="member-info">
-                    <h3 class="member-name">Christopher Reyes</h3>
-                    <p class="member-role">Drums</p>
-                    <div class="member-accent"></div>
-                </div>
-            </div>
-            
-            <div class="member-card" data-member="hope">
-                <div class="member-image">
-                    <div class="member-photo">
-                        <img src="images/hope.jpg" alt="Hope Garcia">
-                    </div>
-                    <div class="member-overlay">
-                        <div class="member-bio">
-                            <p>The voice that brings every throwback hit to life with soul and power</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="member-info">
-                    <h3 class="member-name">Hope Garcia</h3>
-                    <p class="member-role">Vocals</p>
-                    <div class="member-accent"></div>
-                </div>
-            </div>
-            
-            <div class="member-card" data-member="fernando">
-                <div class="member-image">
-                    <div class="member-photo">
-                        <img src="images/fern.jpg" alt="Fernando Jimenez">
-                    </div>
-                    <div class="member-overlay">
-                        <div class="member-bio">
-                            <p>Crafting the perfect riffs and leads that define our signature sound</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="member-info">
-                    <h3 class="member-name">Fernando Jimenez</h3>
-                    <p class="member-role">Guitar</p>
-                    <div class="member-accent"></div>
-                </div>
-            </div>
-            
-            <div class="member-card" data-member="ian">
-                <div class="member-image">
-                    <div class="member-photo">
-                        <img src="images/ian.jpg" alt="Ian Garoian">
-                    </div>
-                    <div class="member-overlay">
-                        <div class="member-bio">
-                            <p>Adding the harmonic complexity that brings depth to every performance</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="member-info">
-                    <h3 class="member-name">Ian Garoian</h3>
-                    <p class="member-role">Keys</p>
-                    <div class="member-accent"></div>
+<!-- Members Background (fixed, controlled by JS) -->
+<div class="members-background">
+    <video autoplay muted loop playsinline>
+        <source src="images/hero.mp4" type="video/mp4">
+    </video>
+    <div class="bg-grid"></div>
+    <div class="bg-particles"></div>
+    <div class="bg-gradient"></div>
+    <div class="bg-noise"></div>
+</div>
+
+<!-- Members Section - Horizontal Scroll -->
+<section id="members" class="band-showcase-section">
+    <div class="band-showcase-wrapper">
+        <div class="band-showcase-track">
+            <!-- Alejo Delgado - Bass -->
+            <div class="showcase-panel showcase-member">
+                <img src="images/artists/alejo.png" class="showcase-artist" alt="Alejo Delgado"/>
+                <div class="showcase-member-info">
+                    <h3 class="showcase-member-name">Alejo Delgado</h3>
+                    <p class="showcase-member-role">Bass</p>
+                    <p class="showcase-member-bio">Bringing the low-end foundation with years of groove experience</p>
                 </div>
             </div>
 
-            <div class="member-card" data-member="ian">
-                <div class="member-image">
-                    <div class="member-photo">
-                        <img src="images/ian.jpg" alt="Ian Garoian">
-                    </div>
-                    <div class="member-overlay">
-                        <div class="member-bio">
-                            <p>Adding the harmonic complexity that brings depth to every performance</p>
-                        </div>
-                    </div>
+            <!-- Christopher Reyes - Drums -->
+            <div class="showcase-panel showcase-member">
+                <img src="images/artists/reyes.png" class="showcase-artist" alt="Christopher Reyes"/>
+                <div class="showcase-member-info">
+                    <h3 class="showcase-member-name">Christopher Reyes</h3>
+                    <p class="showcase-member-role">Drums</p>
+                    <p class="showcase-member-bio">The heartbeat of The Box, keeping the rhythm tight and the crowd moving</p>
                 </div>
-                <div class="member-info">
-                    <h3 class="member-name">Ian Garoian</h3>
-                    <p class="member-role">Vocals Harmony</p>
-                    <div class="member-accent"></div>
+            </div>
+
+            <!-- Hope Garcia - Vocals -->
+            <div class="showcase-panel showcase-member">
+                <img src="images/artists/hope.png" class="showcase-artist" alt="Hope Garcia"/>
+                <div class="showcase-member-info">
+                    <h3 class="showcase-member-name">Hope Garcia</h3>
+                    <p class="showcase-member-role">Vocals</p>
+                    <p class="showcase-member-bio">The voice that brings every throwback hit to life with soul and power</p>
+                </div>
+            </div>
+
+            <!-- Fernando Jimenez - Guitar -->
+            <div class="showcase-panel showcase-member">
+                <img src="images/artists/fern.png" class="showcase-artist" alt="Fernando Jimenez"/>
+                <div class="showcase-member-info">
+                    <h3 class="showcase-member-name">Fernando Jimenez</h3>
+                    <p class="showcase-member-role">Guitar</p>
+                    <p class="showcase-member-bio">Crafting the perfect riffs and leads that define our signature sound</p>
+                </div>
+            </div>
+
+            <!-- Ian Garoian - Keys -->
+            <div class="showcase-panel showcase-member">
+                <img src="images/artists/ian.png" class="showcase-artist" alt="Ian Garoian"/>
+                <div class="showcase-member-info">
+                    <h3 class="showcase-member-name">Ian Garoian</h3>
+                    <p class="showcase-member-role">Keys</p>
+                    <p class="showcase-member-bio">Adding the harmonic complexity that brings depth to every performance</p>
                 </div>
             </div>
         </div>
@@ -682,6 +825,11 @@
                     <div class="booking-step-divider"></div>
                     <div class="booking-step" data-step="2">
                         <span class="booking-step-number">2</span>
+                        <span class="booking-step-label">Contact Info</span>
+                    </div>
+                    <div class="booking-step-divider"></div>
+                    <div class="booking-step" data-step="3">
+                        <span class="booking-step-number">3</span>
                         <span class="booking-step-label">Event Details</span>
                     </div>
                 </div>
@@ -724,19 +872,30 @@
 
                             <!-- Duration Selection -->
                             <div class="booking-duration-section hidden" id="durationSection">
-                                <label class="booking-section-label" for="durationInput">Event Duration (Hours) *</label>
-                                <div class="booking-duration-input-wrapper">
-                                    <input
-                                        type="number"
-                                        id="durationInput"
-                                        class="booking-duration-input"
-                                        placeholder="Enter hours (e.g., 2, 3, 4, 6)"
-                                        min="1"
-                                        max="12"
-                                        step="0.5"
-                                        required
-                                    >
-                                    <span class="booking-input-hint">Enter the number of hours you need (1-12 hours)</span>
+                                <label class="booking-section-label">Event Duration (Hours) *</label>
+                                <div class="booking-duration-row">
+                                    <div class="booking-duration-quick">
+                                        <button type="button" class="booking-duration-btn" data-duration="2">2 hrs</button>
+                                        <button type="button" class="booking-duration-btn" data-duration="3">3 hrs</button>
+                                        <button type="button" class="booking-duration-btn" data-duration="4">4 hrs</button>
+                                        <button type="button" class="booking-duration-btn" data-duration="6">6 hrs</button>
+                                    </div>
+                                    <div class="booking-duration-divider">
+                                        <span>or</span>
+                                    </div>
+                                    <div class="booking-duration-input-wrapper">
+                                        <input
+                                            type="number"
+                                            id="durationInput"
+                                            class="booking-duration-input"
+                                            placeholder="Custom"
+                                            min="1"
+                                            max="12"
+                                            step="0.5"
+                                            inputmode="decimal"
+                                        >
+                                        <span class="booking-duration-unit">hrs</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -751,15 +910,49 @@
                             </div>
 
                             <div class="booking-form-actions">
-                                <button type="button" class="booking-btn booking-btn-primary" id="continueToDetails" disabled>
+                                <button type="button" class="booking-btn booking-btn-primary" id="continueToContact" disabled>
+                                    Continue to Contact Info
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Contact Info -->
+                    <div class="booking-form-step" id="step2">
+                        <div class="booking-step-content">
+                            <div class="booking-form-grid">
+                                <div class="booking-form-group full-width">
+                                    <label for="contactName">Contact Name *</label>
+                                    <input type="text" id="contactName" name="contactName" class="booking-form-input" placeholder="John Doe" required>
+                                    <span class="booking-error-message"></span>
+                                </div>
+
+                                <div class="booking-form-group">
+                                    <label for="contactPhone">Phone Number</label>
+                                    <input type="tel" id="contactPhone" name="contactPhone" class="booking-form-input" placeholder="(555) 123-4567">
+                                    <span class="booking-error-message"></span>
+                                </div>
+
+                                <div class="booking-form-group">
+                                    <label for="contactEmail">Email Address</label>
+                                    <input type="email" id="contactEmail" name="contactEmail" class="booking-form-input" placeholder="john@example.com">
+                                    <span class="booking-error-message"></span>
+                                </div>
+
+                                <p class="booking-contact-note">Please provide at least one contact method (phone or email). Both are preferred.</p>
+                            </div>
+
+                            <div class="booking-form-actions">
+                                <button type="button" class="booking-btn booking-btn-secondary" id="backToDateTime">Back</button>
+                                <button type="button" class="booking-btn booking-btn-primary" id="continueToDetails">
                                     Continue to Event Details
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Step 2: Event Details -->
-                    <div class="booking-form-step" id="step2">
+                    <!-- Step 3: Event Details -->
+                    <div class="booking-form-step" id="step3">
                         <div class="booking-step-content">
                             <div class="booking-form-grid">
                                 <div class="booking-form-group full-width">
@@ -776,24 +969,6 @@
                                         <option value="Anniversary">Anniversary</option>
                                         <option value="Other">Other</option>
                                     </select>
-                                    <span class="booking-error-message"></span>
-                                </div>
-
-                                <div class="booking-form-group">
-                                    <label for="contactName">Contact Name *</label>
-                                    <input type="text" id="contactName" name="contactName" class="booking-form-input" placeholder="John Doe" required>
-                                    <span class="booking-error-message"></span>
-                                </div>
-
-                                <div class="booking-form-group">
-                                    <label for="contactPhone">Phone Number *</label>
-                                    <input type="tel" id="contactPhone" name="contactPhone" class="booking-form-input" placeholder="(555) 123-4567" required>
-                                    <span class="booking-error-message"></span>
-                                </div>
-
-                                <div class="booking-form-group full-width">
-                                    <label for="contactEmail">Email Address *</label>
-                                    <input type="email" id="contactEmail" name="contactEmail" class="booking-form-input" placeholder="john@example.com" required>
                                     <span class="booking-error-message"></span>
                                 </div>
 
@@ -842,7 +1017,7 @@
 
                                 <div class="booking-form-group full-width">
                                     <label for="eventDescription">Event Description *</label>
-                                    <textarea id="eventDescription" name="eventDescription" class="booking-form-input" rows="4" placeholder="Tell us about your event, music preferences, atmosphere, special requests, etc." required></textarea>
+                                    <textarea id="eventDescription" name="eventDescription" class="booking-form-input" rows="3" placeholder="Tell us about your event, music preferences, atmosphere, special requests, etc." required></textarea>
                                     <span class="booking-error-message"></span>
                                 </div>
 
@@ -862,7 +1037,7 @@
                             </div>
 
                             <div class="booking-form-actions">
-                                <button type="button" class="booking-btn booking-btn-secondary" id="backToDateTime">Back to Date & Time</button>
+                                <button type="button" class="booking-btn booking-btn-secondary" id="backToContact">Back</button>
                                 <button type="submit" class="booking-btn booking-btn-primary" id="submitBooking">
                                     <span class="booking-btn-text">Submit Booking Request</span>
                                     <span class="booking-btn-loading hidden">
@@ -921,6 +1096,7 @@
     const elements = {
         step1: document.getElementById('step1'),
         step2: document.getElementById('step2'),
+        step3: document.getElementById('step3'),
         successState: document.getElementById('successState'),
         progressSteps: document.querySelectorAll('.booking-progress-steps .booking-step'),
         calendarDays: document.getElementById('calendarDays'),
@@ -934,8 +1110,10 @@
         timeslotSection: document.getElementById('timeslotSection'),
         timeslotLoading: document.getElementById('timeslotLoading'),
         timeslotGrid: document.getElementById('timeslotGrid'),
-        continueBtn: document.getElementById('continueToDetails'),
-        backBtn: document.getElementById('backToDateTime'),
+        continueToContactBtn: document.getElementById('continueToContact'),
+        continueToDetailsBtn: document.getElementById('continueToDetails'),
+        backToDateTimeBtn: document.getElementById('backToDateTime'),
+        backToContactBtn: document.getElementById('backToContact'),
         submitBtn: document.getElementById('submitBooking'),
         newBookingBtn: document.getElementById('newBooking'),
         form: document.getElementById('bookingForm'),
@@ -1000,9 +1178,30 @@
             elements.monthDropdown.classList.toggle('hidden');
         });
 
+        // Quick duration buttons
+        document.querySelectorAll('.booking-duration-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const duration = parseFloat(btn.dataset.duration);
+
+                // Update button states
+                document.querySelectorAll('.booking-duration-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+
+                // Clear custom input
+                if (elements.durationInput) {
+                    elements.durationInput.value = '';
+                }
+
+                handleDurationSelect(duration);
+            });
+        });
+
         elements.durationInput?.addEventListener('input', (e) => {
             const duration = parseFloat(e.target.value);
             const inputWrapper = e.target.parentElement;
+
+            // Clear quick button selection when typing custom value
+            document.querySelectorAll('.booking-duration-btn').forEach(b => b.classList.remove('selected'));
 
             inputWrapper.classList.remove('error');
 
@@ -1024,10 +1223,49 @@
             e.target.value = formatPhoneNumber(e.target.value);
         });
 
-        elements.continueBtn?.addEventListener('click', () => goToStep(2));
-        elements.backBtn?.addEventListener('click', () => goToStep(1));
+        elements.continueToContactBtn?.addEventListener('click', () => goToStep(2));
+        elements.continueToDetailsBtn?.addEventListener('click', () => {
+            if (validateContactStep()) {
+                goToStep(3);
+            }
+        });
+        elements.backToDateTimeBtn?.addEventListener('click', () => goToStep(1));
+        elements.backToContactBtn?.addEventListener('click', () => goToStep(2));
         elements.newBookingBtn?.addEventListener('click', resetForm);
         elements.form?.addEventListener('submit', handleSubmit);
+    }
+
+    function validateContactStep() {
+        const name = elements.contactName.value.trim();
+        const phone = elements.contactPhone.value.trim();
+        const email = elements.contactEmail.value.trim();
+
+        let isValid = true;
+
+        // Clear previous errors
+        elements.contactName.parentElement.querySelector('.booking-error-message').textContent = '';
+        elements.contactPhone.parentElement.querySelector('.booking-error-message').textContent = '';
+        elements.contactEmail.parentElement.querySelector('.booking-error-message').textContent = '';
+
+        // Name is required
+        if (!name) {
+            elements.contactName.parentElement.querySelector('.booking-error-message').textContent = 'Name is required';
+            isValid = false;
+        }
+
+        // At least one contact method required
+        if (!phone && !email) {
+            elements.contactPhone.parentElement.querySelector('.booking-error-message').textContent = 'Please provide phone or email';
+            isValid = false;
+        }
+
+        // Validate email format if provided
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            elements.contactEmail.parentElement.querySelector('.booking-error-message').textContent = 'Invalid email format';
+            isValid = false;
+        }
+
+        return isValid;
     }
 
     function updateMonthLabel() {
@@ -1132,15 +1370,17 @@
 
     function updateContinueButton() {
         const isValid = state.selectedDate && state.selectedDuration && state.selectedTime;
-        elements.continueBtn.disabled = !isValid;
+        elements.continueToContactBtn.disabled = !isValid;
     }
 
     function goToStep(step) {
         state.currentStep = step;
         elements.step1.classList.remove('active');
         elements.step2.classList.remove('active');
+        elements.step3.classList.remove('active');
         if (step === 1) elements.step1.classList.add('active');
         else if (step === 2) elements.step2.classList.add('active');
+        else if (step === 3) elements.step3.classList.add('active');
 
         elements.progressSteps.forEach((stepEl, index) => {
             if (index < step) stepEl.classList.add('active');
@@ -1200,6 +1440,7 @@
     function showSuccessState(formData) {
         elements.step1.classList.remove('active');
         elements.step2.classList.remove('active');
+        elements.step3.classList.remove('active');
         elements.successState.classList.remove('hidden');
         elements.successEventType.textContent = formData.eventType;
         elements.successDate.textContent = formatDate(state.selectedDate);
@@ -1218,6 +1459,7 @@
         elements.timeslotSection.classList.add('hidden');
         elements.successState.classList.add('hidden');
         if (elements.durationInput) elements.durationInput.value = '';
+        document.querySelectorAll('.booking-duration-btn').forEach(b => b.classList.remove('selected'));
         goToStep(1);
         calendar.selectedDate = null;
         calendar.render();

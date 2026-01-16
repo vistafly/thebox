@@ -42,11 +42,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!heroSection || !logo) return;
 
-    // Check if user already scrolled past hero
-    const isHeroPassed = localStorage.getItem('heroPassed') === 'true';
-    if (isHeroPassed) {
+    // Configuration: 25% of hero height before hiding
+    const HIDE_THRESHOLD_PERCENT = 0.25;
+    const FAST_SCROLL_VELOCITY = 2.0; // px/ms - threshold for instant hide
+
+    // Calculate hide threshold in pixels
+    function getHideThreshold() {
+        return heroSection.offsetHeight * HIDE_THRESHOLD_PERCENT;
+    }
+
+    // Check if user already scrolled past threshold on page load
+    const savedScrollState = localStorage.getItem('heroPassed') === 'true';
+    if (savedScrollState && window.scrollY > getHideThreshold()) {
         document.body.classList.add('hero-passed');
-        document.body.classList.add('fast-scroll'); // Extra safety on load
     }
 
     // Track animation state and scroll velocity
@@ -54,53 +62,40 @@ document.addEventListener('DOMContentLoaded', function() {
     let lastScroll = window.scrollY;
     let lastScrollTime = Date.now();
     let fastScrollTimeout = null;
-    let showLogoTimeout = null;
 
-    // Aggressive scroll handler - instant hide with no tolerance
+    // Scroll handler with 25% hero threshold
     function checkScroll() {
         const currentScroll = window.scrollY;
         const currentTime = Date.now();
+        const hideThreshold = getHideThreshold();
 
-        // Calculate scroll velocity
+        // Calculate scroll velocity for fast-scroll detection
         const scrollDelta = Math.abs(currentScroll - lastScroll);
         const timeDelta = currentTime - lastScrollTime;
         const scrollVelocity = timeDelta > 0 ? scrollDelta / timeDelta : 0;
 
-        // ALWAYS hide logo when ANY scroll is detected (instant, no threshold)
-        const shouldHide = currentScroll > 0;
+        // Determine if logo should be hidden (scrolled past 25% of hero)
+        const shouldHide = currentScroll > hideThreshold;
 
         if (shouldHide) {
-            // Force hero-passed class immediately - NO REMOVAL of inline styles
             document.body.classList.add('hero-passed');
 
-            // Add fast-scroll for any velocity to ensure instant hide
-            if (scrollVelocity > 0.5) {
+            // Fast scroll = instant hide (skip animation)
+            if (scrollVelocity > FAST_SCROLL_VELOCITY) {
                 document.body.classList.add('fast-scroll');
 
-                // Keep fast-scroll class for 200ms after scrolling stops to prevent flashing
                 clearTimeout(fastScrollTimeout);
                 fastScrollTimeout = setTimeout(() => {
-                    // Only remove if still scrolled (not at top)
-                    if (window.scrollY > 0) {
-                        document.body.classList.remove('fast-scroll');
-                    }
-                }, 200);
+                    document.body.classList.remove('fast-scroll');
+                }, 300);
             }
 
             localStorage.setItem('heroPassed', 'true');
         } else {
-            // Only show logo when at ABSOLUTE top (scrollY === 0)
-            // Clear all timeouts to prevent conflicts
+            // Scrolled back into safe zone - fade logo back in
             clearTimeout(fastScrollTimeout);
-            clearTimeout(showLogoTimeout);
-
-            // Delay showing logo slightly to prevent flash during rapid scrolling
-            showLogoTimeout = setTimeout(() => {
-                if (window.scrollY === 0) {
-                    document.body.classList.remove('hero-passed', 'fast-scroll');
-                    localStorage.setItem('heroPassed', 'false');
-                }
-            }, 50); // 50ms delay before showing
+            document.body.classList.remove('hero-passed', 'fast-scroll');
+            localStorage.setItem('heroPassed', 'false');
         }
 
         lastScroll = currentScroll;
@@ -108,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ticking = false;
     }
 
-    // Use requestAnimationFrame for smoother performance
+    // Use requestAnimationFrame for smooth performance
     function requestTick() {
         if (!ticking) {
             requestAnimationFrame(checkScroll);
@@ -116,28 +111,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Use optimized scroll event with rAF
+    // Optimized scroll event
     window.addEventListener('scroll', requestTick, { passive: true });
 
-    // IntersectionObserver for backup detection
+    // IntersectionObserver as backup - only for when logo leaves hero entirely
     const observer = new IntersectionObserver((entries) => {
         const heroEntry = entries[0];
-        // Force hide when ANY part of hero is scrolled out
-        const isFullyVisible = heroEntry.intersectionRatio >= 1;
+        const hideThreshold = getHideThreshold();
 
-        if (!isFullyVisible && window.scrollY > 0) {
-            // Force hide immediately - double check scroll position
+        // If hero is mostly out of view and we're scrolled past threshold, ensure hidden
+        if (heroEntry.intersectionRatio < 0.5 && window.scrollY > hideThreshold) {
             document.body.classList.add('hero-passed');
-            // Add fast-scroll as extra safety during intersection changes
-            document.body.classList.add('fast-scroll');
-        } else if (window.scrollY === 0) {
-            // Only show if at absolute top - clear timeout first
-            clearTimeout(fastScrollTimeout);
-            document.body.classList.remove('hero-passed', 'fast-scroll');
         }
     }, {
-        threshold: [0, 0.05, 0.1, 0.5, 1], // Multiple thresholds for accuracy
-        rootMargin: '0px 0px 0px 0px'
+        threshold: [0, 0.25, 0.5, 0.75, 1],
+        rootMargin: '0px'
     });
 
     observer.observe(heroSection);
@@ -149,86 +137,256 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initLogo3DEffect() {
     const logo = document.querySelector('.logo-desktop');
+    const heroSection = document.getElementById('hero');
     if (!logo) return;
 
     // Configuration
     const config = {
         maxRotation: 20,
         perspective: 1000,
-        movementFactor: 0.03,
-        smoothness: 0.5,
+        smoothness: 0.1,              // Lower = smoother transitions
         floatAmplitude: 10,
-        floatSpeed: 0.0015
+        floatSpeed: 0.0015,
+        precisionThreshold: 0.01,     // Snap to zero below this value
+        swipeSensitivity: 0.8,        // How much swipe affects tilt (higher = more responsive)
+        swipeDecay: 0.92,             // How fast swipe effect fades (lower = faster decay)
+        tapThreshold: 10,             // Max movement (px) to count as tap vs swipe
+        tapTimeThreshold: 200,        // Max duration (ms) to count as tap
+        tapBounceScale: 1.08,         // Scale factor for tap bounce
+        tapBounceDuration: 150        // Duration of tap bounce (ms)
     };
 
     // State
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
+    let pointerX = window.innerWidth / 2;
+    let pointerY = window.innerHeight / 2;
     let targetRotationX = 0;
     let targetRotationY = 0;
     let currentRotationX = 0;
     let currentRotationY = 0;
-    let floatOffset = 0;
-    let lastTime = 0;
+    let animationId = null;
+    let isReady = false;
 
-    // Mouse move handler
-    function handleMouseMove(e) {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
+    // Touch/Swipe state
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+    let lastTouchX = 0;
+    let lastTouchY = 0;
+    let swipeVelocityX = 0;
+    let swipeVelocityY = 0;
+    let isTouching = false;
+
+    // Tap bounce state
+    let currentScale = 1;
+    let targetScale = 1;
+
+    // Utility: Round small values to zero to prevent floating-point precision errors
+    function snapToZero(value) {
+        return Math.abs(value) < config.precisionThreshold ? 0 : value;
     }
 
-    // Calculate target rotations
-    function calculateTargetRotations() {
-        const normalizedX = (mouseX / window.innerWidth) * 2 - 1;
-        const normalizedY = (mouseY / window.innerHeight) * 2 - 1;
-        
+    // Utility: Round to 2 decimal places for clean transform values
+    function roundValue(value) {
+        return Math.round(value * 100) / 100;
+    }
+
+    // Utility: Clamp value between min and max
+    function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    // Check if touch is within hero section
+    function isInHeroSection(clientY) {
+        if (!heroSection) return true;
+        const rect = heroSection.getBoundingClientRect();
+        return clientY >= rect.top && clientY <= rect.bottom;
+    }
+
+    // Mouse move handler (desktop - uses position tracking)
+    function handleMouseMove(e) {
+        pointerX = e.clientX;
+        pointerY = e.clientY;
+
+        // Desktop: calculate rotation based on mouse position
+        const normalizedX = (pointerX / window.innerWidth) * 2 - 1;
+        const normalizedY = (pointerY / window.innerHeight) * 2 - 1;
         targetRotationY = normalizedX * config.maxRotation;
         targetRotationX = -normalizedY * config.maxRotation;
     }
 
-    // Animation loop
-    function animate(time) {
-        if (!lastTime) lastTime = time;
-        const deltaTime = time - lastTime;
-        lastTime = time;
+    // Touch start - record initial position
+    function handleTouchStart(e) {
+        if (e.touches.length === 0) return;
 
-        // Stop animation completely if logo is hidden
+        const touch = e.touches[0];
+        if (!isInHeroSection(touch.clientY)) return;
+
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        lastTouchX = touch.clientX;
+        lastTouchY = touch.clientY;
+        touchStartTime = Date.now();
+        isTouching = true;
+
+        // Reset swipe velocity on new touch
+        swipeVelocityX = 0;
+        swipeVelocityY = 0;
+    }
+
+    // Touch move - calculate swipe direction and apply tilt
+    function handleTouchMove(e) {
+        if (!isTouching || e.touches.length === 0) return;
+
+        const touch = e.touches[0];
+        if (!isInHeroSection(touch.clientY)) return;
+
+        // Calculate movement delta (swipe direction)
+        const deltaX = touch.clientX - lastTouchX;
+        const deltaY = touch.clientY - lastTouchY;
+
+        // Update swipe velocity based on direction
+        // Positive deltaX (swipe right) = tilt right (positive rotateY)
+        // Positive deltaY (swipe down) = tilt forward (negative rotateX)
+        swipeVelocityX += deltaX * config.swipeSensitivity;
+        swipeVelocityY += deltaY * config.swipeSensitivity;
+
+        // Clamp velocities to max rotation
+        swipeVelocityX = clamp(swipeVelocityX, -config.maxRotation, config.maxRotation);
+        swipeVelocityY = clamp(swipeVelocityY, -config.maxRotation, config.maxRotation);
+
+        // Apply swipe direction to target rotation
+        targetRotationY = swipeVelocityX;
+        targetRotationX = -swipeVelocityY;
+
+        // Store last position for next delta calculation
+        lastTouchX = touch.clientX;
+        lastTouchY = touch.clientY;
+    }
+
+    // Touch end - detect tap or let swipe decay
+    function handleTouchEnd(e) {
+        if (!isTouching) return;
+
+        const touchEndTime = Date.now();
+        const touchDuration = touchEndTime - touchStartTime;
+        const totalMovementX = Math.abs(lastTouchX - touchStartX);
+        const totalMovementY = Math.abs(lastTouchY - touchStartY);
+        const totalMovement = Math.sqrt(totalMovementX * totalMovementX + totalMovementY * totalMovementY);
+
+        // Detect tap: short duration + minimal movement
+        if (touchDuration < config.tapTimeThreshold && totalMovement < config.tapThreshold) {
+            triggerTapBounce();
+        }
+
+        isTouching = false;
+    }
+
+    // Tap bounce effect
+    function triggerTapBounce() {
+        targetScale = config.tapBounceScale;
+
+        // Return to normal after bounce
+        setTimeout(() => {
+            targetScale = 1;
+        }, config.tapBounceDuration);
+    }
+
+    // Animation loop - synced to requestAnimationFrame
+    function animate(time) {
+        // Stop if logo is hidden
         if (document.body.classList.contains('hero-passed')) {
-            // Reset transform to simple translation only (no 3D effects)
             logo.style.transform = 'translate(-50%, -50%)';
-            // Reset rotation values
             currentRotationX = 0;
             currentRotationY = 0;
             targetRotationX = 0;
             targetRotationY = 0;
-            requestAnimationFrame(animate);
+            swipeVelocityX = 0;
+            swipeVelocityY = 0;
+            currentScale = 1;
+            targetScale = 1;
+            animationId = requestAnimationFrame(animate);
             return;
         }
 
-        floatOffset = Math.sin(time * config.floatSpeed) * config.floatAmplitude;
-        currentRotationX += (targetRotationX - currentRotationX) * config.smoothness;
-        currentRotationY += (targetRotationY - currentRotationY) * config.smoothness;
+        // Decay swipe velocity when not touching (gradual return to center)
+        if (!isTouching) {
+            swipeVelocityX *= config.swipeDecay;
+            swipeVelocityY *= config.swipeDecay;
 
-        logo.style.transform = `
-            perspective(${config.perspective}px)
-            translate(-50%, -50%)
-            translateY(${floatOffset}px)
-            rotateX(${currentRotationX}deg)
-            rotateY(${currentRotationY}deg)
-        `;
+            // Snap to zero when velocity is negligible
+            if (Math.abs(swipeVelocityX) < config.precisionThreshold) swipeVelocityX = 0;
+            if (Math.abs(swipeVelocityY) < config.precisionThreshold) swipeVelocityY = 0;
 
-        requestAnimationFrame(animate);
+            // Update target rotation based on decaying velocity (mobile)
+            // Only apply if we have swipe velocity (mobile interaction)
+            if (swipeVelocityX !== 0 || swipeVelocityY !== 0) {
+                targetRotationY = swipeVelocityX;
+                targetRotationX = -swipeVelocityY;
+            }
+        }
+
+        // Calculate floating animation
+        const floatOffset = roundValue(Math.sin(time * config.floatSpeed) * config.floatAmplitude);
+
+        // Smooth interpolation for rotation
+        const deltaX = targetRotationX - currentRotationX;
+        const deltaY = targetRotationY - currentRotationY;
+
+        currentRotationX += deltaX * config.smoothness;
+        currentRotationY += deltaY * config.smoothness;
+
+        // Snap to target if difference is negligible
+        currentRotationX = snapToZero(deltaX) === 0 ? targetRotationX : currentRotationX;
+        currentRotationY = snapToZero(deltaY) === 0 ? targetRotationY : currentRotationY;
+
+        // Smooth interpolation for scale (tap bounce)
+        currentScale += (targetScale - currentScale) * 0.2;
+        if (Math.abs(targetScale - currentScale) < 0.001) currentScale = targetScale;
+
+        // Round final values
+        const rotX = roundValue(currentRotationX);
+        const rotY = roundValue(currentRotationY);
+        const scale = roundValue(currentScale);
+
+        // Apply transform with clean values
+        logo.style.transform = `perspective(${config.perspective}px) translate(-50%, -50%) translateY(${floatOffset}px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${scale})`;
+
+        animationId = requestAnimationFrame(animate);
     }
 
-    // Initialize
-    document.addEventListener('mousemove', handleMouseMove);
-    setInterval(calculateTargetRotations, 16);
-    requestAnimationFrame(animate);
+    // Initialize only after DOM is fully ready
+    function start() {
+        if (isReady) return;
+        isReady = true;
 
-    window.addEventListener('resize', () => {
-        mouseX = window.innerWidth / 2;
-        mouseY = window.innerHeight / 2;
-    });
+        // Set initial safe transform
+        logo.style.transform = 'translate(-50%, -50%) perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)';
+
+        // Mouse events (desktop)
+        document.addEventListener('mousemove', handleMouseMove, { passive: true });
+
+        // Touch events (mobile) - swipe direction based
+        document.addEventListener('touchstart', handleTouchStart, { passive: true });
+        document.addEventListener('touchmove', handleTouchMove, { passive: true });
+        document.addEventListener('touchend', handleTouchEnd, { passive: true });
+        document.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            pointerX = window.innerWidth / 2;
+            pointerY = window.innerHeight / 2;
+        }, { passive: true });
+
+        // Start animation loop
+        animationId = requestAnimationFrame(animate);
+    }
+
+    // Wait for full page load to prevent hard-load glitch
+    if (document.readyState === 'complete') {
+        start();
+    } else {
+        window.addEventListener('load', start);
+    }
 }
 
 // Ultra-Responsive Custom Cursor
@@ -1676,3 +1834,1136 @@ if (document.readyState !== 'loading') {
         });
     });
 });
+
+// ==================== //
+// MEMBERS HORIZONTAL SCROLL SHOWCASE
+// ==================== //
+(function initMembersShowcase() {
+    const section = document.getElementById('members');
+    if (!section || !section.classList.contains('band-showcase-section')) return;
+
+    const track = section.querySelector('.band-showcase-track');
+    if (!track) return;
+
+    const panels = track.querySelectorAll('.showcase-panel');
+
+    function setupShowcase() {
+        // Toggle members background visibility
+        const membersBackground = document.querySelector('.members-background');
+        if (membersBackground) {
+            ScrollTrigger.create({
+                trigger: '#members',
+                start: 'top bottom',
+                end: 'bottom top',
+                onEnter: () => membersBackground.classList.add('active'),
+                onLeave: () => membersBackground.classList.remove('active'),
+                onEnterBack: () => membersBackground.classList.add('active'),
+                onLeaveBack: () => membersBackground.classList.remove('active')
+            });
+        }
+
+        // Calculate total scroll distance based on track width
+        const totalWidth = track.scrollWidth;
+        const viewportWidth = window.innerWidth;
+        const panelWidth = totalWidth / panels.length;
+
+        // Total scroll distance
+        const scrollAmount = totalWidth - viewportWidth;
+        const numTransitions = panels.length - 1;
+
+        // Track if first panel float has started
+        let firstPanelFloatStarted = false;
+
+        // Set initial transform on first artist to prevent jitter
+        const firstArtist = panels[0]?.querySelector('.showcase-artist');
+        if (firstArtist) {
+            gsap.set(firstArtist, { yPercent: 0, force3D: true });
+        }
+
+        // Create timeline for segmented scrolling with dampening at each panel center
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: '#members',
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 2,
+                pin: '#members .band-showcase-wrapper',
+                invalidateOnRefresh: true,
+                onEnter: () => {
+                    // Start first panel floating after pin settles
+                    if (!firstPanelFloatStarted && firstArtist) {
+                        firstPanelFloatStarted = true;
+                        // Delay to let pin fully settle
+                        setTimeout(() => {
+                            gsap.to(firstArtist, {
+                                yPercent: -2,
+                                duration: 2.5,
+                                repeat: -1,
+                                yoyo: true,
+                                ease: 'sine.inOut',
+                                force3D: true
+                            });
+                        }, 100);
+                    }
+                }
+            }
+        });
+
+        // Add segments for each panel transition with inOut easing
+        // power2.inOut creates natural slowdown at each member (start/end of each segment)
+        for (let i = 1; i <= numTransitions; i++) {
+            const targetX = -(scrollAmount * (i / numTransitions));
+            tl.to(track, {
+                x: targetX,
+                ease: 'power2.inOut',
+                duration: 1
+            });
+        }
+
+        // Reference for containerAnimation
+        const horizontalScroll = tl;
+
+        // Entry animations for each panel
+        panels.forEach((panel, i) => {
+            const artist = panel.querySelector('.showcase-artist');
+            const info = panel.querySelector('.showcase-member-info');
+
+            if (artist) {
+                // First panel starts visible (floating starts on pin via onEnter)
+                if (i === 0) {
+                    gsap.set(artist, { opacity: 1, scale: 1 });
+                } else {
+                    // Other panels fade and scale in - no floating until visible
+                    gsap.set(artist, { opacity: 0, scale: 0.9 });
+
+                    ScrollTrigger.create({
+                        trigger: panel,
+                        containerAnimation: horizontalScroll,
+                        start: 'left 90%',
+                        end: 'left 60%',
+                        scrub: 0.5,
+                        onEnter: () => {
+                            // Start floating only when panel enters view
+                            gsap.to(artist, {
+                                yPercent: -2,
+                                duration: 2.5 + (i * 0.3),
+                                repeat: -1,
+                                yoyo: true,
+                                ease: 'sine.inOut',
+                                force3D: true
+                            });
+                        },
+                        onUpdate: (self) => {
+                            // Smooth opacity and scale based on progress
+                            gsap.set(artist, {
+                                opacity: self.progress,
+                                scale: 0.9 + (0.1 * self.progress),
+                                force3D: true
+                            });
+                        }
+                    });
+                }
+            }
+
+            if (info) {
+                // First panel info starts visible
+                if (i === 0) {
+                    gsap.set(info, { opacity: 1 });
+                } else {
+                    gsap.set(info, { opacity: 0 });
+
+                    ScrollTrigger.create({
+                        trigger: panel,
+                        containerAnimation: horizontalScroll,
+                        start: 'left 80%',
+                        end: 'left 55%',
+                        scrub: 0.5,
+                        onUpdate: (self) => {
+                            gsap.set(info, { opacity: self.progress });
+                        }
+                    });
+                }
+            }
+        });
+
+        // Handle resize
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                ScrollTrigger.refresh();
+            }, 250);
+        });
+    }
+
+    // Wait for page load and images
+    if (document.readyState === 'complete') {
+        setTimeout(setupShowcase, 300);
+    } else {
+        window.addEventListener('load', () => setTimeout(setupShowcase, 300));
+    }
+})();
+
+// =============================================
+// MAP LAZY LOADER - Performance optimization
+// =============================================
+class MapLazyLoader {
+    constructor() {
+        this.maps = document.querySelectorAll('.lazy-map');
+        this.loadedMaps = new Set();
+        this.init();
+    }
+
+    init() {
+        if (this.maps.length === 0) return;
+
+        if ('IntersectionObserver' in window) {
+            const options = {
+                root: document.querySelector('.tour-grid'),
+                rootMargin: '200px', // Load 200px before visible
+                threshold: 0
+            };
+
+            this.observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        this.loadMap(entry.target);
+                    }
+                });
+            }, options);
+
+            this.maps.forEach(map => this.observer.observe(map));
+        } else {
+            // Fallback: load all maps immediately
+            this.maps.forEach(map => this.loadMap(map));
+        }
+    }
+
+    loadMap(iframe) {
+        if (this.loadedMaps.has(iframe)) return;
+
+        const src = iframe.dataset.src;
+        if (src) {
+            iframe.src = src;
+            this.loadedMaps.add(iframe);
+            if (this.observer) {
+                this.observer.unobserve(iframe);
+            }
+        }
+    }
+}
+
+// =============================================
+// TOUR CALENDAR FUNCTIONALITY
+// =============================================
+
+class TourCalendar {
+    constructor() {
+        this.currentDate = new Date();
+        this.tourDates = [];
+        this.calendarView = document.querySelector('.tour-calendar-view');
+        this.listView = document.querySelector('.tour-grid');
+        this.monthYearElement = document.querySelector('.calendar-month-year');
+        this.calendarDaysElement = document.querySelector('.calendar-days');
+        this.prevMonthBtn = document.querySelector('.prev-month');
+        this.nextMonthBtn = document.querySelector('.next-month');
+        this.viewToggleBtns = document.querySelectorAll('.view-toggle-btn');
+        this.popup = document.getElementById('calendar-popup');
+        this.activeDay = null;
+        this.closeTimer = null;
+
+        // Booking modal elements
+        this.bookingModal = null;
+        this.modalState = {
+            currentStep: 1,
+            selectedDate: null,
+            selectedDuration: null,
+            selectedTime: null,
+            timeSlots: []
+        };
+
+        this.init();
+    }
+
+    init() {
+        if (!this.calendarView || !this.listView) {
+            console.error('Calendar or list view elements not found');
+            return;
+        }
+
+        // Extract tour dates from the DOM
+        this.extractTourDates();
+
+        // Set up event listeners
+        this.setupEventListeners();
+
+        // Render initial calendar (but keep it hidden)
+        this.renderCalendar();
+
+        // Initialize booking modal
+        this.initBookingModal();
+    }
+
+    extractTourDates() {
+        const tourDateCards = document.querySelectorAll('.tour-date');
+        this.tourDates = [];
+
+        tourDateCards.forEach(card => {
+            const timeElement = card.querySelector('time');
+            const venueElement = card.querySelector('.venue-header h3');
+            const venuePromoElement = card.querySelector('.venue-promo');
+            const venueDescElement = card.querySelector('.venue-desc');
+            const eventTimeElement = card.querySelector('.event-time');
+            const eventAgeElement = card.querySelector('.event-age');
+            const addressElement = card.querySelector('.venue-address');
+
+            if (timeElement && venueElement) {
+                const datetime = timeElement.getAttribute('datetime');
+                const venue = venueElement.textContent.trim();
+                const venuePromo = venuePromoElement ? venuePromoElement.textContent.trim() : '';
+                const venueDesc = venueDescElement ? venueDescElement.textContent.trim() : '';
+                const time = eventTimeElement ? eventTimeElement.textContent.trim() : 'TBD';
+                const age = eventAgeElement ? eventAgeElement.textContent.trim() : '';
+                const address = addressElement ? addressElement.textContent.trim() : '';
+
+                if (datetime) {
+                    this.tourDates.push({
+                        date: new Date(datetime + 'T00:00:00'),
+                        venue: venue,
+                        venuePromo: venuePromo,
+                        venueDesc: venueDesc,
+                        time: time,
+                        age: age,
+                        address: address,
+                        element: card
+                    });
+                }
+            }
+        });
+
+        console.log('Extracted tour dates:', this.tourDates);
+    }
+
+    setupEventListeners() {
+        // View toggle buttons
+        this.viewToggleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const view = btn.getAttribute('data-view');
+                this.switchView(view);
+            });
+        });
+
+        // Month navigation
+        if (this.prevMonthBtn) {
+            this.prevMonthBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.changeMonth(-1);
+                this.closePopup();
+            });
+        }
+
+        if (this.nextMonthBtn) {
+            this.nextMonthBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.changeMonth(1);
+                this.closePopup();
+            });
+        }
+
+        // Close popup when clicking outside calendar days or popup
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.calendar-day') && !e.target.closest('.calendar-event-popup')) {
+                this.closePopup();
+            }
+        });
+
+        // Allow closing popup by clicking on calendar background/grid
+        if (this.calendarView) {
+            this.calendarView.addEventListener('click', (e) => {
+                // Close if clicking on calendar background, but not on days or popup
+                if (e.target === this.calendarView ||
+                    e.target.classList.contains('calendar-grid') ||
+                    e.target.classList.contains('calendar-days') ||
+                    e.target.classList.contains('calendar-weekdays')) {
+                    this.closePopup();
+                }
+            });
+        }
+
+        // Close popup with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closePopup();
+            }
+        });
+    }
+
+    switchView(view) {
+        // Update button states
+        this.viewToggleBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-view') === view);
+        });
+
+        // Show/hide views
+        if (view === 'calendar') {
+            this.calendarView.style.display = 'block';
+            this.listView.style.display = 'none';
+            this.renderCalendar();
+        } else {
+            this.calendarView.style.display = 'none';
+            // Restore list view - remove inline style to use CSS defaults
+            this.listView.style.display = '';
+        }
+    }
+
+    changeMonth(delta) {
+        this.currentDate.setMonth(this.currentDate.getMonth() + delta);
+        this.renderCalendar();
+    }
+
+    renderCalendar() {
+        if (!this.monthYearElement || !this.calendarDaysElement) return;
+
+        const year = this.currentDate.getFullYear();
+        const month = this.currentDate.getMonth();
+
+        // Update header
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        this.monthYearElement.textContent = `${monthNames[month]} ${year}`;
+
+        // Clear previous days
+        this.calendarDaysElement.innerHTML = '';
+
+        // Get first day of month and number of days
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Add previous month's trailing days
+        for (let i = firstDay - 1; i >= 0; i--) {
+            const day = daysInPrevMonth - i;
+            const dayElement = this.createDayElement(day, true);
+            this.calendarDaysElement.appendChild(dayElement);
+        }
+
+        // Add current month's days
+        for (let day = 1; day <= daysInMonth; day++) {
+            const currentDate = new Date(year, month, day);
+            currentDate.setHours(0, 0, 0, 0);
+
+            const isToday = currentDate.getTime() === today.getTime();
+            const events = this.getEventsForDate(currentDate);
+
+            const dayElement = this.createDayElement(day, false, isToday, events, currentDate);
+            this.calendarDaysElement.appendChild(dayElement);
+        }
+
+        // Add next month's leading days
+        const totalCells = this.calendarDaysElement.children.length;
+        const remainingCells = 42 - totalCells; // 6 weeks * 7 days
+
+        for (let day = 1; day <= remainingCells; day++) {
+            const dayElement = this.createDayElement(day, true);
+            this.calendarDaysElement.appendChild(dayElement);
+        }
+    }
+
+    createDayElement(day, isOtherMonth = false, isToday = false, events = [], fullDate = null) {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'calendar-day';
+
+        if (isOtherMonth) {
+            dayDiv.classList.add('other-month');
+        }
+
+        if (isToday) {
+            dayDiv.classList.add('today');
+        }
+
+        // Check if date is in the past
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const isPast = fullDate && fullDate < today;
+
+        if (events.length > 0) {
+            // Day has existing bookings - NOT available
+            dayDiv.classList.add('has-event');
+        } else if (!isOtherMonth && !isPast) {
+            // Day is available for booking (not other month, not in past, no events)
+            dayDiv.classList.add('available-to-book');
+        }
+
+        // Day number
+        const dayNumber = document.createElement('div');
+        dayNumber.className = 'calendar-day-number';
+        dayNumber.textContent = day;
+        dayDiv.appendChild(dayNumber);
+
+        // Event count and click handler for days WITH events
+        if (events.length > 0) {
+            const eventCount = document.createElement('div');
+            eventCount.className = 'calendar-day-events';
+            eventCount.textContent = events.length === 1 ? '1 show' : `${events.length} shows`;
+            dayDiv.appendChild(eventCount);
+
+            // Store events data
+            dayDiv.dataset.events = JSON.stringify(events);
+
+            // Click/tap to show popup (view only, no booking)
+            dayDiv.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.showPopup(dayDiv, events);
+            });
+
+            // Desktop hover to show popup
+            dayDiv.addEventListener('mouseenter', () => {
+                if (window.innerWidth > 768) {
+                    this.cancelPopupClose();
+                    this.showPopup(dayDiv, events);
+                }
+            });
+
+            // Desktop mouse leave to schedule close
+            dayDiv.addEventListener('mouseleave', () => {
+                if (window.innerWidth > 768) {
+                    this.schedulePopupClose();
+                }
+            });
+        } else if (!isOtherMonth && !isPast) {
+            // Available day - add "Available" label and booking click handler
+            const availableLabel = document.createElement('div');
+            availableLabel.className = 'calendar-day-available';
+            availableLabel.textContent = 'Available';
+            dayDiv.appendChild(availableLabel);
+
+            // Store the date for booking
+            if (fullDate) {
+                dayDiv.dataset.date = fullDate.toISOString();
+            }
+
+            // Click to open booking modal
+            dayDiv.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.openBookingModalForDate(fullDate);
+            });
+        }
+
+        return dayDiv;
+    }
+
+    getEventsForDate(date) {
+        return this.tourDates.filter(event => {
+            const eventDate = new Date(event.date);
+            eventDate.setHours(0, 0, 0, 0);
+            return eventDate.getTime() === date.getTime();
+        });
+    }
+
+    showPopup(dayElement, events) {
+        if (!this.popup || events.length === 0) return;
+
+        // Clear previous content
+        this.popup.innerHTML = '';
+
+        // Build popup content (view only - these dates are already booked)
+        events.forEach(event => {
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'popup-event';
+
+            // Venue name (display only)
+            const venue = document.createElement('div');
+            venue.className = 'popup-venue';
+            venue.textContent = event.venue;
+            eventDiv.appendChild(venue);
+
+            // Event time and age on same line
+            const timeAge = document.createElement('div');
+            timeAge.className = 'popup-time-age';
+            timeAge.innerHTML = `<i class="fas fa-clock"></i> ${event.time}`;
+            if (event.age) {
+                timeAge.innerHTML += ` <span class="popup-age-inline">${event.age}</span>`;
+            }
+            eventDiv.appendChild(timeAge);
+
+            // Address (compact)
+            if (event.address) {
+                const address = document.createElement('div');
+                address.className = 'popup-address';
+                address.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${event.address}`;
+                eventDiv.appendChild(address);
+            }
+
+            this.popup.appendChild(eventDiv);
+        });
+
+        // Position and show popup
+        this.positionAndShowPopup(dayElement);
+        this.activeDay = dayElement;
+
+        // Setup popup hover listeners (keep popup open when hovering over it)
+        if (!this.popup.hasAttribute('data-listeners-added')) {
+            this.popup.addEventListener('mouseenter', () => {
+                this.cancelPopupClose();
+            });
+
+            this.popup.addEventListener('mouseleave', () => {
+                if (window.innerWidth > 768) {
+                    this.schedulePopupClose();
+                }
+            });
+
+            this.popup.setAttribute('data-listeners-added', 'true');
+        }
+    }
+
+    positionAndShowPopup(dayElement) {
+        const dayRect = dayElement.getBoundingClientRect();
+        const padding = 10;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        // Show popup to measure
+        this.popup.style.visibility = 'visible';
+        this.popup.style.opacity = '1';
+
+        // Get popup dimensions
+        const popupRect = this.popup.getBoundingClientRect();
+        const popupWidth = popupRect.width;
+        const popupHeight = popupRect.height;
+
+        // Calculate horizontal position (centered on day)
+        let left = dayRect.left + (dayRect.width / 2) - (popupWidth / 2);
+
+        // Keep within horizontal bounds
+        if (left < padding) {
+            left = padding;
+        } else if (left + popupWidth > viewportWidth - padding) {
+            left = viewportWidth - popupWidth - padding;
+        }
+
+        // Calculate vertical position (try above first)
+        let top = dayRect.top - popupHeight - padding;
+
+        // If doesn't fit above, position below
+        if (top < padding) {
+            top = dayRect.bottom + padding;
+        }
+
+        // Apply position
+        this.popup.style.left = `${Math.max(padding, left)}px`;
+        this.popup.style.top = `${Math.max(padding, top)}px`;
+    }
+
+    schedulePopupClose() {
+        this.cancelPopupClose();
+        this.closeTimer = setTimeout(() => {
+            this.closePopup();
+        }, 200); // Small delay to allow moving to popup
+    }
+
+    cancelPopupClose() {
+        if (this.closeTimer) {
+            clearTimeout(this.closeTimer);
+            this.closeTimer = null;
+        }
+    }
+
+    closePopup() {
+        if (!this.popup) return;
+
+        this.cancelPopupClose();
+        this.popup.style.visibility = 'hidden';
+        this.popup.style.opacity = '0';
+        this.activeDay = null;
+    }
+
+    // =============================================
+    // BOOKING MODAL FUNCTIONALITY
+    // =============================================
+
+    initBookingModal() {
+        this.bookingModal = document.getElementById('tourBookingModal');
+        if (!this.bookingModal) return;
+
+        // Cache modal elements
+        this.modalElements = {
+            backdrop: this.bookingModal.querySelector('.tour-booking-modal-backdrop'),
+            closeBtn: this.bookingModal.querySelector('.tour-booking-modal-close'),
+            selectedDate: document.getElementById('modalSelectedDate'),
+            progressSteps: this.bookingModal.querySelectorAll('.modal-booking-step'),
+            step1: document.getElementById('modalStep1'),
+            step2: document.getElementById('modalStep2'),
+            step3: document.getElementById('modalStep3'),
+            successState: document.getElementById('modalSuccessState'),
+            durationBtns: this.bookingModal.querySelectorAll('.modal-duration-btn'),
+            durationInput: document.getElementById('modalDurationInput'),
+            timeslotSection: document.getElementById('modalTimeslotSection'),
+            timeslotLoading: document.getElementById('modalTimeslotLoading'),
+            timeslotGrid: document.getElementById('modalTimeslotGrid'),
+            continueToContactBtn: document.getElementById('modalContinueToContact'),
+            backToTimeBtn: document.getElementById('modalBackToTime'),
+            continueToDetailsBtn: document.getElementById('modalContinueToDetails'),
+            backToContactBtn: document.getElementById('modalBackToContact'),
+            submitBtn: document.getElementById('modalSubmit'),
+            closeSuccessBtn: document.getElementById('modalClose'),
+            // Form inputs
+            contactName: document.getElementById('modalContactName'),
+            contactPhone: document.getElementById('modalContactPhone'),
+            contactEmail: document.getElementById('modalContactEmail'),
+            eventType: document.getElementById('modalEventType'),
+            venueName: document.getElementById('modalVenueName'),
+            venueAddress: document.getElementById('modalVenueAddress'),
+            attendance: document.getElementById('modalAttendance'),
+            budget: document.getElementById('modalBudget'),
+            description: document.getElementById('modalDescription'),
+            successDate: document.getElementById('modalSuccessDate')
+        };
+
+        this.setupModalEventListeners();
+    }
+
+    setupModalEventListeners() {
+        const { backdrop, closeBtn, durationBtns, durationInput, continueToContactBtn,
+                backToTimeBtn, continueToDetailsBtn, backToContactBtn, submitBtn, closeSuccessBtn } = this.modalElements;
+
+        // Close modal
+        backdrop?.addEventListener('click', () => this.closeBookingModal());
+        closeBtn?.addEventListener('click', () => this.closeBookingModal());
+        closeSuccessBtn?.addEventListener('click', () => this.closeBookingModal());
+
+        // Escape key to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.bookingModal?.classList.contains('active')) {
+                this.closeBookingModal();
+            }
+        });
+
+        // Duration buttons
+        durationBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const duration = parseFloat(btn.dataset.duration);
+                durationBtns.forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                if (durationInput) durationInput.value = '';
+                this.handleModalDurationSelect(duration);
+            });
+        });
+
+        // Duration input
+        durationInput?.addEventListener('input', (e) => {
+            const duration = parseFloat(e.target.value);
+            durationBtns.forEach(b => b.classList.remove('selected'));
+            if (duration >= 1 && duration <= 12) {
+                this.handleModalDurationSelect(duration);
+            } else {
+                this.modalState.selectedDuration = null;
+                this.modalElements.timeslotSection?.classList.add('hidden');
+                this.updateModalContinueButton();
+            }
+        });
+
+        // Navigation buttons
+        continueToContactBtn?.addEventListener('click', () => this.goToModalStep(2));
+        backToTimeBtn?.addEventListener('click', () => this.goToModalStep(1));
+        continueToDetailsBtn?.addEventListener('click', () => {
+            if (this.validateModalContactStep()) {
+                this.goToModalStep(3);
+            }
+        });
+        backToContactBtn?.addEventListener('click', () => this.goToModalStep(2));
+
+        // Phone number formatting
+        this.modalElements.contactPhone?.addEventListener('input', (e) => {
+            e.target.value = this.formatPhoneNumber(e.target.value);
+        });
+
+        // Submit button
+        submitBtn?.addEventListener('click', () => this.handleModalSubmit());
+    }
+
+    openBookingModalForDate(date) {
+        if (!this.bookingModal || !this.modalElements || !date) return;
+
+        // Close any open popup
+        this.closePopup();
+
+        // Reset modal state
+        this.resetModalState();
+
+        // Set the selected date
+        this.modalState.selectedDate = date;
+
+        // Format and display the date
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedDate = date.toLocaleDateString('en-US', options);
+        if (this.modalElements.selectedDate) {
+            this.modalElements.selectedDate.textContent = formattedDate;
+        }
+
+        // Show modal
+        this.bookingModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+
+        // Focus first interactive element
+        setTimeout(() => {
+            if (this.modalElements.durationBtns && this.modalElements.durationBtns[0]) {
+                this.modalElements.durationBtns[0].focus();
+            }
+        }, 100);
+    }
+
+    closeBookingModal() {
+        if (!this.bookingModal) return;
+
+        this.bookingModal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    resetModalState() {
+        this.modalState = {
+            currentStep: 1,
+            selectedDate: null,
+            selectedDuration: null,
+            selectedTime: null,
+            timeSlots: []
+        };
+
+        if (!this.modalElements) return;
+
+        // Reset UI
+        this.goToModalStep(1);
+        if (this.modalElements.durationBtns) {
+            this.modalElements.durationBtns.forEach(b => b.classList.remove('selected'));
+        }
+        if (this.modalElements.durationInput) this.modalElements.durationInput.value = '';
+        if (this.modalElements.timeslotSection) this.modalElements.timeslotSection.classList.add('hidden');
+        if (this.modalElements.timeslotGrid) this.modalElements.timeslotGrid.innerHTML = '';
+        this.updateModalContinueButton();
+
+        // Clear form inputs
+        const inputs = ['contactName', 'contactPhone', 'contactEmail', 'eventType',
+                        'venueName', 'venueAddress', 'attendance', 'budget', 'description'];
+        inputs.forEach(key => {
+            if (this.modalElements[key]) this.modalElements[key].value = '';
+        });
+
+        // Clear error messages
+        if (this.bookingModal) {
+            this.bookingModal.querySelectorAll('.modal-error-message').forEach(el => el.textContent = '');
+            this.bookingModal.querySelectorAll('.modal-form-input.error').forEach(el => el.classList.remove('error'));
+        }
+
+        // Hide success state, show step 1
+        if (this.modalElements.successState) this.modalElements.successState.classList.remove('active');
+        if (this.modalElements.step1) this.modalElements.step1.classList.add('active');
+    }
+
+    handleModalDurationSelect(duration) {
+        this.modalState.selectedDuration = duration;
+        this.fetchModalTimeSlots();
+    }
+
+    async fetchModalTimeSlots() {
+        const { selectedDate, selectedDuration } = this.modalState;
+        if (!selectedDate || !selectedDuration || !this.modalElements) return;
+
+        // Show timeslot section with loading
+        if (this.modalElements.timeslotSection) this.modalElements.timeslotSection.classList.remove('hidden');
+        if (this.modalElements.timeslotLoading) this.modalElements.timeslotLoading.classList.remove('hidden');
+        if (this.modalElements.timeslotGrid) this.modalElements.timeslotGrid.innerHTML = '';
+
+        // Generate time slots (7 AM to 12 AM, based on duration)
+        const slots = this.generateTimeSlots(selectedDuration);
+        this.modalState.timeSlots = slots;
+
+        // Simulate a brief loading delay for better UX
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        if (this.modalElements.timeslotLoading) this.modalElements.timeslotLoading.classList.add('hidden');
+        this.renderModalTimeSlots();
+    }
+
+    generateTimeSlots(duration) {
+        const slots = [];
+        const startHour = 7; // 7 AM
+        const endHour = 24; // 12 AM (midnight)
+
+        for (let hour = startHour; hour <= endHour - duration; hour++) {
+            for (let minute = 0; minute < 60; minute += 30) {
+                const endTime = hour + duration + (minute / 60);
+                if (endTime <= endHour) {
+                    slots.push({
+                        hour,
+                        minute,
+                        available: true // In a real app, check against API
+                    });
+                }
+            }
+        }
+        return slots;
+    }
+
+    renderModalTimeSlots() {
+        const grid = this.modalElements.timeslotGrid;
+        if (!grid) return;
+
+        grid.innerHTML = '';
+        this.modalState.timeSlots.forEach(slot => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'modal-timeslot-btn';
+            btn.textContent = this.formatTime(slot.hour, slot.minute);
+            btn.disabled = !slot.available;
+
+            if (slot.available) {
+                btn.addEventListener('click', () => {
+                    grid.querySelectorAll('.modal-timeslot-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    this.modalState.selectedTime = { hour: slot.hour, minute: slot.minute };
+                    this.updateModalContinueButton();
+                });
+            }
+
+            grid.appendChild(btn);
+        });
+    }
+
+    formatTime(hour, minute) {
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
+        const displayMinute = minute.toString().padStart(2, '0');
+        return `${displayHour}:${displayMinute} ${period}`;
+    }
+
+    formatPhoneNumber(value) {
+        const cleaned = value.replace(/\D/g, '');
+        const match = cleaned.match(/^(\d{0,3})(\d{0,3})(\d{0,4})$/);
+        if (match) {
+            let formatted = '';
+            if (match[1]) formatted = `(${match[1]}`;
+            if (match[1]?.length === 3) formatted += ') ';
+            if (match[2]) formatted += match[2];
+            if (match[2]?.length === 3 && match[3]) formatted += '-';
+            if (match[3]) formatted += match[3];
+            return formatted;
+        }
+        return value;
+    }
+
+    updateModalContinueButton() {
+        if (!this.modalElements) return;
+        const { selectedDuration, selectedTime } = this.modalState;
+        const btn = this.modalElements.continueToContactBtn;
+        if (btn) {
+            btn.disabled = !(selectedDuration && selectedTime);
+        }
+    }
+
+    goToModalStep(step) {
+        this.modalState.currentStep = step;
+
+        if (!this.modalElements) return;
+
+        // Update progress steps
+        if (this.modalElements.progressSteps) {
+            this.modalElements.progressSteps.forEach(stepEl => {
+                const stepNum = parseInt(stepEl.dataset.step);
+                stepEl.classList.toggle('active', stepNum <= step);
+            });
+        }
+
+        // Show/hide step content
+        [this.modalElements.step1, this.modalElements.step2, this.modalElements.step3, this.modalElements.successState]
+            .forEach(el => { if (el) el.classList.remove('active'); });
+
+        if (step === 1 && this.modalElements.step1) this.modalElements.step1.classList.add('active');
+        else if (step === 2 && this.modalElements.step2) this.modalElements.step2.classList.add('active');
+        else if (step === 3 && this.modalElements.step3) this.modalElements.step3.classList.add('active');
+    }
+
+    validateModalContactStep() {
+        if (!this.modalElements) return false;
+        const { contactName, contactPhone, contactEmail } = this.modalElements;
+        const name = contactName ? contactName.value.trim() : '';
+        const phone = contactPhone ? contactPhone.value.trim() : '';
+        const email = contactEmail ? contactEmail.value.trim() : '';
+
+        let isValid = true;
+
+        // Clear previous errors
+        this.bookingModal.querySelectorAll('.modal-error-message').forEach(el => el.textContent = '');
+        this.bookingModal.querySelectorAll('.modal-form-input.error').forEach(el => el.classList.remove('error'));
+
+        // Name is required
+        if (!name && contactName) {
+            contactName.classList.add('error');
+            const errorEl = contactName.parentElement.querySelector('.modal-error-message');
+            if (errorEl) errorEl.textContent = 'Name is required';
+            isValid = false;
+        }
+
+        // At least one contact method required
+        if (!phone && !email && contactPhone) {
+            const errorEl = contactPhone.parentElement.querySelector('.modal-error-message');
+            if (errorEl) errorEl.textContent = 'Provide phone or email';
+            isValid = false;
+        }
+
+        // Validate email format if provided
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && contactEmail) {
+            contactEmail.classList.add('error');
+            const errorEl = contactEmail.parentElement.querySelector('.modal-error-message');
+            if (errorEl) errorEl.textContent = 'Invalid email format';
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    validateModalDetailsStep() {
+        if (!this.modalElements) return false;
+        const { eventType, venueName, venueAddress, description } = this.modalElements;
+        let isValid = true;
+
+        // Clear previous errors
+        [eventType, venueName, venueAddress, description].forEach(el => {
+            if (el) {
+                el.classList.remove('error');
+                const errorEl = el.parentElement.querySelector('.modal-error-message');
+                if (errorEl) errorEl.textContent = '';
+            }
+        });
+
+        if (eventType && !eventType.value) {
+            eventType.classList.add('error');
+            const errorEl = eventType.parentElement.querySelector('.modal-error-message');
+            if (errorEl) errorEl.textContent = 'Event type is required';
+            isValid = false;
+        }
+
+        if (venueName && !venueName.value.trim()) {
+            venueName.classList.add('error');
+            const errorEl = venueName.parentElement.querySelector('.modal-error-message');
+            if (errorEl) errorEl.textContent = 'Venue name is required';
+            isValid = false;
+        }
+
+        if (venueAddress && (!venueAddress.value.trim() || venueAddress.value.trim().length < 10)) {
+            venueAddress.classList.add('error');
+            const errorEl = venueAddress.parentElement.querySelector('.modal-error-message');
+            if (errorEl) errorEl.textContent = 'Enter full venue address';
+            isValid = false;
+        }
+
+        if (description && (!description.value.trim() || description.value.trim().length < 20)) {
+            description.classList.add('error');
+            const errorEl = description.parentElement.querySelector('.modal-error-message');
+            if (errorEl) errorEl.textContent = 'Provide more event details (20+ chars)';
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    async handleModalSubmit() {
+        if (!this.validateModalDetailsStep()) return;
+
+        const { submitBtn } = this.modalElements;
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+        }
+
+        // Build booking data
+        const { selectedDate, selectedDuration, selectedTime } = this.modalState;
+        const bookingData = {
+            date: selectedDate?.toISOString().split('T')[0],
+            duration: selectedDuration,
+            time: this.formatTime(selectedTime.hour, selectedTime.minute),
+            contactName: this.modalElements.contactName?.value.trim(),
+            contactPhone: this.modalElements.contactPhone?.value.trim(),
+            contactEmail: this.modalElements.contactEmail?.value.trim(),
+            eventType: this.modalElements.eventType?.value,
+            venueName: this.modalElements.venueName?.value.trim(),
+            venueAddress: this.modalElements.venueAddress?.value.trim(),
+            expectedAttendance: this.modalElements.attendance?.value || null,
+            budgetRange: this.modalElements.budget?.value || null,
+            eventDescription: this.modalElements.description?.value.trim(),
+            source: 'tour-calendar'
+        };
+
+        try {
+            // Try to use the API client if available, otherwise simulate success
+            const response = await fetch('/api/book', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bookingData)
+            });
+
+            // Show success regardless (for demo purposes, in production check response)
+            this.showModalSuccess();
+        } catch (error) {
+            console.log('Booking submitted (demo mode):', bookingData);
+            // Show success even if API fails (for demo/development)
+            this.showModalSuccess();
+        }
+
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Booking Request';
+        }
+    }
+
+    showModalSuccess() {
+        // Update success message with date
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedDate = this.modalState.selectedDate?.toLocaleDateString('en-US', options);
+        if (this.modalElements.successDate) {
+            this.modalElements.successDate.textContent = formattedDate || 'your selected date';
+        }
+
+        // Hide all steps, show success
+        [this.modalElements.step1, this.modalElements.step2, this.modalElements.step3]
+            .forEach(el => el?.classList.remove('active'));
+        this.modalElements.successState?.classList.add('active');
+
+        // Update progress to show all complete
+        this.modalElements.progressSteps?.forEach(stepEl => stepEl.classList.add('active'));
+    }
+}
+
+// Initialize tour calendar
+function initTourCalendar() {
+    // Wait for tour dates to be loaded
+    if (document.querySelectorAll('.tour-date').length > 0) {
+        new TourCalendar();
+    } else {
+        // Retry after a short delay if tour dates aren't loaded yet
+        setTimeout(initTourCalendar, 500);
+    }
+}
+
+// Initialize map lazy loader and tour calendar
+function initTourFeatures() {
+    // Initialize map lazy loader
+    new MapLazyLoader();
+
+    // Initialize tour calendar with a small delay to ensure DOM is ready
+    setTimeout(initTourCalendar, 100);
+}
+
+// Handle initialization - works whether DOMContentLoaded has fired or not
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTourFeatures);
+} else {
+    // DOM already loaded, run immediately
+    initTourFeatures();
+}
