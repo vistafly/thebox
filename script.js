@@ -1,7 +1,27 @@
 // script.js
+
+// Mobile detection utility for conditional GSAP configuration
+const isMobile = {
+    iOS: () => /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1),
+    android: () => /Android/.test(navigator.userAgent),
+    touch: () => 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+    any: function() { return this.iOS() || this.android() || this.touch() || window.innerWidth <= 768; }
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize GSAP
     gsap.registerPlugin(ScrollTrigger);
+
+    // Configure ScrollTrigger for mobile devices
+    // Note: normalizeScroll() is intentionally NOT used as it causes crashes on iOS Safari
+    // with complex pinned horizontal scroll sections
+    if (isMobile.any()) {
+        ScrollTrigger.config({
+            ignoreMobileResize: true,
+            autoRefreshEvents: "visibilitychange,DOMContentLoaded,load"
+        });
+    }
 
     // Custom Cursor
     initCustomCursor();
@@ -1520,24 +1540,32 @@ class TourAutoScroll {
     init() {
         // Find tour cards
         this.tourCards = Array.from(document.querySelectorAll('.tour-date'));
-        
+
         if (!this.tourGrid || this.tourCards.length === 0) {
             return;
         }
-        
-        // Create dots container
+
+        // Respect reduced motion preference - skip auto-scroll but keep manual dots
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // Create dots container (always create for manual navigation)
         this.createDots();
-        
+
+        // Skip auto-scroll if user prefers reduced motion
+        if (prefersReducedMotion) {
+            return;
+        }
+
         // Start on mobile only
         this.checkIfShouldRun();
-        
+
         // Optimized resize handler with debounce
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => this.checkIfShouldRun(), 100);
         });
-        
+
         // Add interaction listeners
         this.addTourListeners();
     }
@@ -1871,128 +1899,72 @@ if (document.readyState !== 'loading') {
         const scrollAmount = totalWidth - viewportWidth;
         const numTransitions = panels.length - 1;
 
-        // Track if first panel float has started
-        let firstPanelFloatStarted = false;
+        // Device detection
+        const isMobileDevice = isMobile.any();
 
-        // Set initial transform on first artist to prevent jitter
-        const firstArtist = panels[0]?.querySelector('.showcase-artist');
-        if (firstArtist) {
-            gsap.set(firstArtist, { yPercent: 0, force3D: true });
-        }
+        // Scrub value - higher = more dampening to prevent overshoot on fast scroll
+        // This only affects the members section, not other sections
+        const mainScrubValue = isMobileDevice ? 2.5 : 3.5;
 
-        // Create timeline for segmented scrolling with dampening at each panel center
+        // Timeline with hold periods at each member
         const tl = gsap.timeline({
             scrollTrigger: {
                 trigger: '#members',
                 start: 'top top',
                 end: 'bottom bottom',
-                scrub: 2,
+                scrub: mainScrubValue,
                 pin: '#members .band-showcase-wrapper',
-                invalidateOnRefresh: true,
-                onEnter: () => {
-                    // Start first panel floating after pin settles
-                    if (!firstPanelFloatStarted && firstArtist) {
-                        firstPanelFloatStarted = true;
-                        // Delay to let pin fully settle
-                        setTimeout(() => {
-                            gsap.to(firstArtist, {
-                                yPercent: -2,
-                                duration: 2.5,
-                                repeat: -1,
-                                yoyo: true,
-                                ease: 'sine.inOut',
-                                force3D: true
-                            });
-                        }, 100);
-                    }
-                }
+                anticipatePin: 1,
+                invalidateOnRefresh: true
             }
         });
 
-        // Add segments for each panel transition with inOut easing
-        // power2.inOut creates natural slowdown at each member (start/end of each segment)
+        // Hold duration at each member - creates the "settle" effect
+        // Higher = more scroll required to move past each member
+        const holdDuration = 0.6;
+        // Transition duration between members
+        const transitionDuration = 1;
+
+        // Hold on first panel before any transitions
+        tl.to(track, { x: 0, duration: holdDuration, ease: 'none' }, 0);
+
+        // Build transitions with holds at each member
         for (let i = 1; i <= numTransitions; i++) {
             const targetX = -(scrollAmount * (i / numTransitions));
+
+            // Transition to next member with easing that slows at the end
             tl.to(track, {
                 x: targetX,
                 ease: 'power2.inOut',
-                duration: 1
+                duration: transitionDuration
             });
+
+            // Hold at this member position
+            tl.to(track, { x: targetX, duration: holdDuration, ease: 'none' });
         }
 
-        // Reference for containerAnimation
-        const horizontalScroll = tl;
-
-        // Entry animations for each panel
-        panels.forEach((panel, i) => {
+        // Set all panels visible - simple and stable
+        panels.forEach((panel) => {
             const artist = panel.querySelector('.showcase-artist');
             const info = panel.querySelector('.showcase-member-info');
-
-            if (artist) {
-                // First panel starts visible (floating starts on pin via onEnter)
-                if (i === 0) {
-                    gsap.set(artist, { opacity: 1, scale: 1 });
-                } else {
-                    // Other panels fade and scale in - no floating until visible
-                    gsap.set(artist, { opacity: 0, scale: 0.9 });
-
-                    ScrollTrigger.create({
-                        trigger: panel,
-                        containerAnimation: horizontalScroll,
-                        start: 'left 90%',
-                        end: 'left 60%',
-                        scrub: 0.5,
-                        onEnter: () => {
-                            // Start floating only when panel enters view
-                            gsap.to(artist, {
-                                yPercent: -2,
-                                duration: 2.5 + (i * 0.3),
-                                repeat: -1,
-                                yoyo: true,
-                                ease: 'sine.inOut',
-                                force3D: true
-                            });
-                        },
-                        onUpdate: (self) => {
-                            // Smooth opacity and scale based on progress
-                            gsap.set(artist, {
-                                opacity: self.progress,
-                                scale: 0.9 + (0.1 * self.progress),
-                                force3D: true
-                            });
-                        }
-                    });
-                }
-            }
-
-            if (info) {
-                // First panel info starts visible
-                if (i === 0) {
-                    gsap.set(info, { opacity: 1 });
-                } else {
-                    gsap.set(info, { opacity: 0 });
-
-                    ScrollTrigger.create({
-                        trigger: panel,
-                        containerAnimation: horizontalScroll,
-                        start: 'left 80%',
-                        end: 'left 55%',
-                        scrub: 0.5,
-                        onUpdate: (self) => {
-                            gsap.set(info, { opacity: self.progress });
-                        }
-                    });
-                }
-            }
+            if (artist) gsap.set(artist, { opacity: 1, scale: 1 });
+            if (info) gsap.set(info, { opacity: 1 });
         });
 
-        // Handle resize
+        // Handle resize and orientation changes
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
                 ScrollTrigger.refresh();
             }, 250);
+        });
+
+        // Handle orientation change on mobile (needs longer delay for dimensions to settle)
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                ScrollTrigger.refresh(true);
+            }, 500);
         });
     }
 
@@ -2011,31 +1983,48 @@ class MapLazyLoader {
     constructor() {
         this.maps = document.querySelectorAll('.lazy-map');
         this.loadedMaps = new Set();
+        this.observer = null;
         this.init();
     }
 
     init() {
         if (this.maps.length === 0) return;
 
+        // Check for slow connection - defer loading more aggressively
+        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        const isSlowConnection = connection && (connection.saveData || connection.effectiveType === '2g');
+
         if ('IntersectionObserver' in window) {
             const options = {
                 root: document.querySelector('.tour-grid'),
-                rootMargin: '200px', // Load 200px before visible
-                threshold: 0
+                // Reduced from 200px to 100px, even smaller on slow connections
+                rootMargin: isSlowConnection ? '50px' : '100px',
+                threshold: 0.01
             };
 
             this.observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        this.loadMap(entry.target);
+                        // Use requestIdleCallback for non-critical loading
+                        if ('requestIdleCallback' in window) {
+                            requestIdleCallback(() => this.loadMap(entry.target), { timeout: 2000 });
+                        } else {
+                            this.loadMap(entry.target);
+                        }
                     }
                 });
             }, options);
 
             this.maps.forEach(map => this.observer.observe(map));
         } else {
-            // Fallback: load all maps immediately
-            this.maps.forEach(map => this.loadMap(map));
+            // Fallback: load first 2 maps, defer rest
+            this.maps.forEach((map, index) => {
+                if (index < 2) {
+                    this.loadMap(map);
+                } else {
+                    setTimeout(() => this.loadMap(map), 1000 + (index * 500));
+                }
+            });
         }
     }
 

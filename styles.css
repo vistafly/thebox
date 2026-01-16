@@ -42,8 +42,8 @@
 }
 
 html {
-    scroll-behavior: smooth;
     overflow-x: hidden;
+    overscroll-behavior: none;
 }
 
 body {
@@ -54,6 +54,7 @@ body {
     overflow-x: hidden;
     cursor: none;
     position: relative;
+    overscroll-behavior-y: contain;
 }
 
 ::selection {
@@ -2722,7 +2723,7 @@ body.tour-active .logo-desktop {
 .tour-section {
     background: var(--bg-primary);
     color: var(--text-primary);
-    padding: 100px;
+    padding: 100px 0;
     margin: 0 auto;
     position: relative;
 }
@@ -2746,7 +2747,7 @@ body.tour-active .logo-desktop {
     scroll-snap-stop: always;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
-    padding: 0 2rem 20px 2rem; /* Space for scrollbar */
+    padding: 0 0 20px 0; /* Space for scrollbar */
 
     /* Modern scrollbar styles for desktop */
     scrollbar-width: thin;
@@ -2761,7 +2762,7 @@ body.tour-active .logo-desktop {
 .tour-grid::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
-    margin: 0 40px; /* Margins on left and right */
+    margin-inline: 2rem; /* Margins on left and right */
 }
 
 .tour-grid::-webkit-scrollbar-thumb {
@@ -2786,6 +2787,14 @@ body.tour-active .logo-desktop {
     scroll-snap-align: center;
 }
 
+.tour-date:first-child {
+    margin-left: 2rem;
+}
+
+.tour-date:last-child {
+    margin-right: 2rem;
+}
+
 /* Tablet Responsive */
 @media (max-width: 768px) {
     .tour-section {
@@ -2799,7 +2808,7 @@ body.tour-active .logo-desktop {
 
     .tour-grid {
         gap: 1.5rem;
-        padding: 0 1.5rem 20px 1.5rem;
+        padding: 0 0 20px 0;
     }
 
     .tour-grid::-webkit-scrollbar {
@@ -2807,7 +2816,7 @@ body.tour-active .logo-desktop {
     }
 
     .tour-grid::-webkit-scrollbar-track {
-        margin: 0 20px;
+        margin-inline: 2rem;
     }
 
     .tour-date {
@@ -2853,6 +2862,11 @@ body.tour-active .logo-desktop {
     margin-bottom: 1.5rem;
     margin-top: 2rem;
     cursor: pointer;
+
+    /* Performance: CSS containment for rendering isolation */
+    contain: layout style paint;
+    content-visibility: auto;
+    contain-intrinsic-size: 420px 400px;
 }
 
 /* HIGHLIGHTED CARD - MAXIMUM CONTRAST */
@@ -2867,16 +2881,17 @@ body.tour-active .logo-desktop {
         rgba(254, 255, 5, 0.12) 100%
     );
     
-    /* MASSIVE shadow and glow effects */
-    box-shadow: 
-        0 12px 32px rgba(0, 0, 0, 0.4),
-        0 0 50px rgba(255, 255, 255, 0.6),
-        0 0 100px rgba(255, 255, 255, 0.3),
-        inset 0 0 30px rgba(255, 255, 255, 0.2),
-        inset 0 2px 5px rgba(255, 255, 255, 0.3);
-    
+    /* Optimized shadow and glow effects (reduced from 5 to 3 layers) */
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.35),
+        0 0 40px rgba(255, 255, 255, 0.45),
+        inset 0 0 20px rgba(255, 255, 255, 0.15);
+
     /* Scale up the card slightly */
     transform: scale(1.02);
+
+    /* GPU optimization hint */
+    will-change: transform, box-shadow;
     position: relative;
     z-index: 10;
     
@@ -2884,23 +2899,19 @@ body.tour-active .logo-desktop {
     animation: highlightPulse 3s ease-in-out infinite;
 }
 
-/* Pulsing glow animation */
+/* Pulsing glow animation (optimized: reduced from 5 to 3 layers) */
 @keyframes highlightPulse {
     0%, 100% {
-        box-shadow: 
-            0 12px 32px rgba(0, 0, 0, 0.4),
-            0 0 50px rgba(255, 255, 255, 0.6),
-            0 0 100px rgba(255, 255, 255, 0.3),
-            inset 0 0 30px rgba(255, 255, 255, 0.2),
-            inset 0 2px 5px rgba(255, 255, 255, 0.3);
+        box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.35),
+            0 0 40px rgba(255, 255, 255, 0.45),
+            inset 0 0 20px rgba(255, 255, 255, 0.15);
     }
     50% {
-        box-shadow: 
-            0 15px 40px rgba(0, 0, 0, 0.5),
-            0 0 70px rgba(255, 255, 255, 0.8),
-            0 0 140px rgba(255, 255, 255, 0.4),
-            inset 0 0 40px rgba(255, 255, 255, 0.3),
-            inset 0 2px 5px rgba(255, 255, 255, 0.4);
+        box-shadow:
+            0 12px 35px rgba(0, 0, 0, 0.4),
+            0 0 55px rgba(255, 255, 255, 0.55),
+            inset 0 0 25px rgba(255, 255, 255, 0.2);
     }
 }
 
@@ -2959,69 +2970,27 @@ body.tour-active .logo-desktop {
         0 0 25px rgba(255, 255, 255, 0.4);
 }
 
-/* PULSE ANIMATION WITH COLOR CHANGE */
+/* PULSE ANIMATION (optimized: reduced from 6 to 3 layers) */
 @keyframes buttonPulse {
     0%, 100% {
         transform: scale(1);
-        box-shadow: 
-            0 4px 0 rgba(0, 0, 0, 0.4),
-            0 8px 20px rgba(0, 0, 0, 0.3),
-            0 0 30px rgba(255, 255, 255, 0.7),
-            0 0 60px rgba(255, 255, 255, 0.4),
-            inset 0 2px 5px rgba(255, 255, 255, 0.6),
-            inset 0 -2px 3px rgba(0, 0, 0, 0.2);
-    }
-    50% {
-        transform: scale(1.05);
-        box-shadow: 
-            0 6px 0 rgba(0, 0, 0, 0.4),
-            0 12px 25px rgba(0, 0, 0, 0.4),
-            0 0 40px rgba(255, 255, 255, 0.9),
-            0 0 80px rgba(255, 255, 255, 0.6),
-            inset 0 2px 5px rgba(255, 255, 255, 0.7),
-            inset 0 -2px 3px rgba(0, 0, 0, 0.2);
-        /* More intense glow at pulse peak */
-        text-shadow: 
-            0 0 10px rgba(255, 255, 255, 0.664),
-            0 0 20px rgba(255, 255, 255, 0.281),
-            0 0 35px rgba(255, 255, 255, 0.116);
-    }
-}
-
-@keyframes buttonPulse {
-    0%, 100% {
-        transform: scale(1);
-        box-shadow: 
-            /* Base shadow (contact shadow) */
-            0 2px 0 rgba(0, 0, 0, 0.5),
-            /* Primary depth shadow */
-            0 6px 12px rgba(0, 0, 0, 0.3),
-            /* Ambient glow */
-            0 12px 24px rgba(0, 0, 0, 0.2),
-            /* Top light reflection */
-            inset 0 1px 2px rgba(255, 255, 255, 0.8),
-            /* Bottom shading */
-            inset 0 -4px 6px rgba(0, 0, 0, 0.3),
-            /* Inner core shadow */
-            inset 0 0 10px rgba(0, 0, 0, 0.2);
+        box-shadow:
+            0 4px 12px rgba(0, 0, 0, 0.3),
+            0 0 20px rgba(255, 255, 255, 0.5),
+            inset 0 1px 3px rgba(255, 255, 255, 0.4);
     }
     50% {
         transform: scale(1.03);
-        box-shadow: 
-            /* Enhanced base shadow */
-            0 4px 0 rgba(0, 0, 0, 0.5),
-            /* Deeper primary shadow */
-            0 10px 18px rgba(0, 0, 0, 0.35),
-            /* Stronger ambient glow */
-            0 18px 36px rgba(0, 0, 0, 0.25),
-            /* Brighter top reflection */
-            inset 0 2px 3px rgba(255, 255, 255, 0.9),
-            /* Deeper bottom shading */
-            inset 0 -6px 8px rgba(0, 0, 0, 0.4),
-            /* More pronounced inner shadow */
-            inset 0 0 15px rgba(0, 0, 0, 0.3);
+        box-shadow:
+            0 6px 16px rgba(0, 0, 0, 0.35),
+            0 0 30px rgba(255, 255, 255, 0.6),
+            inset 0 2px 4px rgba(255, 255, 255, 0.5);
+        text-shadow:
+            0 0 8px rgba(255, 255, 255, 0.5),
+            0 0 16px rgba(255, 255, 255, 0.2);
     }
 }
+
 
 /* Hover effects for the highlighted card */
 .tour-date.highlight {
@@ -3082,26 +3051,21 @@ body.tour-active .logo-desktop {
     text-rendering: optimizeLegibility;
 }
 
+/* Optimized: reduced from 6 to 3 layers */
 @keyframes live-card-breathe {
-    0% { 
+    0% {
         transform: translateZ(0) scale(1);
-        box-shadow: 
-            0 10px 35px rgba(0, 0, 0, 0.6),
-            0 5px 15px rgba(0, 0, 0, 0.4),
-            0 0 60px rgba(253, 2, 253, 0.25),
-            0 0 120px rgba(8, 254, 255, 0.15),
-            inset 0 1px 3px rgba(255, 255, 255, 0.08),
-            inset 0 -2px 4px rgba(0, 0, 0, 0.3);
-    }
-    100% { 
-        transform: translateZ(0) scale(1.015);
-        box-shadow: 
-            0 15px 50px rgba(0, 0, 0, 0.7),
+        box-shadow:
             0 8px 25px rgba(0, 0, 0, 0.5),
-            0 0 80px rgba(253, 2, 253, 0.35), /* Increased spread */
-            0 0 160px rgba(8, 254, 255, 0.2), /* Increased spread */
-            inset 0 2px 5px rgba(255, 255, 255, 0.12),
-            inset 0 -3px 6px rgba(0, 0, 0, 0.4);
+            0 0 40px rgba(253, 2, 253, 0.2),
+            0 0 60px rgba(8, 254, 255, 0.1);
+    }
+    100% {
+        transform: translateZ(0) scale(1.015);
+        box-shadow:
+            0 12px 35px rgba(0, 0, 0, 0.55),
+            0 0 50px rgba(253, 2, 253, 0.25),
+            0 0 80px rgba(8, 254, 255, 0.15);
     }
 }
 
@@ -3169,23 +3133,21 @@ body.tour-active .logo-desktop {
     gap: 4px;
 }
 
+/* Optimized: reduced from 4 to 2 layers */
 @keyframes live-indicator-pulse {
-    0%, 100% { 
+    0%, 100% {
         opacity: 1;
         transform: translateZ(0) scale(1);
-        box-shadow: 
-            0 0 15px rgba(255, 0, 0, 0.8),
-            0 0 30px rgba(255, 50, 50, 0.6),
-            0 0 45px rgba(255, 0, 0, 0.4);
+        box-shadow:
+            0 0 12px rgba(255, 0, 0, 0.7),
+            0 0 25px rgba(255, 50, 50, 0.4);
     }
-    50% { 
-        opacity: 0.9;
-        transform: translateZ(0) scale(1.05);
-        box-shadow: 
-            0 0 25px rgba(255, 0, 0, 1),
-            0 0 50px rgba(255, 50, 50, 0.8),
-            0 0 75px rgba(255, 0, 0, 0.6),
-            0 0 100px rgba(255, 100, 100, 0.3);
+    50% {
+        opacity: 0.95;
+        transform: translateZ(0) scale(1.03);
+        box-shadow:
+            0 0 18px rgba(255, 0, 0, 0.85),
+            0 0 35px rgba(255, 50, 50, 0.5);
     }
 }
 
@@ -3633,6 +3595,53 @@ body.tour-active .logo-desktop {
 
 .view-toggle-btn i {
     font-size: 1.1rem;
+}
+
+/* ===== PREFERS-REDUCED-MOTION: TOUR SECTION ===== */
+@media (prefers-reduced-motion: reduce) {
+    /* Disable all tour animations */
+    .tour-date.highlight,
+    .tour-date.highlight::after,
+    .tour-date.currently-playing,
+    .tour-date.currently-playing::after,
+    .tour-date.currently-playing .info::before,
+    .tour-date.currently-playing .info::after,
+    .tour-section::after {
+        animation: none;
+    }
+
+    /* Remove transitions that cause motion */
+    .tour-date,
+    .tour-date.highlight,
+    .tour-date.currently-playing,
+    .tour-dot {
+        transition: opacity 0.2s ease, background-color 0.2s ease;
+    }
+
+    /* Disable hover transforms */
+    .tour-date:hover,
+    .tour-date.highlight:hover,
+    .tour-date.currently-playing:hover,
+    .view-toggle-btn:hover {
+        transform: none;
+    }
+
+    /* Keep static glow for highlighted cards (no animation) */
+    .tour-date.highlight {
+        box-shadow:
+            0 8px 24px rgba(0, 0, 0, 0.3),
+            0 0 30px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Keep static indicator for live badge */
+    .tour-date.currently-playing::after {
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    }
+
+    /* Disable scroll hint animation */
+    .tour-section::after {
+        display: none;
+    }
 }
 
 /* Calendar View Container */
@@ -6064,6 +6073,8 @@ select.booking-form-input option {
     padding: 0;
     margin: 0;
     overflow: hidden;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Members section background - matching hero */
@@ -6155,13 +6166,14 @@ select.booking-form-input option {
 
 /* Base artist styling */
 #members .showcase-artist {
-    max-height: 65vh;
+    max-height: 62vh;
     max-width: 80vw;
     object-fit: contain;
-    transition: filter 0.5s ease;
+    transition: filter 0.5s ease, transform 0.5s ease;
     will-change: transform, opacity;
     transform: translateZ(0);
     backface-visibility: hidden;
+    margin-bottom: 20px;
 }
 
 /* First panel visible by default */
@@ -6170,87 +6182,118 @@ select.booking-form-input option {
     opacity: 1;
 }
 
-/* Glow colors: clothing blended with logo palette (subtle) */
-/* Alejo - Brown flannel + yellow hint → warm golden amber */
+/* Glow colors: vibrant colored auras for each member */
+/* Alejo - Warm golden amber */
 #members .showcase-panel:nth-child(1) .showcase-artist {
-    filter: drop-shadow(0 0 30px rgba(201, 160, 85, 0.3)) drop-shadow(0 0 55px rgba(220, 180, 60, 0.12));
+    filter:
+        drop-shadow(0 0 40px rgba(201, 160, 85, 0.5))
+        drop-shadow(0 0 80px rgba(220, 180, 60, 0.25))
+        drop-shadow(0 0 120px rgba(201, 160, 85, 0.15));
 }
 #members .showcase-panel:nth-child(1) .showcase-member-role {
     color: #D4B06A;
-    text-shadow: 0 0 10px rgba(201, 160, 85, 0.45);
+    text-shadow: 0 0 15px rgba(201, 160, 85, 0.6), 0 0 30px rgba(201, 160, 85, 0.3);
+    border-color: rgba(201, 160, 85, 0.4);
 }
 
-/* Reyes - Red cap + fuchsia hint → warm magenta-red */
+/* Reyes - Warm magenta-red */
 #members .showcase-panel:nth-child(2) .showcase-artist {
-    filter: drop-shadow(0 0 30px rgba(192, 64, 88, 0.3)) drop-shadow(0 0 55px rgba(200, 50, 100, 0.12));
+    filter:
+        drop-shadow(0 0 40px rgba(192, 64, 88, 0.5))
+        drop-shadow(0 0 80px rgba(200, 50, 100, 0.25))
+        drop-shadow(0 0 120px rgba(192, 64, 88, 0.15));
 }
 #members .showcase-panel:nth-child(2) .showcase-member-role {
     color: #D85070;
-    text-shadow: 0 0 10px rgba(192, 64, 88, 0.45);
+    text-shadow: 0 0 15px rgba(192, 64, 88, 0.6), 0 0 30px rgba(192, 64, 88, 0.3);
+    border-color: rgba(192, 64, 88, 0.4);
 }
 
-/* Hope - Teal flannel + aqua hint → bright teal */
+/* Hope - Bright teal */
 #members .showcase-panel:nth-child(3) .showcase-artist {
-    filter: drop-shadow(0 0 30px rgba(48, 192, 184, 0.3)) drop-shadow(0 0 55px rgba(40, 200, 190, 0.12));
+    filter:
+        drop-shadow(0 0 40px rgba(48, 192, 184, 0.5))
+        drop-shadow(0 0 80px rgba(40, 200, 190, 0.25))
+        drop-shadow(0 0 120px rgba(48, 192, 184, 0.15));
 }
 #members .showcase-panel:nth-child(3) .showcase-member-role {
     color: #40D0C8;
-    text-shadow: 0 0 10px rgba(48, 192, 184, 0.45);
+    text-shadow: 0 0 15px rgba(48, 192, 184, 0.6), 0 0 30px rgba(48, 192, 184, 0.3);
+    border-color: rgba(48, 192, 184, 0.4);
 }
 
-/* Fernando - Gray flannel + erin hint → cool sage gray */
+/* Fernando - Cool sage green */
 #members .showcase-panel:nth-child(4) .showcase-artist {
-    filter: drop-shadow(0 0 30px rgba(106, 136, 120, 0.35)) drop-shadow(0 0 55px rgba(100, 150, 115, 0.15));
+    filter:
+        drop-shadow(0 0 40px rgba(106, 156, 120, 0.5))
+        drop-shadow(0 0 80px rgba(100, 170, 115, 0.25))
+        drop-shadow(0 0 120px rgba(106, 156, 120, 0.15));
 }
 #members .showcase-panel:nth-child(4) .showcase-member-role {
-    color: #7FA090;
-    text-shadow: 0 0 10px rgba(106, 136, 120, 0.45);
+    color: #7FB090;
+    text-shadow: 0 0 15px rgba(106, 156, 120, 0.6), 0 0 30px rgba(106, 156, 120, 0.3);
+    border-color: rgba(106, 156, 120, 0.4);
 }
 
-/* Ian - Navy flannel + aqua hint → deep cyan-navy */
+/* Ian - Deep cyan-blue */
 #members .showcase-panel:nth-child(5) .showcase-artist {
-    filter: drop-shadow(0 0 30px rgba(58, 112, 149, 0.35)) drop-shadow(0 0 55px rgba(50, 130, 160, 0.15));
+    filter:
+        drop-shadow(0 0 40px rgba(58, 132, 179, 0.5))
+        drop-shadow(0 0 80px rgba(50, 150, 190, 0.25))
+        drop-shadow(0 0 120px rgba(58, 132, 179, 0.15));
 }
 #members .showcase-panel:nth-child(5) .showcase-member-role {
-    color: #5095B8;
-    text-shadow: 0 0 10px rgba(58, 112, 149, 0.45);
+    color: #50A5C8;
+    text-shadow: 0 0 15px rgba(58, 132, 179, 0.6), 0 0 30px rgba(58, 132, 179, 0.3);
+    border-color: rgba(58, 132, 179, 0.4);
 }
 
 /* Member info styling */
 #members .showcase-member-info {
     text-align: center;
     position: absolute;
-    bottom: 8vh;
+    bottom: 5vh;
     left: 50%;
     transform: translateX(-50%);
     z-index: 10;
     opacity: 0;
+    padding-top: 30px;
 }
 
 #members .showcase-member-name {
     font-family: 'Orbitron', sans-serif;
-    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-size: clamp(2rem, 5vw, 3.5rem);
     font-weight: 700;
     color: var(--white);
-    margin: 0 0 5px 0;
-    text-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+    margin: 0 0 12px 0;
+    text-shadow:
+        0 0 30px rgba(255, 255, 255, 0.5),
+        0 4px 20px rgba(0, 0, 0, 0.5);
+    letter-spacing: 2px;
 }
 
 #members .showcase-member-role {
     font-family: 'Orbitron', sans-serif;
-    font-size: clamp(1rem, 2vw, 1.5rem);
+    font-size: clamp(1.1rem, 2.5vw, 1.6rem);
     font-weight: 600;
-    margin: 0 0 10px 0;
+    margin: 0 0 18px 0;
     text-transform: uppercase;
-    letter-spacing: 3px;
+    letter-spacing: 5px;
+    padding: 8px 24px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    display: inline-block;
+    border: 1px solid currentColor;
+    border-opacity: 0.3;
 }
 
 #members .showcase-member-bio {
-    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    font-size: clamp(0.95rem, 1.6vw, 1.15rem);
     color: var(--text-secondary);
     margin: 0;
-    max-width: 500px;
-    line-height: 1.5;
+    max-width: 550px;
+    line-height: 1.6;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
 
 @media (max-width: 768px) {
@@ -6258,20 +6301,33 @@ select.booking-form-input option {
         height: 400vh;
     }
     #members .showcase-artist {
-        max-height: 55vh;
+        max-height: 50vh;
         max-width: 90vw;
+        margin-bottom: 15px;
     }
     #members .showcase-member-info {
-        bottom: 5vh;
+        bottom: 4vh;
         padding: 0 20px;
+        padding-top: 20px;
     }
     #members .showcase-member-name {
-        font-size: clamp(1.4rem, 5vw, 2rem);
+        font-size: clamp(1.6rem, 6vw, 2.2rem);
+        margin-bottom: 10px;
     }
     #members .showcase-member-role {
         font-size: clamp(0.9rem, 3vw, 1.2rem);
+        padding: 6px 18px;
+        letter-spacing: 3px;
+        margin-bottom: 14px;
     }
     #members .showcase-member-bio {
-        font-size: clamp(0.8rem, 2.5vw, 1rem);
+        font-size: clamp(0.85rem, 2.8vw, 1rem);
+    }
+}
+
+/* Extra small screens - lighter scroll distance */
+@media (max-width: 480px) {
+    #members.band-showcase-section {
+        height: 300vh;
     }
 }
