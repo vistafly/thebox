@@ -220,13 +220,15 @@ function initLogoMorph() {
         const isAtStart = progress === 0 && Math.abs(currentX) < 0.1 && Math.abs(currentY) < 0.1;
 
         if (isAtStart) {
-            // At top - reset everything
-            logo.classList.remove('morphing', 'morphed');
-            if (logoMobile) logoMobile.classList.remove('visible');
-            document.body.classList.remove('logo-morphed');
-            logo.style.transform = '';
-            logo.style.opacity = '';
-            isMorphComplete = false;
+            // At top - reset morph state but let 3D effect control transform
+            if (logo.classList.contains('morphing') || logo.classList.contains('morphed')) {
+                logo.classList.remove('morphing', 'morphed');
+                if (logoMobile) logoMobile.classList.remove('visible');
+                document.body.classList.remove('logo-morphed');
+                logo.style.opacity = '';
+                isMorphComplete = false;
+            }
+            // Don't set transform here - let initLogo3DEffect handle it
         } else if (isFullyMorphed) {
             // Morph complete
             if (!isMorphComplete) {
@@ -563,10 +565,13 @@ function initLogo3DEffect() {
         document.addEventListener('touchend', handleTouchEnd, { passive: true });
         document.addEventListener('touchcancel', handleTouchEnd, { passive: true });
 
-        // Handle resize
+        // Handle resize - reset to center position
         window.addEventListener('resize', () => {
             pointerX = window.innerWidth / 2;
             pointerY = window.innerHeight / 2;
+            // Reset target rotation to center on resize
+            targetRotationX = 0;
+            targetRotationY = 0;
         }, { passive: true });
 
         // Start animation loop
@@ -2077,12 +2082,6 @@ if (document.readyState !== 'loading') {
         // Device detection - use viewport width for consistent behavior with CSS breakpoints
         const isMobileViewport = viewportWidth <= 1024;
 
-        // Store current scroll to restore after setup if needed
-        const currentScroll = window.scrollY;
-
-        // Temporarily scroll to top for accurate pin calculation
-        window.scrollTo(0, 0);
-
         // Timeline with hold periods at each member for "settle" effect
         const tl = gsap.timeline({
             scrollTrigger: {
@@ -2092,6 +2091,7 @@ if (document.readyState !== 'loading') {
                 scrub: 0.8,
                 pin: wrapper,
                 pinSpacing: false,
+                anticipatePin: 1,  // Helps smooth the pin/unpin transition
                 invalidateOnRefresh: true,
                 id: 'members-horizontal'
             }
@@ -3037,21 +3037,45 @@ class TourCalendar {
 
         // Show timeslot section with loading
         if (this.modalElements.timeslotSection) this.modalElements.timeslotSection.classList.remove('hidden');
-        if (this.modalElements.timeslotLoading) this.modalElements.timeslotLoading.classList.remove('hidden');
+        if (this.modalElements.timeslotLoading) {
+            this.modalElements.timeslotLoading.classList.remove('hidden');
+            this.modalElements.timeslotLoading.textContent = 'Loading available times...';
+        }
         if (this.modalElements.timeslotGrid) this.modalElements.timeslotGrid.innerHTML = '';
 
-        // Generate time slots (7 AM to 12 AM, based on duration)
-        const slots = this.generateTimeSlots(selectedDuration);
-        this.modalState.timeSlots = slots;
+        try {
+            // Format date as YYYY-MM-DD
+            const dateStr = selectedDate.toISOString().split('T')[0];
 
-        // Simulate a brief loading delay for better UX
-        await new Promise(resolve => setTimeout(resolve, 300));
+            // Fetch real availability from API
+            const response = await fetch(`/api/availability?date=${dateStr}&duration=${selectedDuration}`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch availability');
+            }
+
+            // Convert API slots to modal format
+            this.modalState.timeSlots = data.slots.map(slot => {
+                const [hour, minute] = slot.start.split(':').map(Number);
+                return {
+                    hour,
+                    minute,
+                    available: slot.available
+                };
+            });
+        } catch (error) {
+            console.error('Error fetching availability:', error);
+            // Fall back to generating slots locally (all available) if API fails
+            this.modalState.timeSlots = this.generateTimeSlots(selectedDuration);
+        }
 
         if (this.modalElements.timeslotLoading) this.modalElements.timeslotLoading.classList.add('hidden');
         this.renderModalTimeSlots();
     }
 
     generateTimeSlots(duration) {
+        // Fallback: generate slots locally (used if API fails)
         const slots = [];
         const startHour = 7; // 7 AM
         const endHour = 24; // 12 AM (midnight)
@@ -3063,7 +3087,7 @@ class TourCalendar {
                     slots.push({
                         hour,
                         minute,
-                        available: true // In a real app, check against API
+                        available: true // Fallback assumes all available
                     });
                 }
             }
@@ -3244,10 +3268,12 @@ class TourCalendar {
 
         // Build booking data
         const { selectedDate, selectedDuration, selectedTime } = this.modalState;
+        // Convert time to 24-hour format (HH:MM) for API compatibility
+        const time24h = `${selectedTime.hour.toString().padStart(2, '0')}:${selectedTime.minute.toString().padStart(2, '0')}`;
         const bookingData = {
             date: selectedDate?.toISOString().split('T')[0],
             duration: selectedDuration,
-            time: this.formatTime(selectedTime.hour, selectedTime.minute),
+            time: time24h,
             contactName: this.modalElements.contactName?.value.trim(),
             contactPhone: this.modalElements.contactPhone?.value.trim(),
             contactEmail: this.modalElements.contactEmail?.value.trim(),
@@ -3261,24 +3287,37 @@ class TourCalendar {
         };
 
         try {
-            // Try to use the API client if available, otherwise simulate success
             const response = await fetch('/api/book', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(bookingData)
             });
 
-            // Show success regardless (for demo purposes, in production check response)
+            const result = await response.json();
+
+            if (!response.ok) {
+                // Handle specific error cases
+                if (response.status === 409) {
+                    alert('This time slot is no longer available. Please select a different time.');
+                } else if (response.status === 400 && result.details) {
+                    const errorMessages = Object.values(result.details).join('\n');
+                    alert(`Validation error:\n${errorMessages}`);
+                } else {
+                    alert(result.error || 'Failed to submit booking. Please try again.');
+                }
+                return;
+            }
+
             this.showModalSuccess();
         } catch (error) {
-            console.log('Booking submitted (demo mode):', bookingData);
-            // Show success even if API fails (for demo/development)
-            this.showModalSuccess();
-        }
-
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit Booking Request';
+            console.error('Booking error:', error);
+            alert('Failed to submit booking. Please check your connection and try again.');
+            return;
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Booking Request';
+            }
         }
     }
 
