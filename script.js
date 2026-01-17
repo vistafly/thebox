@@ -155,9 +155,20 @@ function initLogoMorph() {
     // Calculate end position (in navbar)
     function calculateEndPosition() {
         const cfg = getResponsiveConfig();
-        const headerRect = header ? header.getBoundingClientRect() : { top: 0, height: 80 };
 
-        // Calculate center point of the morphed logo in navbar
+        // Get the actual position of the logo-mobile element for accurate targeting
+        if (logoMobile) {
+            const logoMobileRect = logoMobile.getBoundingClientRect();
+            // Target the center of where the nav logo appears
+            return {
+                x: logoMobileRect.left + logoMobileRect.width / 2,
+                y: logoMobileRect.top + logoMobileRect.height / 2,
+                scale: cfg.endScale
+            };
+        }
+
+        // Fallback if logo-mobile not found
+        const headerRect = header ? header.getBoundingClientRect() : { top: 0, height: 80 };
         return {
             x: cfg.endX + (startPosition.width * cfg.endScale) / 2,
             y: headerRect.top + cfg.endY + (startPosition.width * cfg.endScale) / 2,
@@ -1202,18 +1213,24 @@ function initScrollAnimations() {
     
     // Member cards
     gsap.utils.toArray('.member-card').forEach((card, index) => {
-        gsap.from(card, {
-            scrollTrigger: {
-                trigger: card,
-                start: 'top 85%',
-                toggleActions: 'play none none reverse'
+        gsap.fromTo(card,
+            {
+                y: 40,
+                opacity: 0
             },
-            y: 50,
-            opacity: 0,
-            duration: 0.8,
-            delay: index * 0.15,
-            ease: 'power2.out'
-        });
+            {
+                scrollTrigger: {
+                    trigger: card,
+                    start: 'top 85%',
+                    once: true
+                },
+                y: 0,
+                opacity: 1,
+                duration: 0.5,
+                ease: 'power2.out',
+                immediateRender: false
+            }
+        );
     });
     
     // Music player
@@ -2062,8 +2079,8 @@ if (document.readyState !== 'loading') {
         const isMobileViewport = viewportWidth <= 1024;
 
         // Scrub value - higher = more dampened/slower response to scroll
-        // Mobile gets higher scrub for smoother, more controlled feel
-        const mainScrubValue = isMobileViewport ? 2.5 : 1.5;
+        // Mobile gets much higher scrub for smoother, more controlled feel
+        const mainScrubValue = isMobileViewport ? 4.5 : 1.5;
 
         // Timeline with hold periods at each member
         const tl = gsap.timeline({
