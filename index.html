@@ -1152,6 +1152,56 @@
     let calendar;
     let placesAutocomplete;
 
+    // DEBUG: Auto-fill form with test data (Ctrl+Shift+D) - REMOVE FOR PRODUCTION
+    function debugFillForm() {
+        // Fill contact info
+        elements.contactName.value = 'Test User';
+        elements.contactPhone.value = '(555) 123-4567';
+        elements.contactEmail.value = 'test@example.com';
+
+        // Fill event details
+        elements.eventType.value = 'Private Party';
+        elements.venueName.value = 'Test Venue';
+        elements.venueAddress.value = '123 Test Street, Fresno, CA 93701';
+        elements.expectedAttendance.value = '100';
+        elements.budgetRange.value = '$1,000-$2,500';
+        elements.soundSystem.value = 'Yes';
+        elements.stageSize.value = '10x10';
+        elements.eventDescription.value = 'This is a test booking for debugging purposes. Please ignore this submission.';
+        elements.referralSource.value = 'Google Search';
+
+        // Select a date (tomorrow)
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 7);
+        state.selectedDate = tomorrow;
+        if (calendar) {
+            calendar.selectedDate = tomorrow;
+            calendar.render();
+        }
+
+        // Select duration and trigger time slot fetch
+        state.selectedDuration = 2;
+        if (elements.durationInput) elements.durationInput.value = '2';
+        document.querySelectorAll('.booking-duration-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            if (btn.dataset.duration === '2') btn.classList.add('selected');
+        });
+        elements.durationSection.classList.remove('hidden');
+
+        // Fetch time slots
+        fetchTimeSlots(tomorrow, 2);
+
+        console.log('🐛 Debug: Form auto-filled with test data');
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+            e.preventDefault();
+            debugFillForm();
+        }
+    });
+    // END DEBUG
+
     async function initialize() {
         if (!elements.calendarDays) return; // Exit if booking section not present
 
@@ -1543,6 +1593,7 @@
 </footer>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

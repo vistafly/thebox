@@ -30,7 +30,7 @@ const isMobile = {
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize GSAP
-    gsap.registerPlugin(ScrollTrigger);
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
     // Configure ScrollTrigger for mobile devices
     // Note: normalizeScroll() is intentionally NOT used as it causes crashes on iOS Safari
@@ -40,11 +40,6 @@ document.addEventListener('DOMContentLoaded', function() {
             ignoreMobileResize: true,
             autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
             syncInterval: 100  // Reduce sync frequency for better performance
-        });
-
-        // Set default fastScrollEnd for all ScrollTriggers on mobile
-        ScrollTrigger.defaults({
-            fastScrollEnd: true
         });
     }
 
@@ -1228,9 +1223,10 @@ function initSmoothScrolling() {
 
             // Special handling for home/hero - always scroll to very top
             if (href === '#hero') {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
+                gsap.to(window, {
+                    scrollTo: 0,
+                    duration: 1.2,
+                    ease: 'power2.inOut'
                 });
                 return;
             }
@@ -1247,10 +1243,42 @@ function initSmoothScrolling() {
 
                 // Calculate position
                 const targetPosition = target.offsetTop + offset;
+                const currentScroll = window.scrollY;
+                const scrollDistance = Math.abs(targetPosition - currentScroll);
 
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
+                // Check if scroll will pass through members section
+                const membersSection = document.getElementById('members');
+
+                if (membersSection) {
+                    const membersStart = membersSection.offsetTop;
+                    const membersEnd = membersStart + membersSection.offsetHeight;
+
+                    // If scrolling through members section (either direction)
+                    const willPassMembers = (currentScroll < membersEnd && targetPosition > membersStart) ||
+                                           (currentScroll > membersStart && targetPosition < membersEnd);
+
+                    if (willPassMembers) {
+                        // Calculate duration based on distance for smooth, cinematic scroll
+                        // Longer duration = smoother feel through members
+                        const baseDuration = 1.5;
+                        const extraDuration = Math.min(scrollDistance / 3000, 1.5);
+                        const duration = baseDuration + extraDuration;
+
+                        // Use GSAP scrollTo for buttery smooth scroll through members
+                        gsap.to(window, {
+                            scrollTo: targetPosition,
+                            duration: duration,
+                            ease: 'power1.inOut'
+                        });
+                        return;
+                    }
+                }
+
+                // Standard smooth scroll for other cases
+                gsap.to(window, {
+                    scrollTo: targetPosition,
+                    duration: 1,
+                    ease: 'power2.inOut'
                 });
             }
         });
@@ -2018,6 +2046,9 @@ if (document.readyState !== 'loading') {
     const track = section.querySelector('.band-showcase-track');
     if (!track) return;
 
+    const wrapper = section.querySelector('.band-showcase-wrapper');
+    if (!wrapper) return;
+
     const panels = track.querySelectorAll('.showcase-panel');
 
     function setupShowcase() {
@@ -2046,32 +2077,33 @@ if (document.readyState !== 'loading') {
         // Device detection - use viewport width for consistent behavior with CSS breakpoints
         const isMobileViewport = viewportWidth <= 1024;
 
-        // Scrub value - lower = more responsive, higher = more dampened
-        // Mobile: reduced from 4.5 to 2 for more responsive feel while maintaining smoothness
-        const mainScrubValue = isMobileViewport ? 2 : 1.2;
+        // Store current scroll to restore after setup if needed
+        const currentScroll = window.scrollY;
 
-        // Timeline with hold periods at each member
+        // Temporarily scroll to top for accurate pin calculation
+        window.scrollTo(0, 0);
+
+        // Timeline with hold periods at each member for "settle" effect
         const tl = gsap.timeline({
             scrollTrigger: {
-                trigger: '#members',
+                trigger: section,
                 start: 'top top',
                 end: 'bottom bottom',
-                scrub: mainScrubValue,
-                pin: '#members .band-showcase-wrapper',
-                anticipatePin: 1,
+                scrub: 0.8,
+                pin: wrapper,
+                pinSpacing: false,
                 invalidateOnRefresh: true,
-                fastScrollEnd: true,  // Settles quickly when scroll stops
-                preventOverlaps: true  // Prevents animation conflicts
+                id: 'members-horizontal'
             }
         });
 
-        // Hold duration at each member - creates the "settle" effect
-        const holdDuration = 0.6;
+        // Hold duration at each member - creates the "settle/dampen" effect
+        const holdDuration = 0.5;
         // Transition duration between members
         const transitionDuration = 1;
 
         // Hold on first panel before any transitions
-        tl.to(track, { x: 0, duration: holdDuration, ease: 'none' }, 0);
+        tl.to(track, { x: 0, duration: holdDuration, ease: 'none', force3D: true }, 0);
 
         // Build transitions with holds at each member
         for (let i = 1; i <= numTransitions; i++) {
@@ -2081,11 +2113,12 @@ if (document.readyState !== 'loading') {
             tl.to(track, {
                 x: targetX,
                 ease: 'power2.inOut',
-                duration: transitionDuration
+                duration: transitionDuration,
+                force3D: true
             });
 
-            // Hold at this member position
-            tl.to(track, { x: targetX, duration: holdDuration, ease: 'none' });
+            // Hold at this member position (dampening effect)
+            tl.to(track, { x: targetX, duration: holdDuration, ease: 'none', force3D: true });
         }
 
         // Set all panels visible
@@ -2094,6 +2127,14 @@ if (document.readyState !== 'loading') {
             const info = panel.querySelector('.showcase-member-info');
             if (artist) gsap.set(artist, { opacity: 1, scale: 1 });
             if (info) gsap.set(info, { opacity: 1 });
+        });
+
+        // Refresh and restore scroll position after setup
+        requestAnimationFrame(() => {
+            ScrollTrigger.refresh(true);
+            if (currentScroll > 0) {
+                window.scrollTo(0, currentScroll);
+            }
         });
 
         // Handle resize and orientation changes
@@ -2840,7 +2881,73 @@ class TourCalendar {
 
         // Submit button
         submitBtn?.addEventListener('click', () => this.handleModalSubmit());
+
+        // DEBUG: Ctrl+Shift+D to auto-fill modal form - REMOVE FOR PRODUCTION
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'D' && this.bookingModal?.classList.contains('active')) {
+                e.preventDefault();
+                this.debugFillModalForm();
+            }
+        });
     }
+
+    // DEBUG: Auto-fill modal with test data - REMOVE FOR PRODUCTION
+    debugFillModalForm() {
+        if (!this.modalElements) return;
+
+        // Set a date if not already set
+        if (!this.modalState.selectedDate) {
+            const nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            this.modalState.selectedDate = nextWeek;
+            if (this.modalElements.selectedDate) {
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                this.modalElements.selectedDate.textContent = nextWeek.toLocaleDateString('en-US', options);
+            }
+        }
+
+        // Select duration (2 hours)
+        this.modalState.selectedDuration = 2;
+        if (this.modalElements.durationBtns) {
+            this.modalElements.durationBtns.forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.dataset.duration === '2') btn.classList.add('selected');
+            });
+        }
+
+        // Generate and select a time slot
+        this.modalState.timeSlots = this.generateTimeSlots(2);
+        this.modalState.selectedTime = { hour: 19, minute: 0 }; // 7:00 PM
+        if (this.modalElements.timeslotSection) this.modalElements.timeslotSection.classList.remove('hidden');
+        this.renderModalTimeSlots();
+        // Mark the 7 PM slot as selected
+        setTimeout(() => {
+            const grid = this.modalElements.timeslotGrid;
+            if (grid) {
+                grid.querySelectorAll('.modal-timeslot-btn').forEach(btn => {
+                    if (btn.textContent === '7:00 PM') btn.classList.add('selected');
+                });
+            }
+        }, 50);
+
+        this.updateModalContinueButton();
+
+        // Fill contact info
+        if (this.modalElements.contactName) this.modalElements.contactName.value = 'Test User';
+        if (this.modalElements.contactPhone) this.modalElements.contactPhone.value = '(555) 123-4567';
+        if (this.modalElements.contactEmail) this.modalElements.contactEmail.value = 'test@example.com';
+
+        // Fill event details
+        if (this.modalElements.eventType) this.modalElements.eventType.value = 'Private Party';
+        if (this.modalElements.venueName) this.modalElements.venueName.value = 'Test Venue';
+        if (this.modalElements.venueAddress) this.modalElements.venueAddress.value = '123 Test Street, Fresno, CA 93701';
+        if (this.modalElements.attendance) this.modalElements.attendance.value = '100';
+        if (this.modalElements.budget) this.modalElements.budget.value = '$1,000 - $2,500';
+        if (this.modalElements.description) this.modalElements.description.value = 'This is a test booking for debugging purposes. Please ignore this submission.';
+
+        console.log('🐛 Debug: Modal form auto-filled with test data');
+    }
+    // END DEBUG
 
     openBookingModalForDate(date) {
         if (!this.bookingModal || !this.modalElements || !date) return;

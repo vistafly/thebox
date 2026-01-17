@@ -22,12 +22,22 @@ function validateBooking(data) {
     errors.contactName = 'Contact name is required';
   }
 
-  if (!data.contactPhone || !/^\d{10}$/.test(data.contactPhone.replace(/\D/g, ''))) {
-    errors.contactPhone = 'Valid 10-digit phone number required';
-  }
+  // Phone and Email - at least one required
+  const hasPhone = data.contactPhone && data.contactPhone.trim();
+  const hasEmail = data.contactEmail && data.contactEmail.trim();
 
-  if (!data.contactEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contactEmail)) {
-    errors.contactEmail = 'Valid email address required';
+  if (!hasPhone && !hasEmail) {
+    errors.contactPhone = 'Please provide phone or email';
+  } else {
+    // Validate phone format if provided
+    if (hasPhone && !/^\d{10}$/.test(data.contactPhone.replace(/\D/g, ''))) {
+      errors.contactPhone = 'Valid 10-digit phone number required';
+    }
+
+    // Validate email format if provided
+    if (hasEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contactEmail)) {
+      errors.contactEmail = 'Valid email address required';
+    }
   }
 
   if (!data.eventType) {
