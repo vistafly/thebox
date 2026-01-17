@@ -2809,10 +2809,10 @@ body.tour-active .logo-desktop {
     gap: 2.5rem;
     overflow-x: auto;
     overflow-y: visible;
-    scroll-snap-type: x mandatory;
-    scroll-snap-stop: always;
+    scroll-snap-type: x proximity;  /* Changed from mandatory - less aggressive snapping */
+    /* scroll-snap-stop removed - was causing forced stops on each card */
     -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
+    /* scroll-behavior: smooth removed - conflicts with native mobile scroll momentum */
     padding: 0 0 20px 0; /* Space for scrollbar */
 
     /* Modern scrollbar styles for desktop */
@@ -6360,6 +6360,7 @@ select.booking-form-input option {
 #members .band-showcase-wrapper {
     /* position: sticky removed - GSAP pin handles this */
     height: 100vh;
+    height: 100svh;  /* iOS Safari: use small viewport height to prevent jump when address bar hides */
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -6534,15 +6535,18 @@ select.booking-form-input option {
     #members .showcase-panel.showcase-member {
         /* Shift content upward to center member visually in viewport */
         padding-bottom: 15vh;
+        padding-bottom: 15svh;  /* iOS Safari: stable viewport height */
         box-sizing: border-box;
     }
     #members .showcase-artist {
         max-height: 50vh;
+        max-height: 50svh;  /* iOS Safari: stable viewport height */
         max-width: 90vw;
         margin-bottom: 15px;
     }
     #members .showcase-member-info {
         bottom: 16vh;
+        bottom: 16svh;  /* iOS Safari: stable viewport height */
         padding: 0 20px;
         padding-top: 20px;
     }
@@ -6582,16 +6586,18 @@ select.booking-form-input option {
     }
 }
 
-/* Extra small screens - increased scroll distance for slower feel */
+/* Extra small screens - consistent scroll distance for smooth transitions */
 @media (max-width: 480px) {
     #members.band-showcase-section {
-        height: 650vh;  /* More scroll distance for slower, smoother transitions on small phones */
+        height: 750vh;  /* Keep consistent with 768px breakpoint for smooth experience */
     }
     #members .showcase-panel.showcase-member {
         padding-bottom: 18vh;
+        padding-bottom: 18svh;  /* iOS Safari: stable viewport height */
     }
     #members .showcase-member-info {
         bottom: 18vh;
+        bottom: 18svh;  /* iOS Safari: stable viewport height */
     }
     /* Even simpler filters for small screens */
     #members .showcase-panel:nth-child(1) .showcase-artist {

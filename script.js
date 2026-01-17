@@ -38,7 +38,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isMobile.any()) {
         ScrollTrigger.config({
             ignoreMobileResize: true,
-            autoRefreshEvents: "visibilitychange,DOMContentLoaded,load"
+            autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+            syncInterval: 100  // Reduce sync frequency for better performance
+        });
+
+        // Set default fastScrollEnd for all ScrollTriggers on mobile
+        ScrollTrigger.defaults({
+            fastScrollEnd: true
         });
     }
 
@@ -728,57 +734,6 @@ function initPreloader() {
         }
     });
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-    const header = document.querySelector('.header');
-    if (!header) return;
-    
-    let lastScroll = 0;
-    const scrollThreshold = 10; // Increased threshold for better UX
-    const mobileBreakpoint = 768;
-    
-    function handleScroll() {
-        if (window.innerWidth > mobileBreakpoint) {
-            header.classList.remove('header--hidden', 'header--revealed');
-            return;
-        }
-        
-        const currentScroll = window.pageYOffset;
-        
-        // Skip minimal scroll movements
-        if (Math.abs(currentScroll - lastScroll) < scrollThreshold) return;
-        
-        if (currentScroll > lastScroll && currentScroll > 50) {
-            // Scrolling DOWN
-            header.classList.add('header--hidden');
-            header.classList.remove('header--revealed');
-        } else {
-            // Scrolling UP or at top
-            header.classList.remove('header--hidden');
-            if (currentScroll > 10) {
-                header.classList.add('header--revealed');
-            } else {
-                header.classList.remove('header--revealed');
-            }
-        }
-        
-        lastScroll = currentScroll;
-    }
-    
-    // Debounced resize handler
-    let resizeTimeout;
-    function handleResize() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            if (window.innerWidth > mobileBreakpoint) {
-                header.classList.remove('header--hidden', 'header--revealed');
-            }
-        }, 100);
-    }
-    
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleResize, { passive: true });
-});
 
 // Header Effects
 function initHeaderEffects() {
@@ -1537,6 +1492,38 @@ document.addEventListener('DOMContentLoaded', function() {
         nav.classList.toggle('active');
     });
 
+    // Close menu when clicking on links (mobile only)
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768) {
+                e.preventDefault();
+                const href = this.getAttribute('href');
+
+                // Close menu and reset body
+                menuToggle.classList.remove('active');
+                nav.classList.remove('active');
+                document.body.classList.remove('menu-open');
+                document.body.style.top = '';
+
+                // Scroll to target after body is unfixed
+                setTimeout(() => {
+                    if (href === '#hero') {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    } else {
+                        const target = document.querySelector(href);
+                        if (target) {
+                            const header = document.querySelector('.header');
+                            const headerHeight = header ? header.offsetHeight : 0;
+                            const targetPosition = target.offsetTop + (40 - headerHeight);
+                            window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+                        }
+                    }
+                }, 50);
+            }
+        });
+    });
+});
+
    // Tour Date Highlighting Functions (UNCHANGED)
 function highlightUpcomingDates() {
     const now = new Date();
@@ -2021,25 +2008,6 @@ if (document.readyState !== 'loading') {
     document.addEventListener('DOMContentLoaded', initTourFunctions);
 }
 
-    // Close menu when clicking on links (mobile only)
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', function() {
-            if (window.innerWidth <= 768) {
-                menuToggle.classList.remove('active');
-                nav.classList.remove('active');
-                document.body.classList.remove('menu-open');
-                // INSTANTLY restore scroll position for link clicks too
-                document.body.style.top = '';
-                document.documentElement.style.scrollBehavior = 'auto';
-                window.scrollTo(0, scrollPosition);
-                setTimeout(() => {
-                    document.documentElement.style.scrollBehavior = '';
-                }, 0);
-            }
-        });
-    });
-});
-
 // ==================== //
 // MEMBERS HORIZONTAL SCROLL SHOWCASE
 // ==================== //
@@ -2078,9 +2046,9 @@ if (document.readyState !== 'loading') {
         // Device detection - use viewport width for consistent behavior with CSS breakpoints
         const isMobileViewport = viewportWidth <= 1024;
 
-        // Scrub value - higher = more dampened/slower response to scroll
-        // Mobile gets much higher scrub for smoother, more controlled feel
-        const mainScrubValue = isMobileViewport ? 4.5 : 1.5;
+        // Scrub value - lower = more responsive, higher = more dampened
+        // Mobile: reduced from 4.5 to 2 for more responsive feel while maintaining smoothness
+        const mainScrubValue = isMobileViewport ? 2 : 1.2;
 
         // Timeline with hold periods at each member
         const tl = gsap.timeline({
@@ -2091,7 +2059,9 @@ if (document.readyState !== 'loading') {
                 scrub: mainScrubValue,
                 pin: '#members .band-showcase-wrapper',
                 anticipatePin: 1,
-                invalidateOnRefresh: true
+                invalidateOnRefresh: true,
+                fastScrollEnd: true,  // Settles quickly when scroll stops
+                preventOverlaps: true  // Prevents animation conflicts
             }
         });
 
