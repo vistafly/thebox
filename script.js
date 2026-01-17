@@ -1,5 +1,24 @@
 // script.js
 
+// Early preconnect to Google Maps domains for faster iframe loading
+// This runs immediately before DOM is ready to warm up connections
+(function() {
+    const preconnectUrls = [
+        'https://www.google.com',
+        'https://maps.googleapis.com',
+        'https://maps.gstatic.com'
+    ];
+    preconnectUrls.forEach(url => {
+        if (!document.querySelector(`link[href="${url}"][rel="preconnect"]`)) {
+            const link = document.createElement('link');
+            link.rel = 'preconnect';
+            link.href = url;
+            if (url.includes('gstatic')) link.crossOrigin = 'anonymous';
+            document.head.appendChild(link);
+        }
+    });
+})();
+
 // Mobile detection utility for conditional GSAP configuration
 const isMobile = {
     iOS: () => /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -57,102 +76,217 @@ document.getElementById('current-year').textContent = new Date().getFullYear();
     
 document.addEventListener('DOMContentLoaded', function() {
     initLogo3DEffect();
-    const heroSection = document.getElementById('hero');
+    initLogoMorph();
+});
+
+/**
+ * Logo Morph Animation System
+ * Smoothly morphs the hero logo into the navbar position on scroll
+ * Uses GPU-accelerated properties (transform, opacity) only
+ */
+function initLogoMorph() {
     const logo = document.querySelector('.logo-desktop');
+    const logoMobile = document.querySelector('.logo-mobile');
+    const heroSection = document.getElementById('hero');
+    const header = document.querySelector('.header');
 
-    if (!heroSection || !logo) return;
+    if (!logo || !heroSection) return;
 
-    // Configuration: 25% of hero height before hiding
-    const HIDE_THRESHOLD_PERCENT = 0.25;
-    const FAST_SCROLL_VELOCITY = 2.0; // px/ms - threshold for instant hide
+    // Check for reduced motion preference
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Calculate hide threshold in pixels
-    function getHideThreshold() {
-        return heroSection.offsetHeight * HIDE_THRESHOLD_PERCENT;
+    // Configuration
+    const config = {
+        scrollThreshold: 280, // pixels of scroll to complete morph (longer = smoother)
+        smoothing: 0.12, // interpolation factor for silky smooth movement (lower = smoother)
+        // Desktop end position (relative to viewport)
+        desktop: {
+            endX: 40, // pixels from left
+            endY: 25, // pixels from top (in header)
+            endScale: 0.15, // final scale factor
+        },
+        // Mobile end position
+        mobile: {
+            endX: 20, // pixels from left
+            endY: 15, // pixels from top
+            endScale: 0.24, // final scale factor (larger for mobile)
+        },
+        breakpoint: 1024, // px - below this uses mobile settings
+    };
+
+    // State
+    let isMorphComplete = false;
+    let startPosition = null;
+    let currentConfig = null;
+
+    // Smooth interpolation state (for buttery smooth animation)
+    let currentX = 0;
+    let currentY = 0;
+    let currentScale = 1;
+    let currentOpacity = 1;
+    let animationFrameId = null;
+
+    // Linear interpolation helper
+    function lerp(start, end, factor) {
+        return start + (end - start) * factor;
     }
 
-    // Check if user already scrolled past threshold on page load
-    const savedScrollState = localStorage.getItem('heroPassed') === 'true';
-    if (savedScrollState && window.scrollY > getHideThreshold()) {
-        document.body.classList.add('hero-passed');
+    // Smooth easing function (ease-in-out cubic for natural feel)
+    function easeInOutCubic(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     }
 
-    // Track animation state and scroll velocity
-    let ticking = false;
-    let lastScroll = window.scrollY;
-    let lastScrollTime = Date.now();
-    let fastScrollTimeout = null;
+    // Get current responsive config
+    function getResponsiveConfig() {
+        return window.innerWidth <= config.breakpoint ? config.mobile : config.desktop;
+    }
 
-    // Scroll handler with 25% hero threshold
-    function checkScroll() {
-        const currentScroll = window.scrollY;
-        const currentTime = Date.now();
-        const hideThreshold = getHideThreshold();
+    // Calculate start position (center of viewport)
+    function calculateStartPosition() {
+        const logoWidth = window.innerWidth <= 768 ? 250 : (window.innerWidth <= 1024 ? 300 : 500);
+        return {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            scale: 1,
+            width: logoWidth
+        };
+    }
 
-        // Calculate scroll velocity for fast-scroll detection
-        const scrollDelta = Math.abs(currentScroll - lastScroll);
-        const timeDelta = currentTime - lastScrollTime;
-        const scrollVelocity = timeDelta > 0 ? scrollDelta / timeDelta : 0;
+    // Calculate end position (in navbar)
+    function calculateEndPosition() {
+        const cfg = getResponsiveConfig();
+        const headerRect = header ? header.getBoundingClientRect() : { top: 0, height: 80 };
 
-        // Determine if logo should be hidden (scrolled past 25% of hero)
-        const shouldHide = currentScroll > hideThreshold;
+        // Calculate center point of the morphed logo in navbar
+        return {
+            x: cfg.endX + (startPosition.width * cfg.endScale) / 2,
+            y: headerRect.top + cfg.endY + (startPosition.width * cfg.endScale) / 2,
+            scale: cfg.endScale
+        };
+    }
 
-        if (shouldHide) {
-            document.body.classList.add('hero-passed');
+    // Calculate target values based on scroll position
+    function getTargetValues() {
+        const scrollY = window.scrollY;
+        startPosition = calculateStartPosition();
+        const endPosition = calculateEndPosition();
 
-            // Fast scroll = instant hide (skip animation)
-            if (scrollVelocity > FAST_SCROLL_VELOCITY) {
-                document.body.classList.add('fast-scroll');
+        // Calculate progress (0 to 1) with smooth easing
+        const rawProgress = Math.min(scrollY / config.scrollThreshold, 1);
+        const easedProgress = prefersReducedMotion ? (rawProgress >= 0.5 ? 1 : 0) : easeInOutCubic(rawProgress);
 
-                clearTimeout(fastScrollTimeout);
-                fastScrollTimeout = setTimeout(() => {
-                    document.body.classList.remove('fast-scroll');
-                }, 300);
+        // Calculate target positions
+        const targetX = lerp(0, endPosition.x - startPosition.x, easedProgress);
+        const targetY = lerp(0, endPosition.y - startPosition.y, easedProgress);
+        const targetScale = lerp(1, endPosition.scale, easedProgress);
+
+        // Opacity fades out in the last 30% of the animation (more gradual)
+        const targetOpacity = easedProgress > 0.7 ? lerp(1, 0, (easedProgress - 0.7) / 0.3) : 1;
+
+        return { targetX, targetY, targetScale, targetOpacity, progress: rawProgress };
+    }
+
+    // Continuous animation loop for buttery smooth interpolation
+    function animateLoop() {
+        const { targetX, targetY, targetScale, targetOpacity, progress } = getTargetValues();
+
+        // Smoothly interpolate current values towards targets
+        const smoothingFactor = config.smoothing;
+        currentX = lerp(currentX, targetX, smoothingFactor);
+        currentY = lerp(currentY, targetY, smoothingFactor);
+        currentScale = lerp(currentScale, targetScale, smoothingFactor);
+        currentOpacity = lerp(currentOpacity, targetOpacity, smoothingFactor);
+
+        // Snap to target when very close (prevents endless micro-animations)
+        if (Math.abs(currentX - targetX) < 0.01) currentX = targetX;
+        if (Math.abs(currentY - targetY) < 0.01) currentY = targetY;
+        if (Math.abs(currentScale - targetScale) < 0.0001) currentScale = targetScale;
+        if (Math.abs(currentOpacity - targetOpacity) < 0.001) currentOpacity = targetOpacity;
+
+        // Determine morph state
+        const isFullyMorphed = progress >= 1 && currentOpacity < 0.01;
+        const isAtStart = progress === 0 && Math.abs(currentX) < 0.1 && Math.abs(currentY) < 0.1;
+
+        if (isAtStart) {
+            // At top - reset everything
+            logo.classList.remove('morphing', 'morphed');
+            if (logoMobile) logoMobile.classList.remove('visible');
+            document.body.classList.remove('logo-morphed');
+            logo.style.transform = '';
+            logo.style.opacity = '';
+            isMorphComplete = false;
+        } else if (isFullyMorphed) {
+            // Morph complete
+            if (!isMorphComplete) {
+                isMorphComplete = true;
+                logo.classList.remove('morphing');
+                logo.classList.add('morphed');
+                document.body.classList.add('logo-morphed');
+                if (logoMobile) logoMobile.classList.add('visible');
             }
-
-            localStorage.setItem('heroPassed', 'true');
         } else {
-            // Scrolled back into safe zone - fade logo back in
-            clearTimeout(fastScrollTimeout);
-            document.body.classList.remove('hero-passed', 'fast-scroll');
-            localStorage.setItem('heroPassed', 'false');
+            // Morphing in progress
+            isMorphComplete = false;
+            logo.classList.add('morphing');
+            logo.classList.remove('morphed');
+            if (logoMobile) logoMobile.classList.remove('visible');
+            document.body.classList.remove('logo-morphed');
+
+            // Apply smooth transform (GPU-accelerated)
+            logo.style.transform = `translate(${currentX}px, ${currentY}px) translate(-50%, -50%) scale(${currentScale})`;
+            logo.style.opacity = currentOpacity;
         }
 
-        lastScroll = currentScroll;
-        lastScrollTime = currentTime;
-        ticking = false;
+        // Continue animation loop
+        animationFrameId = requestAnimationFrame(animateLoop);
     }
 
-    // Use requestAnimationFrame for smooth performance
-    function requestTick() {
-        if (!ticking) {
-            requestAnimationFrame(checkScroll);
-            ticking = true;
+    // Start/stop animation based on visibility
+    function startAnimation() {
+        if (!animationFrameId) {
+            animationFrameId = requestAnimationFrame(animateLoop);
         }
     }
 
-    // Optimized scroll event
-    window.addEventListener('scroll', requestTick, { passive: true });
-
-    // IntersectionObserver as backup - only for when logo leaves hero entirely
-    const observer = new IntersectionObserver((entries) => {
-        const heroEntry = entries[0];
-        const hideThreshold = getHideThreshold();
-
-        // If hero is mostly out of view and we're scrolled past threshold, ensure hidden
-        if (heroEntry.intersectionRatio < 0.5 && window.scrollY > hideThreshold) {
-            document.body.classList.add('hero-passed');
+    function stopAnimation() {
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
         }
-    }, {
-        threshold: [0, 0.25, 0.5, 0.75, 1],
-        rootMargin: '0px'
+    }
+
+    // Handle resize - recalculate positions
+    function handleResize() {
+        startPosition = calculateStartPosition();
+        currentConfig = getResponsiveConfig();
+    }
+
+    // Initialize positions
+    startPosition = calculateStartPosition();
+    currentConfig = getResponsiveConfig();
+
+    // Initialize current values based on scroll position
+    const initialValues = getTargetValues();
+    currentX = initialValues.targetX;
+    currentY = initialValues.targetY;
+    currentScale = initialValues.targetScale;
+    currentOpacity = initialValues.targetOpacity;
+
+    // Resize listener
+    window.addEventListener('resize', handleResize, { passive: true });
+
+    // Use visibility API to pause animation when tab is hidden (performance)
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            stopAnimation();
+        } else {
+            startAnimation();
+        }
     });
 
-    observer.observe(heroSection);
-
-    // Initial check
-    checkScroll();
-});
+    // Start the smooth animation loop
+    startAnimation();
+}
 
 
 function initLogo3DEffect() {
@@ -195,6 +329,7 @@ function initLogo3DEffect() {
     let swipeVelocityX = 0;
     let swipeVelocityY = 0;
     let isTouching = false;
+    let isTouchingLogo = false; // Track if touch started on logo (prevents scroll)
 
     // Tap bounce state
     let currentScale = 1;
@@ -234,6 +369,19 @@ function initLogo3DEffect() {
         targetRotationX = -normalizedY * config.maxRotation;
     }
 
+    // Check if touch point is on the logo element
+    function isTouchOnLogo(touch) {
+        const logoRect = logo.getBoundingClientRect();
+        // Add some padding for easier touch targeting
+        const padding = 20;
+        return (
+            touch.clientX >= logoRect.left - padding &&
+            touch.clientX <= logoRect.right + padding &&
+            touch.clientY >= logoRect.top - padding &&
+            touch.clientY <= logoRect.bottom + padding
+        );
+    }
+
     // Touch start - record initial position
     function handleTouchStart(e) {
         if (e.touches.length === 0) return;
@@ -247,6 +395,9 @@ function initLogo3DEffect() {
         lastTouchY = touch.clientY;
         touchStartTime = Date.now();
         isTouching = true;
+
+        // Check if touch started on the logo (prevents scroll while swiping)
+        isTouchingLogo = isTouchOnLogo(touch);
 
         // Reset swipe velocity on new touch
         swipeVelocityX = 0;
@@ -263,6 +414,12 @@ function initLogo3DEffect() {
         // Calculate movement delta (swipe direction)
         const deltaX = touch.clientX - lastTouchX;
         const deltaY = touch.clientY - lastTouchY;
+
+        // Prevent scroll if user is touching and swiping the logo (any direction)
+        // This allows the 3D tilt effect without page scrolling
+        if (isTouchingLogo) {
+            e.preventDefault();
+        }
 
         // Update swipe velocity based on direction
         // Positive deltaX (swipe right) = tilt right (positive rotateY)
@@ -299,6 +456,7 @@ function initLogo3DEffect() {
         }
 
         isTouching = false;
+        isTouchingLogo = false;
     }
 
     // Tap bounce effect
@@ -313,9 +471,10 @@ function initLogo3DEffect() {
 
     // Animation loop - synced to requestAnimationFrame
     function animate(time) {
-        // Stop if logo is hidden
-        if (document.body.classList.contains('hero-passed')) {
-            logo.style.transform = 'translate(-50%, -50%)';
+        // Stop 3D effect if logo is morphing or morphed (morph animation controls transform)
+        const isMorphing = logo.classList.contains('morphing') || logo.classList.contains('morphed') || document.body.classList.contains('logo-morphed');
+        if (isMorphing) {
+            // Reset 3D effect state but don't override morph transform
             currentRotationX = 0;
             currentRotationY = 0;
             targetRotationX = 0;
@@ -386,8 +545,9 @@ function initLogo3DEffect() {
         document.addEventListener('mousemove', handleMouseMove, { passive: true });
 
         // Touch events (mobile) - swipe direction based
+        // Note: touchmove is non-passive to allow preventDefault when swiping the logo
         document.addEventListener('touchstart', handleTouchStart, { passive: true });
-        document.addEventListener('touchmove', handleTouchMove, { passive: true });
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
         document.addEventListener('touchend', handleTouchEnd, { passive: true });
         document.addEventListener('touchcancel', handleTouchEnd, { passive: true });
 
@@ -625,7 +785,7 @@ function initPreloader() {
     const logoPath = document.querySelector('.logo-path');
     const logoText = document.querySelector('.logo-text');
     const progressFill = document.querySelector('.progress-fill');
-    
+
     if (!loader) return;
 
     // Create animation timeline
@@ -1893,18 +2053,17 @@ if (document.readyState !== 'loading') {
         // Calculate total scroll distance based on track width
         const totalWidth = track.scrollWidth;
         const viewportWidth = window.innerWidth;
-        const panelWidth = totalWidth / panels.length;
 
         // Total scroll distance
         const scrollAmount = totalWidth - viewportWidth;
         const numTransitions = panels.length - 1;
 
-        // Device detection
-        const isMobileDevice = isMobile.any();
+        // Device detection - use viewport width for consistent behavior with CSS breakpoints
+        const isMobileViewport = viewportWidth <= 1024;
 
-        // Scrub value - higher = more dampening to prevent overshoot on fast scroll
-        // This only affects the members section, not other sections
-        const mainScrubValue = isMobileDevice ? 2.5 : 3.5;
+        // Scrub value - higher = more dampened/slower response to scroll
+        // Mobile gets higher scrub for smoother, more controlled feel
+        const mainScrubValue = isMobileViewport ? 2.5 : 1.5;
 
         // Timeline with hold periods at each member
         const tl = gsap.timeline({
@@ -1920,7 +2079,6 @@ if (document.readyState !== 'loading') {
         });
 
         // Hold duration at each member - creates the "settle" effect
-        // Higher = more scroll required to move past each member
         const holdDuration = 0.6;
         // Transition duration between members
         const transitionDuration = 1;
@@ -1932,7 +2090,7 @@ if (document.readyState !== 'loading') {
         for (let i = 1; i <= numTransitions; i++) {
             const targetX = -(scrollAmount * (i / numTransitions));
 
-            // Transition to next member with easing that slows at the end
+            // Transition to next member with easing
             tl.to(track, {
                 x: targetX,
                 ease: 'power2.inOut',
@@ -1943,7 +2101,7 @@ if (document.readyState !== 'loading') {
             tl.to(track, { x: targetX, duration: holdDuration, ease: 'none' });
         }
 
-        // Set all panels visible - simple and stable
+        // Set all panels visible
         panels.forEach((panel) => {
             const artist = panel.querySelector('.showcase-artist');
             const info = panel.querySelector('.showcase-member-info');
@@ -1960,7 +2118,7 @@ if (document.readyState !== 'loading') {
             }, 250);
         });
 
-        // Handle orientation change on mobile (needs longer delay for dimensions to settle)
+        // Handle orientation change on mobile
         window.addEventListener('orientationchange', () => {
             setTimeout(() => {
                 ScrollTrigger.refresh(true);
@@ -1983,62 +2141,175 @@ class MapLazyLoader {
     constructor() {
         this.maps = document.querySelectorAll('.lazy-map');
         this.loadedMaps = new Set();
+        this.loadingMaps = new Set();
+        this.pendingQueue = [];
         this.observer = null;
+        this.maxConcurrentLoads = 2; // Only load 2 maps at a time
         this.init();
     }
 
     init() {
         if (this.maps.length === 0) return;
 
+        // Add loading placeholders to all map containers
+        this.maps.forEach(map => this.addLoadingPlaceholder(map));
+
         // Check for slow connection - defer loading more aggressively
         const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
         const isSlowConnection = connection && (connection.saveData || connection.effectiveType === '2g');
 
+        // Reduce concurrent loads on slow connections
+        if (isSlowConnection) {
+            this.maxConcurrentLoads = 1;
+        }
+
         if ('IntersectionObserver' in window) {
             const options = {
-                root: document.querySelector('.tour-grid'),
-                // Reduced from 200px to 100px, even smaller on slow connections
-                rootMargin: isSlowConnection ? '50px' : '100px',
+                root: null, // Use viewport instead of tour-grid for better detection
+                rootMargin: isSlowConnection ? '50px' : '150px',
                 threshold: 0.01
             };
 
             this.observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        // Use requestIdleCallback for non-critical loading
-                        if ('requestIdleCallback' in window) {
-                            requestIdleCallback(() => this.loadMap(entry.target), { timeout: 2000 });
-                        } else {
-                            this.loadMap(entry.target);
-                        }
+                    if (entry.isIntersecting && !this.loadedMaps.has(entry.target) && !this.loadingMaps.has(entry.target)) {
+                        this.queueMap(entry.target);
                     }
                 });
             }, options);
 
             this.maps.forEach(map => this.observer.observe(map));
         } else {
-            // Fallback: load first 2 maps, defer rest
+            // Fallback: staggered loading for browsers without IntersectionObserver
             this.maps.forEach((map, index) => {
-                if (index < 2) {
-                    this.loadMap(map);
-                } else {
-                    setTimeout(() => this.loadMap(map), 1000 + (index * 500));
-                }
+                setTimeout(() => this.queueMap(map), index * 800);
             });
         }
     }
 
+    addLoadingPlaceholder(iframe) {
+        const container = iframe.closest('.venue-map-container');
+        if (!container || container.querySelector('.map-loading-placeholder')) return;
+
+        const placeholder = document.createElement('div');
+        placeholder.className = 'map-loading-placeholder';
+        placeholder.innerHTML = `
+            <div class="map-loading-spinner"></div>
+            <span class="map-loading-text">Loading map...</span>
+        `;
+        container.appendChild(placeholder);
+    }
+
+    removeLoadingPlaceholder(iframe) {
+        const container = iframe.closest('.venue-map-container');
+        if (!container) return;
+
+        const placeholder = container.querySelector('.map-loading-placeholder');
+        if (placeholder) {
+            placeholder.classList.add('fade-out');
+            setTimeout(() => placeholder.remove(), 300);
+        }
+    }
+
+    queueMap(iframe) {
+        if (this.loadedMaps.has(iframe) || this.loadingMaps.has(iframe)) return;
+
+        if (!this.pendingQueue.includes(iframe)) {
+            this.pendingQueue.push(iframe);
+        }
+
+        this.processQueue();
+    }
+
+    processQueue() {
+        while (this.loadingMaps.size < this.maxConcurrentLoads && this.pendingQueue.length > 0) {
+            const iframe = this.pendingQueue.shift();
+            if (iframe && !this.loadedMaps.has(iframe) && !this.loadingMaps.has(iframe)) {
+                this.loadMap(iframe);
+            }
+        }
+    }
+
     loadMap(iframe) {
-        if (this.loadedMaps.has(iframe)) return;
+        if (this.loadedMaps.has(iframe) || this.loadingMaps.has(iframe)) return;
 
         const src = iframe.dataset.src;
-        if (src) {
-            iframe.src = src;
+        if (!src) return;
+
+        this.loadingMaps.add(iframe);
+
+        // Set up load handlers before setting src
+        const onLoad = () => {
+            this.loadingMaps.delete(iframe);
             this.loadedMaps.add(iframe);
+            this.removeLoadingPlaceholder(iframe);
+            iframe.classList.add('loaded');
+
             if (this.observer) {
                 this.observer.unobserve(iframe);
             }
+
+            // Process next map in queue
+            this.processQueue();
+
+            // Clean up listeners
+            iframe.removeEventListener('load', onLoad);
+            iframe.removeEventListener('error', onError);
+        };
+
+        const onError = () => {
+            this.loadingMaps.delete(iframe);
+            this.removeLoadingPlaceholder(iframe);
+
+            // Add error state to container
+            const container = iframe.closest('.venue-map-container');
+            if (container) {
+                container.classList.add('map-error');
+                container.innerHTML = `
+                    <div class="map-error-message">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Map unavailable</span>
+                    </div>
+                `;
+            }
+
+            // Process next map in queue
+            this.processQueue();
+
+            iframe.removeEventListener('load', onLoad);
+            iframe.removeEventListener('error', onError);
+        };
+
+        iframe.addEventListener('load', onLoad);
+        iframe.addEventListener('error', onError);
+
+        // Use requestIdleCallback for better performance if available
+        const loadFn = () => { iframe.src = src; };
+
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(loadFn, { timeout: 1000 });
+        } else {
+            setTimeout(loadFn, 0);
         }
+    }
+
+    // Called during splash screen to warm up Google Maps connection
+    static preconnect() {
+        // These are already in HTML, but we can verify they exist
+        const preconnectUrls = [
+            'https://www.google.com',
+            'https://maps.googleapis.com',
+            'https://maps.gstatic.com'
+        ];
+
+        preconnectUrls.forEach(url => {
+            if (!document.querySelector(`link[href="${url}"][rel="preconnect"]`)) {
+                const link = document.createElement('link');
+                link.rel = 'preconnect';
+                link.href = url;
+                document.head.appendChild(link);
+            }
+        });
     }
 }
 
@@ -2195,15 +2466,21 @@ class TourCalendar {
             btn.classList.toggle('active', btn.getAttribute('data-view') === view);
         });
 
+        // Get tour dots element (created by TourAutoScroll)
+        const tourDots = document.querySelector('.tour-dots');
+
         // Show/hide views
         if (view === 'calendar') {
             this.calendarView.style.display = 'block';
             this.listView.style.display = 'none';
+            if (tourDots) tourDots.style.display = 'none';
             this.renderCalendar();
         } else {
             this.calendarView.style.display = 'none';
             // Restore list view - remove inline style to use CSS defaults
             this.listView.style.display = '';
+            // Restore tour dots visibility (CSS controls actual display based on screen size)
+            if (tourDots) tourDots.style.display = '';
         }
     }
 

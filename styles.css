@@ -294,24 +294,47 @@ body {
 }
 
 /* ==================== */
-/* MOBILE LOGO STYLING */
+/* NAVBAR LOGO STYLING  */
 /* ==================== */
+/* This logo appears in the navbar when the hero logo morphs */
 .logo-mobile {
-    display: none; /* Hidden by default (desktop) */
+    display: block; /* Always in DOM for morph target */
     position: relative;
     z-index: 1001;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease-out, visibility 0.15s;
 }
 
+/* Visible state when morph completes */
+.logo-mobile.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Desktop size */
 .logo-mobile img {
-    height: 80px; /* Smaller size for mobile header */
+    height: 60px;
     width: auto;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-    transition: transform 0.3s ease;
+    filter:
+        drop-shadow(0 0 8px rgba(97, 244, 87, 0.5))
+        drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    transition: transform 0.3s ease, filter 0.3s ease;
 }
 
 /* Mobile logo hover effects */
 .logo-mobile:hover img {
     transform: scale(1.05);
+    filter:
+        drop-shadow(0 0 12px rgba(97, 244, 87, 0.7))
+        drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+/* Reduced motion for mobile logo */
+@media (prefers-reduced-motion: reduce) {
+    .logo-mobile {
+        transition: none;
+    }
 }
 
 /* ===== GUARANTEED VISIBLE LOGO ===== */
@@ -343,28 +366,56 @@ body {
     backface-visibility: hidden;
 }
 
-/* Logo visibility states with smooth transitions */
+/* Logo visibility states - now controlled by JS morph animation */
 .logo-desktop {
   opacity: 1;
   visibility: visible;
-  transition: opacity 0.3s ease-out, transform 0.3s ease-out, visibility 0.3s;
+  /* Transform handled by JS during morph, fallback transition for non-morph states */
+  transition: opacity 0.2s ease-out;
 }
 
-/* Shrink + fade when scrolled past threshold */
-body.hero-passed .logo-desktop {
+/* When morphing is active, JS controls transform directly */
+.logo-desktop.morphing {
+  transition: none; /* JS handles all transforms */
+}
+
+/* Fully morphed state - logo is in navbar position */
+.logo-desktop.morphed {
+  pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  pointer-events: none;
-  transform: translate(-50%, -50%) scale(0.8) !important;
+  transition: opacity 0.15s ease-out, visibility 0.15s;
 }
 
-/* Instant hide for fast scroll and tour (no animation needed) */
-body.fast-scroll .logo-desktop,
+/* Show mobile logo when desktop logo is morphed */
+body.logo-morphed .logo-mobile {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Instant hide for tour sections (no morph animation needed) */
 body.tour-active .logo-desktop {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
   transition: none !important;
+}
+
+/* Reduced motion - instant swap instead of morph */
+@media (prefers-reduced-motion: reduce) {
+  .logo-desktop {
+    transition: none !important;
+  }
+
+  .logo-desktop.morphing {
+    transition: none !important;
+  }
+
+  /* For reduced motion, just fade between states */
+  body.logo-morphed .logo-desktop {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
 /* Float Animation */
@@ -383,19 +434,14 @@ body.tour-active .logo-desktop {
 /* MOBILE BREAKPOINT */
 /* ==================== */
 @media (max-width: 768px) {
-    /* Show mobile logo */
-    .logo-mobile {
-        display: block;
-    }
-
-    /* Keep desktop logo visible but smaller on mobile */
+    /* Smaller desktop logo for mobile morph animation */
     .logo-desktop {
-        width: 250px; /* Even smaller for mobile devices */
+        width: 250px;
     }
 
-    /* Adjust mobile logo size if needed */
+    /* Smaller navbar logo on mobile */
     .logo-mobile img {
-        height: 80px; /* Slightly smaller on very small devices */
+        height: 50px;
     }
 }
 
@@ -524,15 +570,14 @@ body.tour-active .logo-desktop {
 
 /* Mobile Menu */
 @media (max-width: 1024px) {
-    /* Show mobile logo */
-    .logo-mobile {
-        display: block;
-        z-index: 1001;
+    /* Tablet-size desktop logo for morph animation */
+    .logo-desktop {
+        width: 300px;
     }
 
-    /* Keep desktop logo visible on smaller screens */
-    .logo-desktop {
-        width: 300px; /* Smaller size for tablets and smaller laptops */
+    /* Tablet navbar logo size */
+    .logo-mobile img {
+        height: 55px;
     }
     
     /* Adjust header layout */
@@ -3974,14 +4019,16 @@ body.tour-active .logo-desktop {
 
 .tour-booking-modal-container {
     position: relative;
+    display: flex;
+    flex-direction: column;
     background: rgba(10, 10, 11, 0.98);
     border: 2px solid var(--erin);
     border-radius: 12px;
     max-width: 600px;
     width: 95%;
     max-height: 90vh;
-    overflow-y: auto;
-    padding: 1.5rem;
+    overflow: hidden;
+    padding: 0;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
 }
 
@@ -4010,9 +4057,16 @@ body.tour-active .logo-desktop {
 
 .tour-booking-modal-header {
     text-align: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
+    padding: 1.5rem 1.5rem 1rem;
     border-bottom: 1px solid rgba(97, 244, 87, 0.2);
+    flex-shrink: 0;
+}
+
+.tour-booking-modal-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    padding-bottom: 6rem;
 }
 
 .tour-booking-modal-header h3 {
@@ -4259,8 +4313,14 @@ body.tour-active .logo-desktop {
 .tour-booking-modal .modal-form-actions {
     display: flex;
     gap: 1rem;
-    margin-top: 1.5rem;
     justify-content: flex-end;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 11, 0.98);
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(97, 244, 87, 0.2);
 }
 
 .tour-booking-modal .modal-btn {
@@ -4332,7 +4392,6 @@ body.tour-active .logo-desktop {
         max-height: 100%;
         border-radius: 0;
         border: none;
-        border-top: 2px solid var(--erin);
     }
 
     .tour-booking-modal .modal-form-grid {
@@ -4340,12 +4399,24 @@ body.tour-active .logo-desktop {
     }
 
     .tour-booking-modal .modal-duration-row {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-wrap: nowrap;
+    }
+
+    .tour-booking-modal .modal-duration-quick {
+        flex-wrap: nowrap;
     }
 
     .tour-booking-modal .modal-duration-divider {
         display: none;
+    }
+
+    .tour-booking-modal .modal-duration-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .tour-booking-modal .modal-duration-input {
+        width: 60px;
     }
 
     .tour-booking-modal .modal-form-actions {
@@ -4457,6 +4528,11 @@ body.tour-active .logo-desktop {
         font-size: 0.55rem;
     }
 
+    .calendar-day-available {
+        font-size: 0.35rem;
+        letter-spacing: 0.2px;
+    }
+
     .calendar-event-popup {
         width: 240px;
         max-width: 80vw;
@@ -4527,6 +4603,11 @@ body.tour-active .logo-desktop {
 
     .calendar-day-events {
         font-size: 0.5rem;
+    }
+
+    .calendar-day-available {
+        font-size: 0.3rem;
+        letter-spacing: 0.1px;
     }
 }
 
@@ -4893,7 +4974,80 @@ animation: subtleGlow 8s ease-in-out infinite alternate;
     width: 100%;
     height: 100%;
     border: none;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+}
+
+.venue-map-container iframe.loaded {
+    opacity: 1;
+}
+
+/* Map Loading Placeholder */
+.map-loading-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(20, 20, 20, 0.98) 100%);
+    z-index: 2;
+    gap: 0.75rem;
+    transition: opacity 0.3s ease;
+}
+
+.map-loading-placeholder.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.map-loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(97, 244, 87, 0.2);
+    border-top-color: #61F457;
+    border-radius: 50%;
+    animation: mapSpinner 0.8s linear infinite;
+}
+
+@keyframes mapSpinner {
+    to { transform: rotate(360deg); }
+}
+
+.map-loading-text {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Map Error State */
+.venue-map-container.map-error {
+    background: linear-gradient(135deg, rgba(40, 40, 40, 0.9) 0%, rgba(30, 30, 30, 0.95) 100%);
+}
+
+.map-error-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.map-error-message i {
+    font-size: 1.5rem;
+    color: rgba(97, 244, 87, 0.4);
+}
+
+.map-error-message span {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 /* Responsive Enhancements */
@@ -5016,9 +5170,60 @@ animation: subtleGlow 8s ease-in-out infinite alternate;
     .venue-map-container {
         height: 130px;
     }
-    
+
     .cta {
         padding: 0 1.25rem 1.25rem 1.25rem;
+    }
+}
+
+/* Mobile Compact Tour Cards */
+@media (max-width: 480px) {
+    .tour-date .date {
+        padding: 0.75rem;
+    }
+
+    .tour-date .date .month {
+        font-size: 0.9rem;
+    }
+
+    .tour-date .date .day {
+        font-size: 1.75rem;
+    }
+
+    .tour-date .info {
+        padding: 1.1rem;
+        gap: 1rem;
+    }
+
+    .tour-date .venue-header {
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.4rem;
+    }
+
+    .tour-date .venue-desc {
+        font-size: 0.95rem;
+        line-height: 1.5;
+        padding: 0.4rem 0;
+    }
+
+    .tour-date .event-meta {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .tour-date .venue-address {
+        padding: 0.6rem 0.85rem;
+        font-size: 0.9rem;
+    }
+
+    .tour-date .venue-map-container {
+        height: 115px;
+        margin-top: 0.6rem;
+    }
+
+    .tour-date {
+        margin-top: 1.25rem;
+        margin-bottom: 1.25rem;
     }
 }
 
@@ -6132,8 +6337,7 @@ select.booking-form-input option {
 }
 
 #members .band-showcase-wrapper {
-    position: sticky;
-    top: 0;
+    /* position: sticky removed - GSAP pin handles this */
     height: 100vh;
     overflow: hidden;
     display: flex;
@@ -6296,9 +6500,15 @@ select.booking-form-input option {
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
 
+@media (max-width: 1024px) {
+    #members.band-showcase-section {
+        height: 650vh;  /* More scroll distance for dampened feel on tablets/mobile */
+    }
+}
+
 @media (max-width: 768px) {
     #members.band-showcase-section {
-        height: 400vh;
+        height: 550vh;  /* Increased for smoother scrolling */
     }
     #members .showcase-artist {
         max-height: 50vh;
@@ -6323,11 +6533,48 @@ select.booking-form-input option {
     #members .showcase-member-bio {
         font-size: clamp(0.85rem, 2.8vw, 1rem);
     }
+
+    /* Mobile-optimized filters - reduce GPU load */
+    #members .showcase-panel:nth-child(1) .showcase-artist {
+        filter: drop-shadow(0 0 30px rgba(201, 160, 85, 0.4));
+    }
+    #members .showcase-panel:nth-child(2) .showcase-artist {
+        filter: drop-shadow(0 0 30px rgba(192, 64, 88, 0.4));
+    }
+    #members .showcase-panel:nth-child(3) .showcase-artist {
+        filter: drop-shadow(0 0 30px rgba(48, 192, 184, 0.4));
+    }
+    #members .showcase-panel:nth-child(4) .showcase-artist {
+        filter: drop-shadow(0 0 30px rgba(106, 156, 120, 0.4));
+    }
+    #members .showcase-panel:nth-child(5) .showcase-artist {
+        filter: drop-shadow(0 0 30px rgba(58, 132, 179, 0.4));
+    }
+    #members .showcase-artist {
+        will-change: auto;  /* Disable will-change on mobile */
+        transition: transform 0.3s ease;  /* Remove filter transition */
+    }
 }
 
 /* Extra small screens - lighter scroll distance */
 @media (max-width: 480px) {
     #members.band-showcase-section {
-        height: 300vh;
+        height: 450vh;  /* Enough scroll distance for smooth member transitions */
+    }
+    /* Even simpler filters for small screens */
+    #members .showcase-panel:nth-child(1) .showcase-artist {
+        filter: drop-shadow(0 0 20px rgba(201, 160, 85, 0.35));
+    }
+    #members .showcase-panel:nth-child(2) .showcase-artist {
+        filter: drop-shadow(0 0 20px rgba(192, 64, 88, 0.35));
+    }
+    #members .showcase-panel:nth-child(3) .showcase-artist {
+        filter: drop-shadow(0 0 20px rgba(48, 192, 184, 0.35));
+    }
+    #members .showcase-panel:nth-child(4) .showcase-artist {
+        filter: drop-shadow(0 0 20px rgba(106, 156, 120, 0.35));
+    }
+    #members .showcase-panel:nth-child(5) .showcase-artist {
+        filter: drop-shadow(0 0 20px rgba(58, 132, 179, 0.35));
     }
 }
