@@ -29,19 +29,38 @@ const isMobile = {
 };
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize GSAP
+    // Initialize GSAP first (needed for ScrollTrigger checks)
     gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
-    // Configure ScrollTrigger for mobile devices
+    // FIX: Ensure scroll works on laptop trackpads
+    // ScrollTrigger can interfere with native wheel scrolling on Windows laptops
+    document.addEventListener('wheel', (e) => {
+        const currentScrollY = window.scrollY;
+
+        // Check if scroll happened naturally (next frame)
+        requestAnimationFrame(() => {
+            // Check if we're in an active pinned ScrollTrigger section
+            // Include sections that are active (even if progress is 0) to catch entry transitions
+            const activePinnedTrigger = ScrollTrigger.getAll().find(st =>
+                st.pin && st.isActive
+            );
+
+            // If scroll position didn't change after wheel event AND we're not in a pinned section, force it
+            if (window.scrollY === currentScrollY && !e.defaultPrevented && !activePinnedTrigger) {
+                window.scrollBy(0, e.deltaY);
+            }
+        });
+    }, { passive: true });
+
+    // Configure ScrollTrigger
     // Note: normalizeScroll() is intentionally NOT used as it causes crashes on iOS Safari
     // with complex pinned horizontal scroll sections
-    if (isMobile.any()) {
-        ScrollTrigger.config({
-            ignoreMobileResize: true,
-            autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
-            syncInterval: 100  // Reduce sync frequency for better performance
-        });
-    }
+    ScrollTrigger.config({
+        ignoreMobileResize: true,
+        autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+        syncInterval: 100,  // Reduce sync frequency for better performance
+        limitCallbacks: true  // Prevent excessive callback firing that can block scroll
+    });
 
     // Custom Cursor
     initCustomCursor();
@@ -366,7 +385,7 @@ function initLogo3DEffect() {
 
     // Check if touch is within hero section
     function isInHeroSection(clientY) {
-        if (!heroSection) return true;
+        if (!heroSection) return false; // Changed: return false if hero section not found
         const rect = heroSection.getBoundingClientRect();
         return clientY >= rect.top && clientY <= rect.bottom;
     }
@@ -401,7 +420,6 @@ function initLogo3DEffect() {
         if (e.touches.length === 0) return;
 
         const touch = e.touches[0];
-        if (!isInHeroSection(touch.clientY)) return;
 
         touchStartX = touch.clientX;
         touchStartY = touch.clientY;
@@ -423,7 +441,6 @@ function initLogo3DEffect() {
         if (!isTouching || e.touches.length === 0) return;
 
         const touch = e.touches[0];
-        if (!isInHeroSection(touch.clientY)) return;
 
         // Calculate movement delta (swipe direction)
         const deltaX = touch.clientX - lastTouchX;
@@ -559,11 +576,14 @@ function initLogo3DEffect() {
         document.addEventListener('mousemove', handleMouseMove, { passive: true });
 
         // Touch events (mobile) - swipe direction based
+        // Register touch events on hero section only to avoid blocking page scroll
         // Note: touchmove is non-passive to allow preventDefault when swiping the logo
-        document.addEventListener('touchstart', handleTouchStart, { passive: true });
-        document.addEventListener('touchmove', handleTouchMove, { passive: false });
-        document.addEventListener('touchend', handleTouchEnd, { passive: true });
-        document.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+        if (heroSection) {
+            heroSection.addEventListener('touchstart', handleTouchStart, { passive: true });
+            heroSection.addEventListener('touchmove', handleTouchMove, { passive: false });
+            heroSection.addEventListener('touchend', handleTouchEnd, { passive: true });
+            heroSection.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+        }
 
         // Handle resize - reset to center position
         window.addEventListener('resize', () => {
@@ -800,6 +820,8 @@ function initPreloader() {
         delay: 0.3,
         onComplete: () => {
             loader.style.display = 'none';
+            loader.style.pointerEvents = 'none';
+            console.log('Loader hidden, pointer events disabled');
         }
     });
 }
@@ -2128,6 +2150,9 @@ if (document.readyState !== 'loading') {
             if (artist) gsap.set(artist, { opacity: 1, scale: 1 });
             if (info) gsap.set(info, { opacity: 1 });
         });
+
+        // Capture current scroll position before refresh
+        const currentScroll = window.scrollY;
 
         // Refresh and restore scroll position after setup
         requestAnimationFrame(() => {

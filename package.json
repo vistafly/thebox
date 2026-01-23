@@ -21,11 +21,12 @@
   "devDependencies": {
     "concurrently": "^9.2.1",
     "http-server": "^14.1.1",
-    "vercel": "^50.4.5"
+    "vercel": "^50.4.11"
   },
   "overrides": {
     "undici": "^6.22.1",
     "diff": "^8.0.3",
-    "path-to-regexp": "^8.0.0"
+    "path-to-regexp": "^8.0.0",
+    "tar": "^7.5.4"
   }
 }

@@ -88,6 +88,7 @@ body {
 .loader.hidden {
     opacity: 0;
     visibility: hidden;
+    pointer-events: none;
 }
 
 .loader-content {
@@ -2827,6 +2828,13 @@ body.tour-active .logo-desktop {
     /* Modern scrollbar styles for desktop */
     scrollbar-width: thin;
     scrollbar-color: var(--erin) rgba(255, 255, 255, 0.1);
+
+    /* Prevent horizontal scroll from hijacking vertical page scroll */
+    overscroll-behavior-x: contain;
+    overscroll-behavior-y: none;
+
+    /* Allow pan gestures in both directions but prioritize vertical scrolling */
+    touch-action: pan-y pan-x;
 }
 
 /* Custom Scrollbar for Webkit browsers (Chrome, Safari, Edge) - All Screens */
