@@ -6313,7 +6313,7 @@ select.booking-form-input option {
 /* MEMBERS HORIZONTAL SCROLL SHOWCASE */
 /* ==================== */
 #members.band-showcase-section {
-    height: 500vh;
+    height: 350vh;  /* Reduced for faster transitions between members */
     position: relative;
     background: transparent;
     padding: 0;
@@ -6377,13 +6377,17 @@ select.booking-form-input option {
 }
 
 #members .band-showcase-wrapper {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
     height: 100vh;
-    height: 100svh;  /* iOS Safari: use small viewport height to prevent jump when address bar hides */
+    height: 100svh;
     overflow: hidden;
     display: flex;
     align-items: center;
     z-index: 1;
-    transform: translateZ(0);  /* Force GPU compositing layer */
+    will-change: transform;
     backface-visibility: hidden;
 }
 
@@ -6415,7 +6419,7 @@ select.booking-form-input option {
     max-height: 62vh;
     max-width: 80vw;
     object-fit: contain;
-    transition: filter 0.5s ease, transform 0.5s ease;
+    transition: filter 0.5s ease;  /* Only filter transition, not transform */
     will-change: transform, opacity;
     transform: translateZ(0);
     backface-visibility: hidden;
@@ -6543,13 +6547,13 @@ select.booking-form-input option {
 
 @media (max-width: 1024px) {
     #members.band-showcase-section {
-        height: 650vh;  /* More scroll distance for dampened feel on tablets/mobile */
+        height: 450vh;  /* Reduced for faster transitions on tablets */
     }
 }
 
 @media (max-width: 768px) {
     #members.band-showcase-section {
-        height: 750vh;  /* Increased significantly for much slower/smoother scrolling on mobile */
+        height: 500vh;  /* Reduced for faster transitions on mobile */
     }
     #members .showcase-panel.showcase-member {
         /* Shift content upward to center member visually in viewport */
@@ -6608,7 +6612,7 @@ select.booking-form-input option {
 /* Extra small screens - consistent scroll distance for smooth transitions */
 @media (max-width: 480px) {
     #members.band-showcase-section {
-        height: 750vh;  /* Keep consistent with 768px breakpoint for smooth experience */
+        height: 500vh;  /* Consistent with 768px breakpoint */
     }
     #members .showcase-panel.showcase-member {
         padding-bottom: 18vh;

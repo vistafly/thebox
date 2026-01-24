@@ -57,9 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // with complex pinned horizontal scroll sections
     ScrollTrigger.config({
         ignoreMobileResize: true,
-        autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
-        syncInterval: 100,  // Reduce sync frequency for better performance
-        limitCallbacks: true  // Prevent excessive callback firing that can block scroll
+        autoRefreshEvents: "visibilitychange,DOMContentLoaded,load"
     });
 
     // Custom Cursor
@@ -2093,55 +2091,25 @@ if (document.readyState !== 'loading') {
             });
         }
 
-        // Calculate total scroll distance based on track width
-        const totalWidth = track.scrollWidth;
-        const viewportWidth = window.innerWidth;
+        // Calculate total scroll distance
+        const scrollAmount = track.scrollWidth - window.innerWidth;
 
-        // Total scroll distance
-        const scrollAmount = totalWidth - viewportWidth;
-        const numTransitions = panels.length - 1;
-
-        // Device detection - use viewport width for consistent behavior with CSS breakpoints
-        const isMobileViewport = viewportWidth <= 1024;
-
-        // Timeline with hold periods at each member for "settle" effect
-        const tl = gsap.timeline({
+        // ScrollTrigger with pin
+        gsap.to(track, {
+            x: -scrollAmount,
+            ease: 'none',
+            force3D: true,
             scrollTrigger: {
                 trigger: section,
                 start: 'top top',
                 end: 'bottom bottom',
-                scrub: 0.8,
+                scrub: true,
                 pin: wrapper,
                 pinSpacing: false,
-                anticipatePin: 1,  // Helps smooth the pin/unpin transition
                 invalidateOnRefresh: true,
                 id: 'members-horizontal'
             }
         });
-
-        // Hold duration at each member - creates the "settle/dampen" effect
-        const holdDuration = 0.5;
-        // Transition duration between members
-        const transitionDuration = 1;
-
-        // Hold on first panel before any transitions
-        tl.to(track, { x: 0, duration: holdDuration, ease: 'none', force3D: true }, 0);
-
-        // Build transitions with holds at each member
-        for (let i = 1; i <= numTransitions; i++) {
-            const targetX = -(scrollAmount * (i / numTransitions));
-
-            // Transition to next member with easing
-            tl.to(track, {
-                x: targetX,
-                ease: 'power2.inOut',
-                duration: transitionDuration,
-                force3D: true
-            });
-
-            // Hold at this member position (dampening effect)
-            tl.to(track, { x: targetX, duration: holdDuration, ease: 'none', force3D: true });
-        }
 
         // Set all panels visible
         panels.forEach((panel) => {
