@@ -1,6 +1,7 @@
 {
   "name": "thebox-booking",
   "version": "1.0.0",
+  "type": "module",
   "description": "Band booking system with Google Calendar integration for The Box",
   "main": "index.js",
   "scripts": {

@@ -305,13 +305,15 @@ body {
     z-index: 1001;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.15s ease-out, visibility 0.15s;
+    transition: opacity 0.25s ease-out, visibility 0.25s;
+    will-change: opacity;
 }
 
 /* Visible state when morph completes */
 .logo-mobile.visible {
     opacity: 1;
     visibility: visible;
+    transition: opacity 0.2s ease-in;
 }
 
 /* Desktop size */
@@ -386,7 +388,7 @@ body {
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.15s ease-out, visibility 0.15s;
+  transition: opacity 0.2s ease-out, visibility 0.2s;
 }
 
 /* Show mobile logo when desktop logo is morphed */

@@ -115,8 +115,8 @@ function initLogoMorph() {
 
     // Configuration
     const config = {
-        scrollThreshold: 280, // pixels of scroll to complete morph (longer = smoother)
-        smoothing: 0.12, // interpolation factor for silky smooth movement (lower = smoother)
+        scrollThreshold: 150, // pixels of scroll to complete morph (reduced for quicker transition)
+        smoothing: 0.18, // interpolation factor for smooth movement (higher = more responsive)
         // Desktop end position (relative to viewport)
         desktop: {
             endX: 40, // pixels from left
@@ -209,15 +209,15 @@ function initLogoMorph() {
         const targetY = lerp(0, endPosition.y - startPosition.y, easedProgress);
         const targetScale = lerp(1, endPosition.scale, easedProgress);
 
-        // Opacity fades out in the last 30% of the animation (more gradual)
-        const targetOpacity = easedProgress > 0.7 ? lerp(1, 0, (easedProgress - 0.7) / 0.3) : 1;
+        // Opacity fades out starting at 40% progress (earlier fade for smoother handoff)
+        const targetOpacity = easedProgress > 0.4 ? lerp(1, 0, (easedProgress - 0.4) / 0.6) : 1;
 
-        return { targetX, targetY, targetScale, targetOpacity, progress: rawProgress };
+        return { targetX, targetY, targetScale, targetOpacity, progress: rawProgress, easedProgress };
     }
 
     // Continuous animation loop for buttery smooth interpolation
     function animateLoop() {
-        const { targetX, targetY, targetScale, targetOpacity, progress } = getTargetValues();
+        const { targetX, targetY, targetScale, targetOpacity, progress, easedProgress } = getTargetValues();
 
         // Smoothly interpolate current values towards targets
         const smoothingFactor = config.smoothing;
@@ -232,7 +232,8 @@ function initLogoMorph() {
         if (Math.abs(currentScale - targetScale) < 0.0001) currentScale = targetScale;
         if (Math.abs(currentOpacity - targetOpacity) < 0.001) currentOpacity = targetOpacity;
 
-        // Determine morph state
+        // Determine morph state - show navbar logo earlier (at 50% progress) for smooth overlap
+        const shouldShowNavLogo = easedProgress > 0.5;
         const isFullyMorphed = progress >= 1 && currentOpacity < 0.01;
         const isAtStart = progress === 0 && Math.abs(currentX) < 0.1 && Math.abs(currentY) < 0.1;
 
@@ -260,8 +261,15 @@ function initLogoMorph() {
             isMorphComplete = false;
             logo.classList.add('morphing');
             logo.classList.remove('morphed');
-            if (logoMobile) logoMobile.classList.remove('visible');
-            document.body.classList.remove('logo-morphed');
+
+            // Show navbar logo early for smooth crossfade (prevents logo gap)
+            if (shouldShowNavLogo) {
+                if (logoMobile) logoMobile.classList.add('visible');
+                document.body.classList.add('logo-morphed');
+            } else {
+                if (logoMobile) logoMobile.classList.remove('visible');
+                document.body.classList.remove('logo-morphed');
+            }
 
             // Apply smooth transform (GPU-accelerated)
             logo.style.transform = `translate(${currentX}px, ${currentY}px) translate(-50%, -50%) scale(${currentScale})`;
