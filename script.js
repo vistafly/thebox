@@ -32,25 +32,123 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize GSAP first (needed for ScrollTrigger checks)
     gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
-    // FIX: Ensure scroll works on laptop trackpads
-    // ScrollTrigger can interfere with native wheel scrolling on Windows laptops
-    document.addEventListener('wheel', (e) => {
-        const currentScrollY = window.scrollY;
+    // Trackpad scroll limiter - caps velocity and distance for laptop trackpads only
+    const trackpadLimiter = {
+        // Default limits (loose - for most of the page)
+        defaultMaxDelta: 250,
+        defaultMaxVelocity: 2500,
 
-        // Check if scroll happened naturally (next frame)
-        requestAnimationFrame(() => {
-            // Check if we're in an active pinned ScrollTrigger section
-            // Include sections that are active (even if progress is 0) to catch entry transitions
-            const activePinnedTrigger = ScrollTrigger.getAll().find(st =>
-                st.pin && st.isActive
-            );
+        // Members section limits (tight - more dampening)
+        membersMaxDelta: 60,
+        membersMaxVelocity: 400,
 
-            // If scroll position didn't change after wheel event AND we're not in a pinned section, force it
-            if (window.scrollY === currentScrollY && !e.defaultPrevented && !activePinnedTrigger) {
-                window.scrollBy(0, e.deltaY);
+        lastTime: 0,
+        lastDelta: 0,
+        eventCount: 0,
+        eventWindow: [],
+        isTrackpad: false,
+
+        isInMembersSection() {
+            const members = document.getElementById('members');
+            if (!members) return false;
+
+            const rect = members.getBoundingClientRect();
+            // Check if members section is currently in view and pinned
+            return rect.top <= 0 && rect.bottom >= window.innerHeight;
+        },
+
+        detectTrackpad(e) {
+            const now = performance.now();
+
+            // Track recent events to detect trackpad pattern
+            this.eventWindow.push({ time: now, delta: Math.abs(e.deltaY) });
+
+            // Keep only events from last 100ms
+            this.eventWindow = this.eventWindow.filter(ev => now - ev.time < 100);
+
+            // Trackpad indicators:
+            // 1. Many small events in quick succession (5+ events in 100ms)
+            // 2. Pixel-based deltaMode (0)
+            // 3. Small, often fractional deltaY values
+            const isHighFrequency = this.eventWindow.length >= 5;
+            const isPixelMode = e.deltaMode === 0;
+            const isSmallDelta = Math.abs(e.deltaY) < 150;
+            const hasFractional = e.deltaY % 1 !== 0;
+
+            // Score-based detection
+            let score = 0;
+            if (isHighFrequency) score += 2;
+            if (isPixelMode) score += 1;
+            if (isSmallDelta) score += 1;
+            if (hasFractional) score += 2;
+
+            this.isTrackpad = score >= 3;
+            return this.isTrackpad;
+        },
+
+        clampDelta(deltaY, deltaTime) {
+            // Use tighter limits for members section
+            const inMembers = this.isInMembersSection();
+            const maxDelta = inMembers ? this.membersMaxDelta : this.defaultMaxDelta;
+            const maxVelocity = inMembers ? this.membersMaxVelocity : this.defaultMaxVelocity;
+
+            // Clamp distance per event
+            let clampedDelta = Math.sign(deltaY) * Math.min(Math.abs(deltaY), maxDelta);
+
+            // Clamp velocity (pixels per second)
+            if (deltaTime > 0) {
+                const velocity = Math.abs(clampedDelta) / (deltaTime / 1000);
+                if (velocity > maxVelocity) {
+                    clampedDelta = Math.sign(clampedDelta) * (maxVelocity * (deltaTime / 1000));
+                }
             }
-        });
-    }, { passive: true });
+
+            return clampedDelta;
+        }
+    };
+
+    // Main wheel event handler with trackpad limiting
+    document.addEventListener('wheel', (e) => {
+        const now = performance.now();
+        const deltaTime = now - trackpadLimiter.lastTime;
+        trackpadLimiter.lastTime = now;
+
+        // Detect if this is a trackpad
+        const isTrackpad = trackpadLimiter.detectTrackpad(e);
+
+        // Only limit trackpad input, let mouse wheel pass through normally
+        if (!isTrackpad) {
+            // Original fix for ScrollTrigger interference
+            const currentScrollY = window.scrollY;
+            requestAnimationFrame(() => {
+                const activePinnedTrigger = ScrollTrigger.getAll().find(st =>
+                    st.pin && st.isActive
+                );
+                if (window.scrollY === currentScrollY && !e.defaultPrevented && !activePinnedTrigger) {
+                    window.scrollBy(0, e.deltaY);
+                }
+            });
+            return;
+        }
+
+        // For trackpad: prevent default and apply clamped scroll
+        e.preventDefault();
+
+        const clampedDelta = trackpadLimiter.clampDelta(e.deltaY, deltaTime);
+
+        // Check for active pinned ScrollTrigger
+        const activePinnedTrigger = ScrollTrigger.getAll().find(st =>
+            st.pin && st.isActive
+        );
+
+        // Scroll with clamped value
+        if (!activePinnedTrigger) {
+            window.scrollBy(0, clampedDelta);
+        } else {
+            // Let ScrollTrigger handle it, but with clamped value via synthetic event
+            window.scrollBy(0, clampedDelta);
+        }
+    }, { passive: false });
 
     // Configure ScrollTrigger
     // Note: normalizeScroll() is intentionally NOT used as it causes crashes on iOS Safari
@@ -2099,24 +2197,32 @@ if (document.readyState !== 'loading') {
             });
         }
 
-        // Calculate total scroll distance
-        const scrollAmount = track.scrollWidth - window.innerWidth;
+        // Calculate panel width for transitions
+        const panelWidth = window.innerWidth;
+
+        // Create timeline with eased transitions between each panel
+        // power2.inOut creates resistance at card centers (slows at start/end of each transition)
+        const tl = gsap.timeline();
+
+        for (let i = 0; i < panels.length - 1; i++) {
+            tl.to(track, {
+                x: -panelWidth * (i + 1),
+                ease: 'power2.inOut',
+                duration: 1
+            });
+        }
 
         // ScrollTrigger with pin
-        gsap.to(track, {
-            x: -scrollAmount,
-            ease: 'none',
-            force3D: true,
-            scrollTrigger: {
-                trigger: section,
-                start: 'top top',
-                end: 'bottom bottom',
-                scrub: true,
-                pin: wrapper,
-                pinSpacing: false,
-                invalidateOnRefresh: true,
-                id: 'members-horizontal'
-            }
+        ScrollTrigger.create({
+            trigger: section,
+            start: 'top top',
+            end: 'bottom bottom',
+            scrub: 0.5,
+            pin: wrapper,
+            pinSpacing: false,
+            invalidateOnRefresh: true,
+            id: 'members-horizontal',
+            animation: tl
         });
 
         // Set all panels visible
@@ -2180,8 +2286,11 @@ class MapLazyLoader {
     init() {
         if (this.maps.length === 0) return;
 
-        // Add loading placeholders to all map containers
-        this.maps.forEach(map => this.addLoadingPlaceholder(map));
+        // Add loading placeholders and directions overlays to all map containers
+        this.maps.forEach(map => {
+            this.addLoadingPlaceholder(map);
+            this.addDirectionsOverlay(map);
+        });
 
         // Check for slow connection - defer loading more aggressively
         const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
@@ -2227,6 +2336,32 @@ class MapLazyLoader {
             <span class="map-loading-text">Loading map...</span>
         `;
         container.appendChild(placeholder);
+    }
+
+    addDirectionsOverlay(iframe) {
+        const container = iframe.closest('.venue-map-container');
+        if (!container || container.querySelector('.map-directions-overlay')) return;
+
+        // Find the venue address from the parent tour-date article
+        const tourDate = container.closest('.tour-date');
+        const addressEl = tourDate?.querySelector('.venue-address');
+        const address = addressEl?.textContent?.trim() || '';
+
+        if (!address) return;
+
+        const overlay = document.createElement('a');
+        overlay.className = 'map-directions-overlay';
+        overlay.href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+        overlay.target = '_blank';
+        overlay.rel = 'noopener noreferrer';
+        overlay.setAttribute('aria-label', `Get directions to ${address}`);
+        overlay.innerHTML = `
+            <span class="directions-hint">
+                <i class="fas fa-directions"></i>
+                Get Directions
+            </span>
+        `;
+        container.appendChild(overlay);
     }
 
     removeLoadingPlaceholder(iframe) {
